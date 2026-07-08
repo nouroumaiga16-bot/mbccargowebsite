@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enregistrer un envoi — MBC Cargo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bleu-ciel: #2FA8E0;
+    --bleu-ciel-clair: #EAF6FD;
+    --bleu-marine: #0E3A5F;
+    --bleu-marine-2: #123f66;
+    --gris: #5b6b78;
+    --blanc: #ffffff;
+    --bordure: #dbeaf3;
+    --vert: #2e9e6b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--blanc);color:var(--bleu-marine);font-family:'IBM Plex Sans',sans-serif;line-height:1.5;}
+  .wrap{max-width:640px;margin:0 auto;padding:32px 20px 80px;}
+
+  header{text-align:center;margin-bottom:30px;}
+  .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--bleu-ciel);font-weight:600;margin-bottom:10px;}
+  h1{font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(24px,7vw,32px);letter-spacing:-.01em;color:var(--bleu-marine);}
+  .sous-titre{color:var(--gris);font-size:14px;margin-top:8px;}
+
+  .champ{margin-bottom:16px;}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--bleu-marine);}
+  input, select, textarea{
+    width:100%;background:var(--blanc);border:1.5px solid var(--bordure);color:var(--bleu-marine);
+    padding:12px 14px;border-radius:8px;font-size:15px;font-family:'IBM Plex Sans',sans-serif;
+  }
+  input:focus, select:focus, textarea:focus{outline:none;border-color:var(--bleu-ciel);box-shadow:0 0 0 3px rgba(47,168,224,.15);}
+  textarea{resize:vertical;min-height:70px;}
+  .ligne-double{display:flex;gap:12px;}
+  .ligne-double .champ{flex:1;}
+
+  button{
+    width:100%;background:var(--bleu-ciel);color:var(--blanc);border:none;border-radius:8px;
+    padding:14px;font-weight:600;font-size:15px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;
+    margin-top:8px;transition:background .15s;
+  }
+  button:hover{background:var(--bleu-marine);}
+  button:disabled{opacity:.6;cursor:not-allowed;}
+
+  #message{font-size:14px;color:var(--gris);margin-top:10px;min-height:18px;}
+  #message.erreur{color:#c94f4f;}
+
+  #confirmation{display:none;background:var(--bleu-ciel-clair);border:1px solid var(--bordure);border-radius:14px;padding:26px 22px;margin-top:20px;text-align:center;}
+  #confirmation.visible{display:block;}
+  #confirmation .icone{width:40px;height:40px;border-radius:50%;background:var(--vert);color:#fff;
+    display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:20px;}
+  #confirmation .label{font-size:13px;color:var(--gris);margin-bottom:6px;}
+  #confirmation .numero{font-family:'Sora',sans-serif;font-weight:700;font-size:26px;color:var(--bleu-marine);letter-spacing:.02em;}
+  #confirmation .conseil{font-size:13px;color:var(--gris);margin-top:14px;}
+  .btn-copier{
+    background:var(--blanc);border:1.5px solid var(--bleu-ciel);color:var(--bleu-ciel);
+    padding:9px 16px;border-radius:7px;font-size:13px;font-weight:600;margin-top:12px;cursor:pointer;
+  }
+  .btn-copier:hover{background:var(--bleu-ciel-clair);}
+
+  footer{text-align:center;margin-top:40px;font-size:12px;color:var(--gris);}
+  footer a{color:var(--bleu-ciel);text-decoration:none;font-weight:500;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">MBC Cargo · Montréal — Ouagadougou</div>
+    <h1>Enregistrer votre envoi</h1>
+    <p class="sous-titre">Remplissez ce formulaire pour recevoir votre numéro de suivi.</p>
+  </header>
+
+  <form id="form-envoi">
+    <div class="champ">
+      <label for="nom">Nom complet</label>
+      <input type="text" id="nom" required>
+    </div>
+    <div class="champ">
+      <label for="telephone">Téléphone (WhatsApp de préférence)</label>
+      <input type="tel" id="telephone" required>
+    </div>
+    <div class="ligne-double">
+      <div class="champ">
+        <label for="origine">Ville de départ</label>
+        <input type="text" id="origine" value="Montréal" required>
+      </div>
+      <div class="champ">
+        <label for="destination">Ville d'arrivée</label>
+        <input type="text" id="destination" value="Ouagadougou" required>
+      </div>
+    </div>
+    <div class="champ">
+      <label for="description">Description du colis</label>
+      <textarea id="description" placeholder="Ex. 2 valises + 1 carton d'électroménager" required></textarea>
+    </div>
+    <button type="submit" id="btn-envoyer">Obtenir mon numéro de suivi</button>
+    <div id="message"></div>
+  </form>
+
+  <div id="confirmation">
+    <div class="icone">✓</div>
+    <div class="label">Votre numéro de suivi</div>
+    <div class="numero" id="numero-genere">—</div>
+    <button class="btn-copier" id="btn-copier">Copier le numéro</button>
+    <p class="conseil">Conservez ce numéro. Il vous permettra de suivre l'état de votre colis à tout moment sur notre <a href="/suivi.html">page de suivi</a>.</p>
+  </div>
+
+  <footer>Besoin d'aide ? <a href="https://wa.me/">Écrivez-nous sur WhatsApp</a></footer>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURATION — coller ici l'URL de ton Google Apps Script
+   déployé en Application Web (se termine par /exec)
+   ============================================================ */
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwVHAh_DBiV_eXGUYR9u-LkCbKlNQAEqqW1YbkcKe2WVL7W4m9eYYFMWo-l1fF52cYQQ/exec";
+
+const form = document.getElementById("form-envoi");
+const message = document.getElementById("message");
+const btn = document.getElementById("btn-envoyer");
+const confirmation = document.getElementById("confirmation");
+
+form.addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  if(APPS_SCRIPT_URL.includes("COLLER_ICI")){
+    message.textContent = "Configuration requise : URL Apps Script non renseignée.";
+    message.classList.add("erreur");
+    return;
+  }
+
+  const donnees = {
+    client: document.getElementById("nom").value.trim(),
+    telephone: document.getElementById("telephone").value.trim(),
+    origine: document.getElementById("origine").value.trim(),
+    destination: document.getElementById("destination").value.trim(),
+    note: document.getElementById("description").value.trim()
+  };
+
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours...";
+  message.textContent = "";
+  message.classList.remove("erreur");
+
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(donnees)
+    });
+    const data = await res.json();
+
+    if(data.success){
+      document.getElementById("numero-genere").textContent = data.numero;
+      form.style.display = "none";
+      confirmation.classList.add("visible");
+    } else {
+      message.textContent = "Une erreur est survenue. Réessayez.";
+      message.classList.add("erreur");
+    }
+  }catch(err){
+    message.textContent = "Connexion impossible. Vérifiez votre réseau et réessayez.";
+    message.classList.add("erreur");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = "Obtenir mon numéro de suivi";
+  }
+});
+
+document.getElementById("btn-copier").addEventListener("click", function(){
+  const numero = document.getElementById("numero-genere").textContent;
+  navigator.clipboard.writeText(numero);
+  this.textContent = "Copié ✓";
+  setTimeout(() => this.textContent = "Copier le numéro", 1800);
+});
+</script>
+</body>
+</html>

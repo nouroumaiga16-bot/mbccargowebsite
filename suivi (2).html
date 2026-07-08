@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi de colis — MBC Cargo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bleu-ciel: #2FA8E0;
+    --bleu-ciel-clair: #EAF6FD;
+    --bleu-marine: #0E3A5F;
+    --bleu-marine-2: #123f66;
+    --gris: #5b6b78;
+    --blanc: #ffffff;
+    --bordure: #dbeaf3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background: var(--blanc);
+    color: var(--bleu-marine);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    line-height:1.5;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:32px 20px 80px;}
+
+  header{text-align:center;margin-bottom:36px;}
+  .eyebrow{
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--bleu-ciel);font-weight:600;margin-bottom:10px;
+  }
+  h1{
+    font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(26px,7vw,34px);
+    letter-spacing:-.01em;color:var(--bleu-marine);
+  }
+  .sous-titre{color:var(--gris);font-size:14px;margin-top:8px;}
+
+  form{display:flex;gap:8px;margin:28px 0;}
+  input[type=text]{
+    flex:1;background:var(--blanc);border:1.5px solid var(--bordure);color:var(--bleu-marine);
+    padding:14px 16px;border-radius:8px;font-size:15px;font-family:'IBM Plex Sans',sans-serif;
+  }
+  input[type=text]:focus{outline:none;border-color:var(--bleu-ciel);box-shadow:0 0 0 3px rgba(47,168,224,.15);}
+  input[type=text]::placeholder{color:#9fb3c2;}
+  button{
+    background:var(--bleu-ciel);color:var(--blanc);border:none;border-radius:8px;
+    padding:0 22px;font-weight:600;font-size:14px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;
+    transition:background .15s;
+  }
+  button:hover{background:var(--bleu-marine);}
+  button:focus-visible{outline:2px solid var(--bleu-marine);outline-offset:2px;}
+
+  #message{font-size:14px;color:var(--gris);min-height:20px;margin-bottom:6px;}
+  #message.erreur{color:#c94f4f;}
+
+  .resultat{display:none;background:var(--bleu-ciel-clair);border:1px solid var(--bordure);border-radius:14px;padding:24px 22px;margin-top:18px;}
+  .resultat.visible{display:block;}
+  .resultat .num{font-family:'Sora',sans-serif;font-weight:600;font-size:19px;color:var(--bleu-marine);}
+  .resultat .meta{color:var(--gris);font-size:13px;margin-top:4px;}
+
+  .corridor{margin:26px 0 6px;position:relative;height:6px;background:#d3e8f4;border-radius:3px;overflow:hidden;}
+  .corridor-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--bleu-marine),var(--bleu-ciel));border-radius:3px;transition:width 1s ease;width:0%;}
+  .villes{display:flex;justify-content:space-between;font-size:11px;color:var(--gris);margin-top:6px;letter-spacing:.03em;font-weight:500;}
+
+  .etapes{list-style:none;margin-top:26px;display:flex;flex-direction:column;gap:0;}
+  .etape{display:flex;gap:14px;padding:10px 0;position:relative;}
+  .etape:not(:last-child)::before{
+    content:'';position:absolute;left:11px;top:34px;bottom:-6px;width:1px;background:var(--bordure);
+  }
+  .puce{width:23px;height:23px;border-radius:50%;border:1.5px solid var(--bordure);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gris);
+    background:var(--blanc);margin-top:1px;}
+  .etape.fait .puce{background:var(--bleu-ciel);border-color:var(--bleu-ciel);color:var(--blanc);}
+  .etape.actuel .puce{border-color:var(--bleu-marine);color:var(--bleu-marine);box-shadow:0 0 0 3px rgba(14,58,95,.12);}
+  .etape-texte .titre{font-size:14px;font-weight:500;}
+  .etape.fait .etape-texte .titre, .etape.actuel .etape-texte .titre{color:var(--bleu-marine);}
+  .etape:not(.fait):not(.actuel) .etape-texte .titre{color:#9fb3c2;}
+  .etape-texte .date{font-size:12px;color:var(--gris);margin-top:2px;}
+
+  .note{background:rgba(47,168,224,.1);border-left:2px solid var(--bleu-ciel);padding:10px 14px;
+    font-size:13px;color:var(--bleu-marine-2);margin-top:20px;border-radius:0 6px 6px 0;}
+
+  footer{text-align:center;margin-top:44px;font-size:12px;color:var(--gris);}
+  footer a{color:var(--bleu-ciel);text-decoration:none;font-weight:500;}
+
+  @media (prefers-reduced-motion: reduce){
+    .corridor-fill{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">MBC Cargo · Montréal — Ouagadougou</div>
+    <h1>Où est votre colis ?</h1>
+    <p class="sous-titre">Entrez le numéro de suivi reçu par WhatsApp ou par courriel.</p>
+  </header>
+
+  <form id="form-suivi">
+    <input type="text" id="input-suivi" placeholder="Ex. MBC-2026-0142" autocomplete="off" autocapitalize="characters">
+    <button type="submit">Suivre</button>
+  </form>
+  <div id="message"></div>
+
+  <div class="resultat" id="resultat">
+    <div class="num" id="res-num"></div>
+    <div class="meta" id="res-meta"></div>
+
+    <div class="corridor"><div class="corridor-fill" id="corridor-fill"></div></div>
+    <div class="villes"><span id="ville-origine">Montréal</span><span id="ville-dest">Ouagadougou</span></div>
+
+    <ul class="etapes" id="etapes"></ul>
+
+    <div class="note" id="note" style="display:none;"></div>
+  </div>
+
+  <footer>Un problème avec votre suivi ? <a href="https://wa.me/">Écrivez-nous sur WhatsApp</a></footer>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURATION — à faire une seule fois
+   1. Créer un Google Sheet avec les colonnes exactes suivantes :
+      NuméroSuivi | Client | Statut | DateMAJ | Origine | Destination | Note
+   2. Statut doit être une des valeurs : Reçu / En transit / Dédouanement / Arrivé / Livré
+   3. Fichier > Partager > Publier sur le web > format CSV
+   4. Coller le lien CSV généré ci-dessous.
+   ============================================================ */
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwVHAh_DBiV_eXGUYR9u-LkCbKlNQAEqqW1YbkcKe2WVL7W4m9eYYFMWo-l1fF52cYQQ/exec";
+
+const ETAPES = ["Reçu", "En transit", "Dédouanement", "Arrivé", "Livré"];
+
+async function chercherColis(numero){
+  const msg = document.getElementById("message");
+  const resultat = document.getElementById("resultat");
+  resultat.classList.remove("visible");
+  msg.classList.remove("erreur");
+  msg.textContent = "Recherche en cours...";
+
+  try{
+    const res = await fetch(APPS_SCRIPT_URL + "?numero=" + encodeURIComponent(numero));
+    const data = await res.json();
+
+    if(!data.trouve){
+      msg.textContent = "Aucun colis trouvé avec ce numéro. Vérifiez et réessayez.";
+      msg.classList.add("erreur");
+      return;
+    }
+
+    msg.textContent = "";
+    afficherResultat(data.donnees);
+  }catch(e){
+    msg.textContent = "Impossible de charger les données. Réessayez dans un instant.";
+    msg.classList.add("erreur");
+  }
+}
+
+function afficherResultat(d){
+  document.getElementById("res-num").textContent = d.NuméroSuivi;
+  document.getElementById("res-meta").textContent = (d.Client ? d.Client + " · " : "") + "Mis à jour le " + (d.DateMAJ || "—");
+  document.getElementById("ville-origine").textContent = d.Origine || "Montréal";
+  document.getElementById("ville-dest").textContent = d.Destination || "Ouagadougou";
+
+  const idx = ETAPES.indexOf(d.Statut);
+  const pct = idx >= 0 ? ((idx) / (ETAPES.length - 1)) * 100 : 0;
+  document.getElementById("corridor-fill").style.width = pct + "%";
+
+  const ul = document.getElementById("etapes");
+  ul.innerHTML = "";
+  ETAPES.forEach((etape, i) => {
+    const li = document.createElement("li");
+    li.className = "etape" + (i < idx ? " fait" : i === idx ? " actuel" : "");
+    li.innerHTML = `
+      <div class="puce">${i < idx ? "✓" : ""}</div>
+      <div class="etape-texte">
+        <div class="titre">${etape}</div>
+        <div class="date">${i === idx ? (d.DateMAJ || "") : ""}</div>
+      </div>`;
+    ul.appendChild(li);
+  });
+
+  const note = document.getElementById("note");
+  if(d.Note && d.Note.trim() !== ""){
+    note.style.display = "block";
+    note.textContent = d.Note;
+  } else {
+    note.style.display = "none";
+  }
+
+  document.getElementById("resultat").classList.add("visible");
+}
+
+document.getElementById("form-suivi").addEventListener("submit", function(e){
+  e.preventDefault();
+  const val = document.getElementById("input-suivi").value.trim();
+  if(val) chercherColis(val);
+});
+</script>
+</body>
+</html>
