@@ -692,12 +692,12 @@ footer{background:#040d1a;padding:64px 80px 36px;border-top:3px solid var(--cyan
     <p class="cta-sub">Devis gratuit en moins de 2 heures. Remplissez le formulaire ou contactez-nous directement.</p>
     <div class="cta-form">
       <div class="cta-row">
-        <input type="text" class="cinput" placeholder="Votre nom complet">
-        <input type="tel" class="cinput" placeholder="WhatsApp / Telephone">
+        <input type="text" id="cta-nom" class="cinput" placeholder="Votre nom complet">
+        <input type="tel" id="cta-tel" class="cinput" placeholder="WhatsApp / Telephone">
       </div>
       <div class="cta-row">
-        <select class="cinput" style="cursor:pointer"><option value="" disabled selected>Type d'envoi</option><option>Colis — Fret aerien</option><option>Colis — Fret maritime</option><option>Vehicule</option><option>Conteneur / Grand volume</option></select>
-        <select class="cinput" style="cursor:pointer"><option value="" disabled selected>Destination</option><option>Ouagadougou, Burkina Faso</option><option>Bobo-Dioulasso, Burkina Faso</option><option>Dakar, Senegal</option><option>Abidjan, Cote d'Ivoire</option><option>Bamako, Mali</option><option>Autre</option></select>
+        <select id="cta-type" class="cinput" style="cursor:pointer"><option value="" disabled selected>Type d'envoi</option><option>Colis — Fret aerien</option><option>Colis — Fret maritime</option><option>Vehicule</option><option>Conteneur / Grand volume</option></select>
+        <select id="cta-dest" class="cinput" style="cursor:pointer"><option value="" disabled selected>Destination</option><option>Ouagadougou, Burkina Faso</option><option>Bobo-Dioulasso, Burkina Faso</option><option>Dakar, Senegal</option><option>Abidjan, Cote d'Ivoire</option><option>Bamako, Mali</option><option>Autre</option></select>
       </div>
       <button class="cbtn" id="submitBtn">
         DEMANDER MON DEVIS GRATUIT
@@ -752,8 +752,14 @@ window.addEventListener('scroll',()=>{
   document.getElementById('nav').style.boxShadow=window.scrollY>20?'0 4px 24px rgba(10,30,60,.12)':'none';
 });
 document.getElementById('submitBtn').addEventListener('click',function(){
-  this.innerHTML='&#10003; DEMANDE ENVOYEE — ON VOUS RAPPELLE SOUS 2H !';
-  this.style.background='#15803d';this.disabled=true;
+  const nom=document.getElementById('cta-nom').value;
+  const tel=document.getElementById('cta-tel').value;
+  const type=document.getElementById('cta-type').value;
+  const dest=document.getElementById('cta-dest').value;
+  const msg='Bonjour MBC Cargo, je souhaite un devis.%0ANom: '+nom+'%0ATelephone: '+tel+'%0AType d\'envoi: '+type+'%0ADestination: '+dest;
+  window.open('https://wa.me/14188129289?text='+msg,'_blank');
+  this.innerHTML='&#10003; Ouverture de WhatsApp...';
+  this.style.background='#15803d';
 });
 </script>
 </body>
