@@ -422,7 +422,13 @@ footer{background:#040d1a;padding:64px 80px 36px;border-top:3px solid var(--cyan
   .footer-bottom{flex-direction:column;gap:12px;text-align:center}
   .strip{padding:14px 24px;overflow-x:auto;gap:20px}
 }
-</style>
+.nav-toggle{display:none;background:none;border:none;font-size:28px;color:var(--blue-deeper);cursor:pointer;padding:8px}
+@media (max-width:900px){
+.nav-toggle{display:block}
+.nav-links{display:none;position:fixed;top:74px;left:0;right:0;background:#fff;flex-direction:column;padding:20px 24px;gap:20px;box-shadow:0 8px 20px rgba(0,0,0,.1)}
+.nav-links.open{display:flex}
+.nav-links a{font-size:16px}
+}</style>
 </head>
 <body>
 
