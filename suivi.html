@@ -120,82 +120,17 @@
 </div>
 
 <script>
-/* ============================================================
-   CONFIGURATION — à faire une seule fois
-   1. Créer un Google Sheet avec les colonnes exactes suivantes :
-      NuméroSuivi | Client | Statut | DateMAJ | Origine | Destination | Note
-   2. Statut doit être une des valeurs : Reçu / En transit / Dédouanement / Arrivé / Livré
-   3. Fichier > Partager > Publier sur le web > format CSV
-   4. Coller le lien CSV généré ci-dessous.
-   ============================================================ */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwVHAh_DBiV_eXGUYR9u-LkCbKlNQAEqqW1YbkcKe2WVL7W4m9eYYFMWo-l1fF52cYQQ/exec";
+const APP_URL = "https://app.mbccargo.com";
 
-const ETAPES = ["Reçu", "En transit", "Dédouanement", "Arrivé", "Livré"];
-
-async function chercherColis(numero){
-  const msg = document.getElementById("message");
-  const resultat = document.getElementById("resultat");
-  resultat.classList.remove("visible");
-  msg.classList.remove("erreur");
-  msg.textContent = "Recherche en cours...";
-
-  try{
-    const res = await fetch(APPS_SCRIPT_URL + "?numero=" + encodeURIComponent(numero));
-    const data = await res.json();
-
-    if(!data.trouve){
-      msg.textContent = "Aucun colis trouvé avec ce numéro. Vérifiez et réessayez.";
-      msg.classList.add("erreur");
-      return;
-    }
-
-    msg.textContent = "";
-    afficherResultat(data.donnees);
-  }catch(e){
-    msg.textContent = "Impossible de charger les données. Réessayez dans un instant.";
-    msg.classList.add("erreur");
-  }
+function chercherColis(numero) {
+  var n = (numero || "").trim().toUpperCase();
+  if (!n) return;
+  window.location.href = APP_URL + "/suivi/" + encodeURIComponent(n);
 }
 
-function afficherResultat(d){
-  document.getElementById("res-num").textContent = d.NuméroSuivi;
-  document.getElementById("res-meta").textContent = (d.Client ? d.Client + " · " : "") + "Mis à jour le " + (d.DateMAJ || "—");
-  document.getElementById("ville-origine").textContent = d.Origine || "Montréal";
-  document.getElementById("ville-dest").textContent = d.Destination || "Ouagadougou";
-
-  const idx = ETAPES.indexOf(d.Statut);
-  const pct = idx >= 0 ? ((idx) / (ETAPES.length - 1)) * 100 : 0;
-  document.getElementById("corridor-fill").style.width = pct + "%";
-
-  const ul = document.getElementById("etapes");
-  ul.innerHTML = "";
-  ETAPES.forEach((etape, i) => {
-    const li = document.createElement("li");
-    li.className = "etape" + (i < idx ? " fait" : i === idx ? " actuel" : "");
-    li.innerHTML = `
-      <div class="puce">${i < idx ? "✓" : ""}</div>
-      <div class="etape-texte">
-        <div class="titre">${etape}</div>
-        <div class="date">${i === idx ? (d.DateMAJ || "") : ""}</div>
-      </div>`;
-    ul.appendChild(li);
-  });
-
-  const note = document.getElementById("note");
-  if(d.Note && d.Note.trim() !== ""){
-    note.style.display = "block";
-    note.textContent = d.Note;
-  } else {
-    note.style.display = "none";
-  }
-
-  document.getElementById("resultat").classList.add("visible");
-}
-
-document.getElementById("form-suivi").addEventListener("submit", function(e){
+document.getElementById("form-suivi").addEventListener("submit", function (e) {
   e.preventDefault();
-  const val = document.getElementById("input-suivi").value.trim();
-  if(val) chercherColis(val);
+  chercherColis(document.getElementById("input-suivi").value);
 });
 </script>
 </body>
