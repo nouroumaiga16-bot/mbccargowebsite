@@ -223,8 +223,10 @@
 <script>
 /* ============================================================
    MBC CARGO — ESPACE DE GESTION (prototype fonctionnel)
-   Stockage partagé via window.storage — voir avertissement UI
+   Stockage : Google Sheets via Apps Script — voir APPS_SCRIPT_URL ci-dessous
    ============================================================ */
+
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzs9ITzYkNYlkQHSwq9YxqIEZ13nhwth-Qu--LO3VKxifkl39Xm1uy-AsnoJBN6_pO7/exec";
 
 const STORAGE_KEY = "mbc-cargo-app-state";
 
@@ -277,18 +279,15 @@ async function sha256(text){
 const MY_ROLE_KEY = "mbc-cargo-my-role";
 
 async function loadMyRole(){
-  try{
-    const res = await window.storage.get(MY_ROLE_KEY, false);
-    if(res && res.value) role = res.value;
-  }catch(e){ /* pas encore de session sur cet appareil */ }
+  try{ role = localStorage.getItem(MY_ROLE_KEY) || null; }catch(e){ role = null; }
 }
 
 async function saveMyRole(r){
-  try{ await window.storage.set(MY_ROLE_KEY, r, false); }catch(e){ /* best effort */ }
+  try{ localStorage.setItem(MY_ROLE_KEY, r); }catch(e){ /* best effort */ }
 }
 
 async function clearMyRole(){
-  try{ await window.storage.delete(MY_ROLE_KEY, false); }catch(e){ /* best effort */ }
+  try{ localStorage.removeItem(MY_ROLE_KEY); }catch(e){ /* best effort */ }
 }
 
 let state = defaultState();
@@ -341,14 +340,16 @@ function fmtDate(iso){
 
 async function loadState(){
   try{
-    const res = await window.storage.get(STORAGE_KEY, true);
-    if(res && res.value){
-      const parsed = JSON.parse(res.value);
+    const res = await fetch(APPS_SCRIPT_URL, {method:"GET"});
+    const data = await res.json();
+    if(data && data.value){
+      const parsed = JSON.parse(data.value);
       state = Object.assign(defaultState(), parsed);
     }
   }catch(e){
-    // Pas encore de données — on part d'un état vide
+    // Pas encore de données, ou backend injoignable — on part d'un état vide
     state = defaultState();
+    console.error("Erreur de chargement:", e);
   }
   await loadMyRole();
   checkUrlForCompletionCode();
@@ -366,8 +367,13 @@ function checkUrlForCompletionCode(){
 
 async function saveState(){
   try{
-    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(state), true);
-    if(!result){ saveError = true; } else { saveError = false; }
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify({ action: "set", value: JSON.stringify(state) })
+    });
+    const data = await res.json();
+    saveError = !(data && data.ok);
   }catch(e){
     saveError = true;
     console.error("Erreur de sauvegarde:", e);
