@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBC Cargo — Espace de gestion</title>
+<style>
+  :root{
+    --bg:#0c0c0d;
+    --panel:#161615;
+    --panel-2:#1d1d1b;
+    --cream:#f2ede1;
+    --cream-dim:#cfc9bb;
+    --green:#7c9c89;
+    --green-dark:#5a7c69;
+    --muted:#8c887d;
+    --border:#2b2a27;
+    --amber:#c8a15c;
+    --rust:#b5674c;
+    --radius:10px;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--cream);font-family:var(--sans);}
+  input,select,textarea,button{font-family:inherit;}
+  a{color:inherit;}
+  .app{min-height:100vh;display:flex;flex-direction:column;}
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:1.2rem;letter-spacing:.3px;}
+  .brand .mark{width:30px;height:30px;border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:var(--cream);font-family:var(--sans);}
+  .topbar-actions{display:flex;align-items:center;gap:14px;font-size:.85rem;}
+  .link-btn{background:none;border:none;color:var(--cream-dim);cursor:pointer;font-size:.85rem;padding:6px 10px;border-radius:6px;}
+  .link-btn:hover{color:var(--cream);background:var(--panel-2);}
+
+  /* ---------- PUBLIC PAGE ---------- */
+  .public-wrap{max-width:640px;margin:0 auto;padding:40px 20px 80px;}
+  .eyebrow{font-size:.75rem;color:var(--muted);margin-bottom:10px;}
+  .hero-title{font-family:var(--serif);font-size:2.3rem;line-height:1.15;margin:0 0 14px;}
+  .hero-title .line{display:block;overflow:hidden;}
+  .hero-title .line span{display:inline-block;transform:translateY(110%);animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards;}
+  .hero-title .line:nth-child(2) span{animation-delay:.11s;}
+  .hero-sub{color:var(--cream-dim);line-height:1.5;margin:0 0 14px;max-width:46ch;opacity:0;animation:fadeIn .6s ease .55s forwards;}
+
+  /* route animation: Canada -> Ouagadougou */
+  .route{position:relative;height:34px;margin:22px 0 26px;opacity:0;animation:fadeIn .5s ease .15s forwards;}
+  .route svg{width:100%;height:100%;display:block;overflow:visible;}
+  .route .path{fill:none;stroke:var(--border);stroke-width:1.5;}
+  .route .path-draw{fill:none;stroke:var(--green);stroke-width:1.5;stroke-dasharray:400;stroke-dashoffset:400;
+    animation:draw 1.6s cubic-bezier(.3,.6,.2,1) .3s forwards;}
+  .route .pt{fill:var(--cream);}
+  .route .marker{fill:var(--green);opacity:0;animation:travel 1.6s cubic-bezier(.3,.6,.2,1) .3s forwards;}
+  .route .lbl{font-size:9px;fill:var(--muted);font-family:var(--sans);letter-spacing:.04em;}
+  .route .ring{transform-box:fill-box;transform-origin:center;opacity:0;
+    animation:ring .85s ease-out 1.85s forwards;}
+  .route .spark{transform-box:fill-box;transform-origin:center;opacity:0;font-size:13px;
+    animation:spark .7s cubic-bezier(.3,1.7,.4,1) 1.9s forwards;}
+
+  .tagline-rotator{position:relative;height:20px;margin:-4px 0 24px;overflow:hidden;}
+  .tagline-rotator span{position:absolute;left:0;top:0;font-size:.82rem;color:var(--green);opacity:0;
+    animation:taglineCycle 12s ease-in-out infinite;}
+  .tagline-rotator span:nth-child(1){animation-delay:0s;}
+  .tagline-rotator span:nth-child(2){animation-delay:3s;}
+  .tagline-rotator span:nth-child(3){animation-delay:6s;}
+  .tagline-rotator span:nth-child(4){animation-delay:9s;}
+
+  @keyframes rise{to{transform:translateY(0);}}
+  @keyframes fadeIn{to{opacity:1;}}
+  @keyframes draw{to{stroke-dashoffset:0;}}
+  @keyframes travel{
+    0%{opacity:0;}
+    4%{opacity:1;}
+    100%{opacity:1;}
+  }
+  @keyframes ring{
+    0%{opacity:.9;transform:scale(.3);}
+    100%{opacity:0;transform:scale(3.2);}
+  }
+  @keyframes spark{
+    0%{opacity:0;transform:scale(.2) translateY(4px);}
+    55%{opacity:1;transform:scale(1.25) translateY(0);}
+    100%{opacity:1;transform:scale(1) translateY(0);}
+  }
+  @keyframes taglineCycle{
+    0%{opacity:0;transform:translateY(6px);}
+    6%{opacity:1;transform:translateY(0);}
+    27%{opacity:1;transform:translateY(0);}
+    33%{opacity:0;transform:translateY(-6px);}
+    100%{opacity:0;}
+  }
+  @keyframes statusReveal{
+    from{opacity:0;transform:translateX(-6px);}
+    to{opacity:1;transform:translateX(0);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hero-title .line span{animation:none;transform:none;}
+    .hero-sub, .route, .route .path-draw, .route .marker{animation:none;opacity:1;}
+    .route .path-draw{stroke-dashoffset:0;}
+    .route .ring{animation:none;opacity:0;}
+    .route .spark{animation:none;opacity:1;transform:none;}
+    .tagline-rotator span{animation:none;opacity:0;}
+    .tagline-rotator span:first-child{opacity:1;}
+    .status-item{animation:none !important;opacity:1 !important;}
+  }
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:20px;}
+  .card h3{margin:0 0 4px;font-size:.72rem;letter-spacing:.06em;color:var(--muted);font-weight:600;text-transform:none;}
+  .card h2{font-family:var(--serif);font-size:1.25rem;margin:2px 0 16px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:.78rem;color:var(--cream-dim);margin-bottom:6px;}
+  .field input, .field select, .field textarea{
+    width:100%;background:var(--cream);color:#2a271f;border:none;border-radius:8px;
+    padding:12px 14px;font-size:.95rem;
+  }
+  .field textarea{resize:vertical;min-height:70px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--green);color:#12241c;border:none;border-radius:8px;
+    padding:13px 18px;font-size:.92rem;font-weight:600;cursor:pointer;width:100%;
+  }
+  .btn:hover{background:var(--green-dark);color:var(--cream);}
+  .btn.secondary{background:transparent;border:1px solid var(--border);color:var(--cream);}
+  .btn.secondary:hover{border-color:var(--green);}
+  .btn.small{width:auto;padding:9px 14px;font-size:.82rem;}
+  .btn.danger{background:var(--rust);color:var(--cream);}
+
+  .status-track{margin-top:18px;}
+  .status-item{display:flex;gap:12px;padding:9px 0;font-size:.88rem;opacity:0;animation:statusReveal .4s ease forwards;}
+  .status-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0;background:var(--border);}
+  .status-item.done .status-dot{background:var(--green);}
+  .status-item.current .status-dot{background:var(--amber);box-shadow:0 0 0 3px rgba(200,161,92,.25);}
+  .status-item.done{color:var(--cream);}
+  .status-item.current{color:var(--cream);font-weight:600;}
+  .status-item.todo{color:var(--muted);}
+
+  .empty{color:var(--muted);font-size:.88rem;padding:10px 0;}
+  .msg{font-size:.85rem;padding:10px 12px;border-radius:8px;margin-top:10px;}
+  .msg.ok{background:rgba(124,156,137,.15);color:var(--green);}
+  .msg.err{background:rgba(181,103,76,.15);color:var(--rust);}
+  .status-message{font-size:.92rem;color:var(--cream);background:var(--panel-2);border:1px solid var(--border);
+    border-radius:8px;padding:14px 16px;margin-bottom:4px;line-height:1.5;opacity:0;
+    animation:fadeIn .5s ease .1s forwards;}
+  .status-message.delivered{background:rgba(124,156,137,.14);border-color:rgba(124,156,137,.4);
+    color:var(--green);font-weight:600;}
+  .status-message .emoji{margin-right:6px;}
+
+  /* ---------- TEAM SHELL ---------- */
+  .team-shell{display:flex;flex:1;min-height:0;}
+  .sidebar{width:210px;flex-shrink:0;border-right:1px solid var(--border);padding:18px 10px;}
+  .sidebar .role-tag{font-size:.72rem;color:var(--muted);padding:0 10px 14px;}
+  .nav-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--cream-dim);
+    padding:10px 12px;border-radius:8px;font-size:.88rem;cursor:pointer;margin-bottom:2px;}
+  .nav-item:hover{background:var(--panel-2);}
+  .nav-item.active{background:var(--green-dark);color:var(--cream);}
+  .content{flex:1;padding:26px 30px;overflow-y:auto;}
+  .content h1{font-family:var(--serif);font-size:1.5rem;margin:0 0 20px;}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:26px;}
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+  .stat .num{font-family:var(--serif);font-size:1.7rem;}
+  .stat .label{font-size:.76rem;color:var(--muted);margin-top:4px;}
+
+  table{width:100%;border-collapse:collapse;font-size:.86rem;}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:.74rem;padding:8px 10px;border-bottom:1px solid var(--border);}
+  td{padding:10px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tr.clickable{cursor:pointer;}
+  tr.clickable:hover td{background:var(--panel-2);}
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.72rem;font-weight:600;}
+  .badge.nouveau{background:rgba(140,136,125,.2);color:var(--cream-dim);}
+  .badge.regulier{background:rgba(124,156,137,.2);color:var(--green);}
+  .badge.vip{background:rgba(200,161,92,.2);color:var(--amber);}
+  .badge.aerien{background:rgba(124,156,137,.18);color:var(--green);}
+  .badge.maritime{background:rgba(140,136,125,.22);color:var(--cream-dim);}
+  .badge.remis{background:rgba(124,156,137,.2);color:var(--green);}
+  .badge.attente{background:rgba(200,161,92,.2);color:var(--amber);}
+
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+  .toolbar input, .toolbar select{background:var(--panel);border:1px solid var(--border);color:var(--cream);
+    padding:8px 12px;border-radius:8px;font-size:.85rem;}
+  .section-title{font-size:.72rem;letter-spacing:.05em;color:var(--muted);margin:24px 0 10px;}
+
+  .panel-detail{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:16px;}
+  .kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:.86rem;}
+  .kv:last-child{border-bottom:none;}
+  .kv .k{color:var(--muted);}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;}
+  .modal{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto;}
+  .modal h3{font-family:var(--serif);margin:0 0 16px;font-size:1.1rem;}
+
+  .invoice-sheet{background:var(--cream);color:#2a271f;border-radius:var(--radius);padding:32px;max-width:520px;margin:0 auto;}
+  .invoice-sheet .inv-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;}
+  .invoice-sheet .inv-brand{font-family:var(--serif);font-size:1.3rem;color:var(--green-dark);}
+  .invoice-sheet table{font-size:.85rem;}
+  .invoice-sheet td, .invoice-sheet th{border-color:#d8d2c2;color:#2a271f;}
+  .invoice-sheet .total-row td{font-weight:700;font-size:1rem;}
+  .paid-tag{display:inline-block;background:var(--green-dark);color:#fff;padding:4px 12px;border-radius:6px;font-size:.78rem;font-weight:700;letter-spacing:.03em;}
+  .print-note{font-size:.78rem;color:#6b6656;margin-top:18px;border-top:1px dashed #cfc9bb;padding-top:14px;}
+
+  @media print{
+    body *{visibility:hidden;}
+    .invoice-sheet, .invoice-sheet *{visibility:visible;}
+    .invoice-sheet{position:absolute;top:0;left:0;width:100%;}
+  }
+  .thumb{width:54px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--border);}
+  .notes-list{margin-top:8px;display:flex;flex-direction:column;gap:6px;}
+  .note-line{font-size:.8rem;color:var(--cream-dim);background:var(--panel-2);padding:7px 10px;border-radius:6px;}
+  .warn-box{background:rgba(200,161,92,.12);border:1px solid rgba(200,161,92,.3);color:var(--amber);
+    border-radius:8px;padding:12px 14px;font-size:.8rem;margin-bottom:18px;line-height:1.5;}
+  @media (max-width:720px){
+    .team-shell{flex-direction:column;}
+    .sidebar{width:100%;display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);}
+    .nav-item{white-space:nowrap;}
+    .row2{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div id="root" class="app"></div>
+
+<script>
+/* ============================================================
+   MBC CARGO — ESPACE DE GESTION (prototype fonctionnel)
+   Stockage partagé via window.storage — voir avertissement UI
+   ============================================================ */
+
+const STORAGE_KEY = "mbc-cargo-app-state";
+
+const AERIEN_STATUSES = [
+  "Devis confirmé","Reçu au dépôt Canada","Emballé / Préparé pour expédition",
+  "En vol","Arrivé à Ouagadougou","Dédouanement en cours",
+  "Prêt pour remise","Remis au client"
+];
+const MARITIME_STATUSES = [
+  "Devis confirmé","Reçu au dépôt Canada","Chargé en conteneur/navire",
+  "Parti du port (Canada)","En mer","Arrivé au port de destination",
+  "Dédouanement en cours","Dédouané — en transit vers Ouagadougou",
+  "Arrivé à Ouagadougou","Prêt pour remise","Remis au client"
+];
+
+const STATUS_MESSAGES = {
+  "Devis confirmé": "Votre commande est confirmée, {name}. On prépare tout dès réception de votre colis.",
+  "Reçu au dépôt Canada": "Bonne nouvelle {name}, votre colis est arrivé à notre dépôt au Canada.",
+  "Emballé / Préparé pour expédition": "Votre colis est emballé avec soin et prêt à partir, {name}.",
+  "Chargé en conteneur/navire": "Votre colis est chargé et prêt pour la traversée, {name}.",
+  "Parti du port (Canada)": "Le navire a quitté le port canadien avec votre colis à bord.",
+  "En vol": "Votre colis est en plein vol vers l'Afrique, {name}.",
+  "En mer": "Votre colis traverse l'Atlantique en ce moment même.",
+  "Arrivé au port de destination": "Votre colis a atteint le port de destination.",
+  "Dédouanement en cours": "Votre colis est en cours de dédouanement, {name} — encore un peu de patience.",
+  "Dédouané — en transit vers Ouagadougou": "Dédouanement terminé ! Direction Ouagadougou.",
+  "Arrivé à Ouagadougou": "Votre colis est arrivé à Ouagadougou, {name} !",
+  "Prêt pour remise": "Votre colis vous attend, {name}, prêt à être récupéré.",
+  "Remis au client": "Merci {name} pour votre confiance ! Votre colis a été remis avec succès."
+};
+
+function statusMessage(label, name){
+  const template = STATUS_MESSAGES[label] || "Votre colis progresse bien, {name}.";
+  return template.replace("{name}", name || "cher client");
+}
+
+function statusesFor(type){ return type === "aerien" ? AERIEN_STATUSES : MARITIME_STATUSES; }
+
+function defaultState(){
+  return { clients: [], shipments: [], invoices: [], pendingRequests: [],
+    auth: { adminHash: null, assistantHash: null } };
+}
+
+async function sha256(text){
+  const enc = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+const MY_ROLE_KEY = "mbc-cargo-my-role";
+
+async function loadMyRole(){
+  try{
+    const res = await window.storage.get(MY_ROLE_KEY, false);
+    if(res && res.value) role = res.value;
+  }catch(e){ /* pas encore de session sur cet appareil */ }
+}
+
+async function saveMyRole(r){
+  try{ await window.storage.set(MY_ROLE_KEY, r, false); }catch(e){ /* best effort */ }
+}
+
+async function clearMyRole(){
+  try{ await window.storage.delete(MY_ROLE_KEY, false); }catch(e){ /* best effort */ }
+}
+
+let state = defaultState();
+let view = "public";          // 'public' | 'team'
+let role = null;               // 'admin' | 'assistant'
+let authError = "";
+let settingsOpen = false;
+let activeTab = "dashboard";
+let selectedClientId = null;
+let selectedInvoiceId = null;
+let publicTrackResult = null;
+let publicLookupPhone = "";
+let publicPendingMatch = null;
+let ready = false;
+let saveError = false;
+
+function uid(prefix){
+  return prefix + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+function pad4(n){ return String(n).padStart(4,"0"); }
+
+function yymm(d){
+  d = d || new Date();
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  return yy+mm;
+}
+
+function nextTrackingNumber(){
+  const prefix = "MBC-" + yymm();
+  const countThisMonth = state.shipments.filter(s => s.trackingNumber.startsWith(prefix)).length;
+  return prefix + "-" + pad4(countThisMonth + 1);
+}
+
+function nextInvoiceNumber(){
+  const prefix = "MBC-FAC-" + yymm();
+  const countThisMonth = state.invoices.filter(i => i.invoiceNumber.startsWith(prefix)).length;
+  return prefix + "-" + pad4(countThisMonth + 1);
+}
+
+function fmtMoney(n){
+  return (Number(n)||0).toLocaleString("fr-CA", {style:"currency", currency:"CAD"});
+}
+function fmtDate(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleDateString("fr-CA", {year:"numeric", month:"short", day:"numeric"});
+}
+
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, true);
+    if(res && res.value){
+      const parsed = JSON.parse(res.value);
+      state = Object.assign(defaultState(), parsed);
+    }
+  }catch(e){
+    // Pas encore de données — on part d'un état vide
+    state = defaultState();
+  }
+  await loadMyRole();
+  checkUrlForCompletionCode();
+  ready = true;
+  render();
+}
+
+function checkUrlForCompletionCode(){
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("complete");
+  if(!code) return;
+  const p = state.pendingRequests.find(p => p.code === code.toUpperCase() && !p.completed);
+  publicPendingMatch = p || "notfound";
+}
+
+async function saveState(){
+  try{
+    const result = await window.storage.set(STORAGE_KEY, JSON.stringify(state), true);
+    if(!result){ saveError = true; } else { saveError = false; }
+  }catch(e){
+    saveError = true;
+    console.error("Erreur de sauvegarde:", e);
+  }
+  render();
+}
+
+/* ---------------- DATA HELPERS ---------------- */
+
+function getClient(id){ return state.clients.find(c => c.id === id); }
+function getShipmentsForClient(id){ return state.shipments.filter(s => s.clientId === id); }
+function getInvoicesForClient(id){ return state.invoices.filter(i => i.clientId === id); }
+
+function findOrCreateClient({name, phone, city}){
+  let c = state.clients.find(c => c.phone.replace(/\s+/g,"") === phone.replace(/\s+/g,""));
+  if(c){
+    if(city && !c.city) c.city = city;
+    return c;
+  }
+  c = {
+    id: uid("cli"), name, phone, city: city || "",
+    status: "Nouveau", notes: "", createdAt: new Date().toISOString()
+  };
+  state.clients.push(c);
+  return c;
+}
+
+/* ---------------- ACTIONS: ADMIN — DEVIS & PAIEMENT ---------------- */
+
+function genCode(){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for(let i=0;i<6;i++) out += chars[Math.floor(Math.random()*chars.length)];
+  return out;
+}
+
+function addPaidRequest({clientName, phone, freightType, amount}){
+  const client = findOrCreateClient({name: clientName, phone});
+  const invoice = {
+    id: uid("inv"),
+    invoiceNumber: nextInvoiceNumber(),
+    clientId: client.id,
+    shipmentId: null,
+    amount: Number(amount),
+    status: "Payé",
+    paidAt: new Date().toISOString()
+  };
+  state.invoices.push(invoice);
+  const pending = {
+    id: uid("pend"),
+    clientId: client.id,
+    clientName, phone, freightType,
+    invoiceId: invoice.id,
+    code: genCode(),
+    linkSent: false,
+    completed: false,
+    createdAt: new Date().toISOString()
+  };
+  state.pendingRequests.push(pending);
+  saveState();
+}
+
+function markLinkSent(pendingId){
+  const p = state.pendingRequests.find(p => p.id === pendingId);
+  if(p) p.linkSent = true;
+  saveState();
+}
+
+function pendingLink(p){
+  const base = window.location.origin + window.location.pathname;
+  return base + "?complete=" + p.code;
+}
+
+function pendingWhatsAppText(p){
+  const link = pendingLink(p);
+  return `Bonjour ${p.clientName}, merci pour votre paiement à MBC Cargo ! `
+    + `Complétez vos informations d'envoi ici : ${link}`;
+}
+
+function phoneDigits(phone){
+  return (phone || "").replace(/[^\d]/g, "");
+}
+
+function whatsappSendUrl(p){
+  const digits = phoneDigits(p.phone);
+  return `https://wa.me/${digits}?text=${encodeURIComponent(pendingWhatsAppText(p))}`;
+}
+
+/* ---------------- ACTIONS: PUBLIC — COMPLÉTER DOSSIER ---------------- */
+
+function completeClientForm(pendingId, {city, content, weight}){
+  const p = state.pendingRequests.find(p => p.id === pendingId);
+  if(!p) return null;
+  const client = getClient(p.clientId);
+  if(city) client.city = city;
+  const shipment = {
+    id: uid("ship"),
+    trackingNumber: nextTrackingNumber(),
+    clientId: client.id,
+    freightType: p.freightType,
+    description: content,
+    weight: weight,
+    statusIndex: 0,
+    notes: [],
+    deliveredPhoto: null,
+    deliveredAt: null,
+    createdAt: new Date().toISOString()
+  };
+  state.shipments.push(shipment);
+  const inv = state.invoices.find(i => i.id === p.invoiceId);
+  if(inv) inv.shipmentId = shipment.id;
+  p.completed = true;
+  saveState();
+  return shipment;
+}
+
+/* ---------------- ACTIONS: SUIVI ---------------- */
+
+function advanceStatus(shipmentId, newIndex){
+  const s = state.shipments.find(s => s.id === shipmentId);
+  if(!s) return;
+  s.statusIndex = newIndex;
+  if(newIndex === statusesFor(s.freightType).length - 1){
+    s.deliveredAt = new Date().toISOString();
+  }
+  saveState();
+}
+
+function addNote(shipmentId, text){
+  const s = state.shipments.find(s => s.id === shipmentId);
+  if(!s || !text.trim()) return;
+  s.notes.push({text: text.trim(), at: new Date().toISOString()});
+  saveState();
+}
+
+function attachDeliveryPhoto(shipmentId, dataUrl){
+  const s = state.shipments.find(s => s.id === shipmentId);
+  if(!s) return;
+  s.deliveredPhoto = dataUrl;
+  saveState();
+}
+
+/* ---------------- RENDER ROOT ---------------- */
+
+function render(){
+  const root = document.getElementById("root");
+  if(!ready){
+    root.innerHTML = `<div style="padding:60px;text-align:center;color:var(--muted)">Chargement…</div>`;
+    return;
+  }
+  root.innerHTML = topbarHtml() + (view === "public" ? publicHtml() : teamHtml());
+  bindEvents();
+}
+
+function topbarHtml(){
+  return `
+  <div class="topbar">
+    <div class="brand"><span class="mark">MBC</span> MBC Cargo</div>
+    <div class="topbar-actions">
+      ${saveError ? `<span style="color:var(--rust);font-size:.78rem;">Sauvegarde indisponible</span>` : ``}
+      ${view === "public"
+        ? `<button class="link-btn" data-action="go-team">Espace équipe</button>`
+        : `<button class="link-btn" data-action="go-public">← Voir le site public</button>`}
+    </div>
+  </div>`;
+}
+
+/* ================= PUBLIC VIEW ================= */
+
+const TAGLINES = [
+  "Chaque colis compte, chaque famille compte.",
+  "Du Montréal à Ouagadougou, on garde le fil.",
+  "L'Afrique n'a jamais été aussi proche du Canada.",
+  "Envoyé de chez nous, livré chez les vôtres."
+];
+
+function routeAnimationHtml(){
+  return `
+  <div class="route" aria-hidden="true">
+    <svg viewBox="0 0 400 34" preserveAspectRatio="none">
+      <text class="lbl" x="0" y="10">CANADA</text>
+      <text class="lbl" x="344" y="10" text-anchor="end">BURKINA FASO</text>
+      <path class="path" d="M6,22 Q200,4 394,22"></path>
+      <path class="path-draw" d="M6,22 Q200,4 394,22"></path>
+      <circle class="pt" cx="6" cy="22" r="3"></circle>
+      <circle class="pt" cx="394" cy="22" r="3"></circle>
+      <circle class="marker" cx="6" cy="22" r="3.5">
+        <animateMotion dur="1.6s" begin="0.3s" fill="freeze" path="M0,0 Q194,-18 388,0"></animateMotion>
+      </circle>
+      <circle class="ring" cx="394" cy="22" r="4" fill="none" stroke="var(--green)" stroke-width="1.5"></circle>
+      <text class="spark" x="394" y="12" text-anchor="middle">✨</text>
+    </svg>
+  </div>`;
+}
+
+function publicHtml(){
+  return `
+  <div class="public-wrap">
+    <div class="eyebrow">MBC CARGO · CANADA → AFRIQUE</div>
+    <div class="hero-title">
+      <span class="line"><span>Votre cargaison,</span></span>
+      <span class="line"><span>notre priorité.</span></span>
+    </div>
+    ${routeAnimationHtml()}
+    <p class="hero-sub">Fret aérien, maritime et véhicules. Entrez votre numéro — la position s'affiche tout de suite.</p>
+    <div class="tagline-rotator" aria-hidden="true">
+      ${TAGLINES.map(t => `<span>${t}</span>`).join("")}
+    </div>
+
+    <div class="card">
+      <h3>NUMÉRO DE SUIVI</h3>
+      <div class="field"><input id="track-input" placeholder="MBC-2609-0001" value="${publicLookupPhone==='' ? '' : ''}"></div>
+      <button class="btn" data-action="do-track">Suivre</button>
+      ${publicTrackResult !== undefined && publicTrackResult !== null ? renderTrackResult() : ""}
+      ${publicTrackResult === "notfound" ? `<div class="msg err">Aucun colis trouvé avec ce numéro.</div>` : ""}
+    </div>
+
+    <div class="card">
+      <h3>DOSSIER PAYÉ</h3>
+      <h2>Compléter mes informations</h2>
+      ${publicPendingMatch && publicPendingMatch !== "notfound" ? "" : `
+      <p style="color:var(--cream-dim);font-size:.85rem;margin-top:-8px;">Si vous venez d'effectuer un paiement, entrez le numéro de téléphone utilisé pour la commande.</p>
+      <div class="field"><input id="phone-lookup" placeholder="Numéro de téléphone (ex: +226 70 00 00 00)"></div>
+      <button class="btn secondary" data-action="lookup-phone">Rechercher mon dossier</button>
+      `}
+      ${renderPendingMatch()}
+    </div>
+  </div>`;
+}
+
+function renderTrackResult(){
+  if(publicTrackResult === "notfound") return "";
+  const s = publicTrackResult;
+  const client = getClient(s.clientId);
+  const firstName = client ? client.name.trim().split(/\s+/)[0] : "";
+  const statuses = statusesFor(s.freightType);
+  const currentLabel = statuses[s.statusIndex];
+  const isDelivered = s.statusIndex === statuses.length - 1;
+  const message = statusMessage(currentLabel, firstName);
+  const rows = statuses.map((label, i) => {
+    let cls = "todo";
+    if(i < s.statusIndex) cls = "done";
+    else if(i === s.statusIndex) cls = "current";
+    return `<div class="status-item ${cls}" style="animation-delay:${i*0.06}s"><div class="status-dot"></div><div>${label}</div></div>`;
+  }).join("");
+  return `
+    <div class="status-message ${isDelivered ? 'delivered' : ''}">
+      <span class="emoji">${isDelivered ? "🎉" : "📦"}</span>${message}
+    </div>
+    <div class="status-track">${rows}</div>`;
+}
+
+function renderPendingMatch(){
+  if(!publicPendingMatch) return "";
+  if(publicPendingMatch === "notfound"){
+    return `<div class="msg err">Aucun dossier payé en attente pour ce numéro.</div>`;
+  }
+  const p = publicPendingMatch;
+  return `
+  <div class="msg ok" style="margin-bottom:0;">Dossier trouvé pour ${p.clientName}. Complétez ci-dessous :</div>
+  <div class="field" style="margin-top:14px;"><label>Ville / quartier à destination</label><input id="cf-city" placeholder="Ouagadougou, secteur..."></div>
+  <div class="field"><label>Contenu du colis</label><textarea id="cf-content" placeholder="Décrivez le contenu"></textarea></div>
+  <div class="field"><label>Poids (kg) ou détails véhicule</label><input id="cf-weight" placeholder="ex: 12 kg"></div>
+  <button class="btn" data-action="submit-client-form" data-pending-id="${p.id}">Envoyer mes informations</button>
+  `;
+}
+
+/* ================= TEAM VIEW ================= */
+
+function teamHtml(){
+  const noPasswordsYet = !state.auth.adminHash && !state.auth.assistantHash;
+
+  if(!role && noPasswordsYet){
+    return `
+    <div class="public-wrap" style="max-width:420px;">
+      <div class="card">
+        <h3>PREMIÈRE CONFIGURATION</h3>
+        <h2>Créer les accès de l'équipe</h2>
+        <div class="warn-box">Aucun mot de passe n'est encore configuré. Crée un mot de passe pour toi (Admin) et un pour l'assistante. Note : c'est une protection simple côté navigateur, pas un système de sécurité de niveau entreprise — suffisant pour un usage interne, mais à garder confidentiel.</div>
+        <div class="field"><label>Mot de passe Admin (Nourou)</label><input type="password" id="setup-admin-pwd"></div>
+        <div class="field"><label>Mot de passe Assistante</label><input type="password" id="setup-assist-pwd"></div>
+        ${authError ? `<div class="msg err">${authError}</div>` : ""}
+        <button class="btn" data-action="setup-passwords">Créer les accès et me connecter en Admin</button>
+      </div>
+    </div>`;
+  }
+
+  if(!role){
+    return `
+    <div class="public-wrap" style="max-width:420px;">
+      <div class="card">
+        <h3>ESPACE ÉQUIPE</h3>
+        <h2>Connexion</h2>
+        <div class="field"><label>Profil</label>
+          <select id="login-role">
+            <option value="admin">Nourou (Admin)</option>
+            <option value="assistant">Assistante (Suivi &amp; remise)</option>
+          </select>
+        </div>
+        <div class="field"><label>Mot de passe</label><input type="password" id="login-pwd"></div>
+        ${authError ? `<div class="msg err">${authError}</div>` : ""}
+        <button class="btn" data-action="do-login">Se connecter</button>
+      </div>
+    </div>`;
+  }
+
+  const tabs = role === "admin"
+    ? [["dashboard","Tableau de bord"], ["devis","Devis & Paiement"], ["suivi","Suivi"], ["clients","Clients"], ["factures","Factures"], ["parametres","Paramètres"]]
+    : [["suivi","Suivi"]];
+
+  if(!tabs.find(t => t[0] === activeTab)) activeTab = tabs[0][0];
+
+  return `
+  <div class="team-shell">
+    <div class="sidebar">
+      <div class="role-tag">${role === "admin" ? "Nourou · Admin" : "Assistante"}</div>
+      ${tabs.map(([key,label]) => `<button class="nav-item ${activeTab===key?'active':''}" data-action="set-tab" data-tab="${key}">${label}</button>`).join("")}
+      <button class="nav-item" data-action="logout" style="margin-top:16px;color:var(--muted);">Se déconnecter</button>
+    </div>
+    <div class="content">
+      ${renderTab()}
+    </div>
+  </div>`;
+}
+
+function renderTab(){
+  switch(activeTab){
+    case "dashboard": return dashboardHtml();
+    case "devis": return devisHtml();
+    case "suivi": return suiviHtml();
+    case "clients": return clientsHtml();
+    case "factures": return facturesHtml();
+    case "parametres": return parametresHtml();
+    default: return "";
+  }
+}
+
+function parametresHtml(){
+  return `
+  <h1>Paramètres</h1>
+  <div class="card" style="max-width:420px;">
+    <h3>SÉCURITÉ</h3>
+    <h2>Changer les mots de passe</h2>
+    <div class="warn-box">Laisse un champ vide pour ne pas changer ce mot de passe.</div>
+    <div class="field"><label>Nouveau mot de passe Admin</label><input type="password" id="new-admin-pwd"></div>
+    <div class="field"><label>Nouveau mot de passe Assistante</label><input type="password" id="new-assist-pwd"></div>
+    ${authError ? `<div class="msg err">${authError}</div>` : ""}
+    <button class="btn" data-action="update-passwords">Enregistrer</button>
+  </div>
+  <div class="card" style="max-width:420px;">
+    <h3>DONNÉES</h3>
+    <h2>Réinitialiser les données</h2>
+    <p style="color:var(--cream-dim);font-size:.85rem;">Efface tous les clients, colis, factures et demandes. Les mots de passe restent inchangés. Action irréversible.</p>
+    <button class="btn danger" data-action="reset-data">Tout effacer</button>
+  </div>
+  `;
+}
+
+/* --- DASHBOARD --- */
+function dashboardHtml(){
+  const now = new Date();
+  const thisMonthKey = yymm(now);
+  const revenusMonth = state.invoices
+    .filter(i => i.paidAt && yymm(new Date(i.paidAt)) === thisMonthKey)
+    .reduce((sum,i) => sum + Number(i.amount||0), 0);
+  const nouveauxClients = state.clients.filter(c => yymm(new Date(c.createdAt)) === thisMonthKey).length;
+  const enCours = state.shipments.filter(s => s.statusIndex < statusesFor(s.freightType).length - 1).length;
+  const enDedouanement = state.shipments.filter(s => {
+    const label = statusesFor(s.freightType)[s.statusIndex] || "";
+    return label.toLowerCase().includes("dédouanement");
+  }).length;
+  const aerienCount = state.shipments.filter(s => s.freightType === "aerien").length;
+  const maritimeCount = state.shipments.filter(s => s.freightType === "maritime").length;
+  const pretsPourRemise = state.shipments.filter(s => {
+    const st = statusesFor(s.freightType);
+    return st[s.statusIndex] === "Prêt pour remise";
+  });
+  const liensAEnvoyer = state.pendingRequests.filter(p => !p.linkSent);
+  const enAttenteFormulaire = state.pendingRequests.filter(p => p.linkSent && !p.completed);
+
+  return `
+  <h1>Tableau de bord</h1>
+  <div class="stats-grid">
+    <div class="stat"><div class="num">${enCours}</div><div class="label">Colis en cours</div></div>
+    <div class="stat"><div class="num">${fmtMoney(revenusMonth)}</div><div class="label">Revenus ce mois-ci</div></div>
+    <div class="stat"><div class="num">${nouveauxClients}</div><div class="label">Nouveaux clients ce mois</div></div>
+    <div class="stat"><div class="num">${enDedouanement}</div><div class="label">En dédouanement</div></div>
+  </div>
+
+  <div class="section-title">RÉPARTITION PAR TYPE DE FRET</div>
+  <div class="stats-grid">
+    <div class="stat"><div class="num">${aerienCount}</div><div class="label">Envois aériens</div></div>
+    <div class="stat"><div class="num">${maritimeCount}</div><div class="label">Maritime / véhicules</div></div>
+  </div>
+
+  <div class="section-title">À TRAITER</div>
+  <div class="panel-detail">
+    <div class="kv"><div class="k">Liens formulaire à envoyer</div><div>${liensAEnvoyer.length}</div></div>
+    <div class="kv"><div class="k">En attente que le client complète son dossier</div><div>${enAttenteFormulaire.length}</div></div>
+    <div class="kv"><div class="k">Colis prêts pour remise</div><div>${pretsPourRemise.length}</div></div>
+  </div>
+  `;
+}
+
+/* --- DEVIS & PAIEMENT --- */
+function devisHtml(){
+  const rows = state.pendingRequests.slice().reverse().map(p => {
+    const inv = state.invoices.find(i => i.id === p.invoiceId);
+    return `
+    <tr>
+      <td>${p.clientName}<br><span style="color:var(--muted);font-size:.78rem;">${p.phone}</span></td>
+      <td><span class="badge ${p.freightType==='aerien'?'aerien':'maritime'}">${p.freightType==='aerien'?'Aérien':'Maritime/Véhicule'}</span></td>
+      <td>${inv ? fmtMoney(inv.amount) : "—"}</td>
+      <td>${p.completed ? '<span class="badge remis">Dossier complété</span>' : (p.linkSent ? '<span class="badge attente">Lien envoyé</span>' : '<span class="badge attente">Lien à envoyer</span>')}</td>
+      <td>${!p.linkSent ? `<button class="btn small" data-action="copy-link" data-id="${p.id}">Envoyer sur WhatsApp</button>` : (p.linkSent && !p.completed ? `<button class="btn small secondary" data-action="copy-link" data-id="${p.id}">Renvoyer sur WhatsApp</button>` : "")}</td>
+    </tr>`;
+  }).join("");
+
+  return `
+  <h1>Devis & Paiement</h1>
+  <div class="card" style="max-width:480px;">
+    <h3>NOUVEAU PAIEMENT CONFIRMÉ</h3>
+    <h2>Ajouter une demande</h2>
+    <div class="field"><label>Nom du client</label><input id="np-name"></div>
+    <div class="field"><label>Téléphone (WhatsApp)</label><input id="np-phone" placeholder="+226 70 00 00 00"></div>
+    <div class="row2">
+      <div class="field"><label>Type de fret</label>
+        <select id="np-type"><option value="aerien">Aérien</option><option value="maritime">Maritime / Véhicule</option></select>
+      </div>
+      <div class="field"><label>Montant reçu (CAD)</label><input id="np-amount" type="number" step="0.01"></div>
+    </div>
+    <button class="btn" data-action="add-paid-request">Confirmer le paiement</button>
+  </div>
+
+  <div class="section-title">DEMANDES ET LIENS</div>
+  <table>
+    <thead><tr><th>Client</th><th>Fret</th><th>Montant</th><th>Statut</th><th></th></tr></thead>
+    <tbody>${rows || `<tr><td colspan="5" class="empty">Aucune demande pour le moment.</td></tr>`}</tbody>
+  </table>
+  `;
+}
+
+/* --- SUIVI --- */
+function suiviHtml(){
+  const shipments = state.shipments.slice().reverse();
+  const rows = shipments.map(s => {
+    const client = getClient(s.clientId);
+    const statuses = statusesFor(s.freightType);
+    const options = statuses.map((label,i) => `<option value="${i}" ${i===s.statusIndex?'selected':''}>${label}</option>`).join("");
+    return `
+    <tr>
+      <td><strong>${s.trackingNumber}</strong><br><span style="color:var(--muted);font-size:.78rem;">${client ? client.name : "—"}</span></td>
+      <td><span class="badge ${s.freightType==='aerien'?'aerien':'maritime'}">${s.freightType==='aerien'?'Aérien':'Maritime/Véhicule'}</span></td>
+      <td><select data-action="change-status" data-id="${s.id}">${options}</select></td>
+      <td>
+        <div class="notes-list">${(s.notes||[]).slice(-2).map(n => `<div class="note-line">${n.text}</div>`).join("") || `<span class="empty">Aucune note</span>`}</div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <input placeholder="Ajouter une note…" id="note-${s.id}" style="flex:1;background:var(--panel-2);border:1px solid var(--border);color:var(--cream);padding:6px 8px;border-radius:6px;font-size:.78rem;">
+          <button class="btn small" data-action="add-note" data-id="${s.id}">+</button>
+        </div>
+      </td>
+      <td>
+        ${s.deliveredPhoto ? `<img class="thumb" src="${s.deliveredPhoto}">` :
+          `<input type="file" accept="image/*" data-action="upload-photo" data-id="${s.id}" style="font-size:.72rem;max-width:120px;">`}
+      </td>
+    </tr>`;
+  }).join("");
+
+  return `
+  <h1>Suivi des colis</h1>
+  <table>
+    <thead><tr><th>Colis</th><th>Type</th><th>Statut</th><th>Notes</th><th>Photo de remise</th></tr></thead>
+    <tbody>${rows || `<tr><td colspan="5" class="empty">Aucun colis enregistré pour le moment.</td></tr>`}</tbody>
+  </table>
+  `;
+}
+
+/* --- CLIENTS --- */
+let clientSort = "name";
+let clientSearch = "";
+
+function clientsHtml(){
+  let list = state.clients.slice();
+  if(clientSearch.trim()){
+    const q = clientSearch.toLowerCase();
+    list = list.filter(c => c.name.toLowerCase().includes(q) || c.phone.includes(q));
+  }
+  list.sort((a,b) => {
+    if(clientSort === "name") return a.name.localeCompare(b.name);
+    if(clientSort === "date") return new Date(b.createdAt) - new Date(a.createdAt);
+    if(clientSort === "envois") return getShipmentsForClient(b.id).length - getShipmentsForClient(a.id).length;
+    return 0;
+  });
+
+  const rows = list.map(c => {
+    const n = getShipmentsForClient(c.id).length;
+    return `
+    <tr class="clickable" data-action="open-client" data-id="${c.id}">
+      <td>${c.name}</td>
+      <td>${c.phone}</td>
+      <td><span class="badge ${c.status==='VIP'?'vip':(c.status==='Régulier'?'regulier':'nouveau')}">${c.status}</span></td>
+      <td>${n}</td>
+    </tr>`;
+  }).join("");
+
+  return `
+  <h1>Clients</h1>
+  <div class="toolbar">
+    <input placeholder="Rechercher par nom ou numéro…" id="client-search" value="${clientSearch}">
+    <select id="client-sort">
+      <option value="name" ${clientSort==='name'?'selected':''}>Trier : Nom</option>
+      <option value="date" ${clientSort==='date'?'selected':''}>Trier : Plus récents</option>
+      <option value="envois" ${clientSort==='envois'?'selected':''}>Trier : Nb d'envois</option>
+    </select>
+  </div>
+  <table>
+    <thead><tr><th>Nom</th><th>Téléphone</th><th>Statut</th><th>Envois</th></tr></thead>
+    <tbody>${rows || `<tr><td colspan="4" class="empty">Aucun client pour le moment.</td></tr>`}</tbody>
+  </table>
+  ${selectedClientId ? clientDetailHtml(selectedClientId) : ""}
+  `;
+}
+
+function clientDetailHtml(id){
+  const c = getClient(id);
+  if(!c) return "";
+  const shipments = getShipmentsForClient(id);
+  const invoices = getInvoicesForClient(id);
+  const totalPaid = invoices.reduce((s,i) => s + Number(i.amount||0), 0);
+  return `
+  <div class="panel-detail">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h2 style="font-family:var(--serif);margin:0;">${c.name}</h2>
+      <select data-action="change-client-status" data-id="${c.id}">
+        <option value="Nouveau" ${c.status==='Nouveau'?'selected':''}>Nouveau</option>
+        <option value="Régulier" ${c.status==='Régulier'?'selected':''}>Régulier</option>
+        <option value="VIP" ${c.status==='VIP'?'selected':''}>VIP</option>
+      </select>
+    </div>
+    <div class="kv"><div class="k">Téléphone</div><div>${c.phone}</div></div>
+    <div class="kv"><div class="k">Ville</div><div>${c.city || "—"}</div></div>
+    <div class="kv"><div class="k">Total payé</div><div>${fmtMoney(totalPaid)}</div></div>
+    <div class="kv"><div class="k">Client depuis</div><div>${fmtDate(c.createdAt)}</div></div>
+    <div class="section-title">ENVOIS</div>
+    ${shipments.length ? shipments.map(s => `<div class="note-line">${s.trackingNumber} — ${statusesFor(s.freightType)[s.statusIndex]}</div>`).join("") : `<div class="empty">Aucun envoi.</div>`}
+    <div class="section-title">NOTES INTERNES</div>
+    <textarea id="client-notes-${c.id}" style="width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--cream);padding:8px;border-radius:6px;">${c.notes||""}</textarea>
+    <button class="btn small" style="margin-top:8px;" data-action="save-client-notes" data-id="${c.id}">Enregistrer les notes</button>
+  </div>`;
+}
+
+/* --- FACTURES --- */
+function facturesHtml(){
+  if(selectedInvoiceId){
+    return invoicePrintHtml(selectedInvoiceId);
+  }
+  const rows = state.invoices.slice().reverse().map(i => {
+    const client = getClient(i.clientId);
+    return `
+    <tr class="clickable" data-action="open-invoice" data-id="${i.id}">
+      <td>${i.invoiceNumber}</td>
+      <td>${client ? client.name : "—"}</td>
+      <td>${fmtMoney(i.amount)}</td>
+      <td>${fmtDate(i.paidAt)}</td>
+      <td><span class="badge remis">${i.status}</span></td>
+    </tr>`;
+  }).join("");
+  return `
+  <h1>Factures</h1>
+  <table>
+    <thead><tr><th>N° facture</th><th>Client</th><th>Montant</th><th>Date</th><th>Statut</th></tr></thead>
+    <tbody>${rows || `<tr><td colspan="5" class="empty">Aucune facture pour le moment.</td></tr>`}</tbody>
+  </table>`;
+}
+
+function invoicePrintHtml(id){
+  const inv = state.invoices.find(i => i.id === id);
+  const client = getClient(inv.clientId);
+  const shipment = inv.shipmentId ? state.shipments.find(s => s.id === inv.shipmentId) : null;
+  return `
+  <button class="btn secondary small" style="margin-bottom:16px;" data-action="close-invoice">← Retour aux factures</button>
+  <div class="invoice-sheet" id="invoice-print-area">
+    <div class="inv-head">
+      <div>
+        <div class="inv-brand">MBC Cargo</div>
+        <div style="font-size:.8rem;color:#6b6656;">Canada → Afrique · Fret aérien, maritime, véhicules</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-weight:700;">${inv.invoiceNumber}</div>
+        <div style="font-size:.8rem;color:#6b6656;">${fmtDate(inv.paidAt)}</div>
+      </div>
+    </div>
+    <div class="kv"><div class="k">Client</div><div>${client ? client.name : "—"}</div></div>
+    <div class="kv"><div class="k">Téléphone</div><div>${client ? client.phone : "—"}</div></div>
+    ${shipment ? `<div class="kv"><div class="k">N° de suivi</div><div>${shipment.trackingNumber}</div></div>
+    <div class="kv"><div class="k">Type de fret</div><div>${shipment.freightType==='aerien'?'Aérien':'Maritime / Véhicule'}</div></div>
+    <div class="kv"><div class="k">Description</div><div>${shipment.description || "—"}</div></div>` : ""}
+    <table style="width:100%;margin-top:16px;">
+      <tr class="total-row"><td>Montant total</td><td style="text-align:right;">${fmtMoney(inv.amount)}</td></tr>
+    </table>
+    <div style="margin-top:14px;"><span class="paid-tag">${inv.status}</span></div>
+    <div class="print-note">Cette facture doit être présentée (imprimée ou sur téléphone) pour la récupération du colis.</div>
+  </div>
+  <button class="btn" style="max-width:220px;margin-top:18px;" onclick="window.print()">Imprimer / Exporter en PDF</button>
+  `;
+}
+
+/* ---------------- EVENTS ---------------- */
+
+function bindEvents(){
+  const root = document.getElementById("root");
+
+  root.querySelectorAll("[data-action]").forEach(el => {
+    const action = el.dataset.action;
+
+    if(el.tagName === "SELECT" && action === "change-status"){
+      el.addEventListener("change", () => advanceStatus(el.dataset.id, Number(el.value)));
+      return;
+    }
+    if(el.tagName === "SELECT" && action === "change-client-status"){
+      el.addEventListener("change", () => { getClient(el.dataset.id).status = el.value; saveState(); });
+      return;
+    }
+    if(el.tagName === "INPUT" && action === "upload-photo"){
+      el.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = () => attachDeliveryPhoto(el.dataset.id, reader.result);
+        reader.readAsDataURL(file);
+      });
+      return;
+    }
+    if(el.id === "client-search"){
+      el.addEventListener("input", () => { clientSearch = el.value; render(); });
+      return;
+    }
+    if(el.id === "client-sort"){
+      el.addEventListener("change", () => { clientSort = el.value; render(); });
+      return;
+    }
+
+    el.addEventListener("click", () => handleClick(action, el));
+  });
+
+  // re-bind plain selects/inputs without data-action separately handled above already via querySelectorAll data-action
+  const cs = document.getElementById("client-search");
+  if(cs && !cs.dataset.bound){ cs.dataset.bound="1"; }
+}
+
+function handleClick(action, el){
+  switch(action){
+    case "go-team": view = "team"; authError=""; render(); break;
+    case "go-public": view = "public"; render(); break;
+    case "logout": role = null; clearMyRole(); render(); break;
+
+    case "setup-passwords": {
+      const adminPwd = document.getElementById("setup-admin-pwd").value;
+      const assistPwd = document.getElementById("setup-assist-pwd").value;
+      if(!adminPwd || !assistPwd){ authError = "Merci de remplir les deux mots de passe."; render(); return; }
+      (async () => {
+        state.auth.adminHash = await sha256(adminPwd);
+        state.auth.assistantHash = await sha256(assistPwd);
+        await saveState();
+        role = "admin";
+        authError = "";
+        await saveMyRole("admin");
+        activeTab = "dashboard";
+        render();
+      })();
+      break;
+    }
+
+    case "do-login": {
+      const chosenRole = document.getElementById("login-role").value;
+      const pwd = document.getElementById("login-pwd").value;
+      (async () => {
+        const hash = await sha256(pwd);
+        const expected = chosenRole === "admin" ? state.auth.adminHash : state.auth.assistantHash;
+        if(hash === expected){
+          role = chosenRole;
+          authError = "";
+          await saveMyRole(chosenRole);
+          activeTab = chosenRole === "admin" ? "dashboard" : "suivi";
+        } else {
+          authError = "Mot de passe incorrect.";
+        }
+        render();
+      })();
+      break;
+    }
+
+    case "update-passwords": {
+      const newAdmin = document.getElementById("new-admin-pwd").value;
+      const newAssist = document.getElementById("new-assist-pwd").value;
+      (async () => {
+        if(newAdmin) state.auth.adminHash = await sha256(newAdmin);
+        if(newAssist) state.auth.assistantHash = await sha256(newAssist);
+        authError = "";
+        await saveState();
+        alert("Mots de passe mis à jour.");
+      })();
+      break;
+    }
+
+    case "reset-data": {
+      if(confirm("Es-tu sûr de vouloir effacer tous les clients, colis, factures et demandes ? Cette action est irréversible.")){
+        const authKeep = state.auth;
+        state = defaultState();
+        state.auth = authKeep;
+        saveState();
+      }
+      break;
+    }
+    case "set-tab": activeTab = el.dataset.tab; selectedClientId=null; selectedInvoiceId=null; render(); break;
+
+    case "do-track": {
+      const val = document.getElementById("track-input").value.trim();
+      const s = state.shipments.find(s => s.trackingNumber.toLowerCase() === val.toLowerCase());
+      publicTrackResult = s || "notfound";
+      render();
+      break;
+    }
+    case "lookup-phone": {
+      const val = document.getElementById("phone-lookup").value.trim();
+      const p = state.pendingRequests.find(p => !p.completed && p.phone.replace(/\s+/g,"") === val.replace(/\s+/g,""));
+      publicPendingMatch = p || "notfound";
+      render();
+      break;
+    }
+    case "submit-client-form": {
+      const id = el.dataset.pendingId;
+      const city = document.getElementById("cf-city").value.trim();
+      const content = document.getElementById("cf-content").value.trim();
+      const weight = document.getElementById("cf-weight").value.trim();
+      const shipment = completeClientForm(id, {city, content, weight});
+      publicPendingMatch = null;
+      publicTrackResult = shipment;
+      alert("Merci ! Votre numéro de suivi est : " + shipment.trackingNumber);
+      render();
+      break;
+    }
+
+    case "add-paid-request": {
+      const clientName = document.getElementById("np-name").value.trim();
+      const phone = document.getElementById("np-phone").value.trim();
+      const freightType = document.getElementById("np-type").value;
+      const amount = document.getElementById("np-amount").value;
+      if(!clientName || !phone || !amount) { alert("Merci de remplir tous les champs."); return; }
+      addPaidRequest({clientName, phone, freightType, amount});
+      break;
+    }
+    case "send-link": markLinkSent(el.dataset.id); break;
+    case "copy-link": {
+      const p = state.pendingRequests.find(p => p.id === el.dataset.id);
+      if(!p) return;
+      const digits = phoneDigits(p.phone);
+      if(digits.length < 8){
+        prompt("Numéro invalide pour WhatsApp. Copie le message ci-dessous et envoie-le manuellement :", pendingWhatsAppText(p));
+        markLinkSent(p.id);
+        return;
+      }
+      window.open(whatsappSendUrl(p), "_blank");
+      markLinkSent(p.id);
+      break;
+    }
+
+    case "add-note": {
+      const input = document.getElementById("note-" + el.dataset.id);
+      addNote(el.dataset.id, input.value);
+      break;
+    }
+
+    case "open-client": selectedClientId = el.dataset.id; render(); break;
+    case "save-client-notes": {
+      const ta = document.getElementById("client-notes-" + el.dataset.id);
+      getClient(el.dataset.id).notes = ta.value;
+      saveState();
+      break;
+    }
+
+    case "open-invoice": selectedInvoiceId = el.dataset.id; render(); break;
+    case "close-invoice": selectedInvoiceId = null; render(); break;
+  }
+}
+
+loadState();
+</script>
+</body>
+</html>
