@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MBC Cargo — Espace de gestion</title>
+<link rel="manifest" href="manifest-gestion.json">
+<meta name="theme-color" content="#0c0c0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="MBC Gestion">
+<link rel="apple-touch-icon" href="icon-gestion-180.png">
 <style>
   :root{
     --bg:#0c0c0d;
@@ -226,7 +232,7 @@
    Stockage : Google Sheets via Apps Script — voir APPS_SCRIPT_URL ci-dessous
    ============================================================ */
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzs9ITzYkNYlkQHSwq9YxqIEZ13nhwth-Qu--LO3VKxifkl39Xm1uy-AsnoJBN6_pO7/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbySG-vISR4KAWNStxSF3U7YR_JtO8pXe6h4xiinHc3Golae_jdFvqPTwdOGPITlDs0R/exec";
 
 const STORAGE_KEY = "mbc-cargo-app-state";
 
@@ -1161,6 +1167,12 @@ function handleClick(action, el){
 }
 
 loadState();
+
+if ("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw-gestion.js").catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
