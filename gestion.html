@@ -363,6 +363,22 @@ async function loadState(){
   render();
 }
 
+async function refreshState(){
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {method:"GET"});
+    const data = await res.json();
+    if(data && data.value){
+      const parsed = JSON.parse(data.value);
+      state = Object.assign(defaultState(), parsed);
+    }
+    saveError = false;
+  }catch(e){
+    saveError = true;
+    console.error("Erreur d'actualisation:", e);
+  }
+  render();
+}
+
 function checkUrlForCompletionCode(){
   const params = new URLSearchParams(window.location.search);
   const code = params.get("complete");
@@ -371,7 +387,26 @@ function checkUrlForCompletionCode(){
   publicPendingMatch = p || "notfound";
 }
 
-async function saveState(){
+let saveQueue = Promise.resolve();
+let pendingSaveCount = 0;
+
+function saveState(){
+  pendingSaveCount++;
+  render();
+  // On enchaîne les sauvegardes une par une (jamais deux en même temps)
+  // pour éviter qu'une sauvegarde plus lente n'écrase une plus récente.
+  saveQueue = saveQueue.then(() => doSave()).catch(() => {}).finally(() => { pendingSaveCount--; render(); });
+  return saveQueue;
+}
+
+window.addEventListener("beforeunload", (e) => {
+  if(pendingSaveCount > 0){
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
+
+async function doSave(){
   try{
     const res = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
@@ -394,7 +429,7 @@ function getShipmentsForClient(id){ return state.shipments.filter(s => s.clientI
 function getInvoicesForClient(id){ return state.invoices.filter(i => i.clientId === id); }
 
 function findOrCreateClient({name, phone, city}){
-  let c = state.clients.find(c => c.phone.replace(/\s+/g,"") === phone.replace(/\s+/g,""));
+  let c = state.clients.find(c => phoneDigits(c.phone) === phoneDigits(phone));
   if(c){
     if(city && !c.city) c.city = city;
     return c;
@@ -416,7 +451,15 @@ function genCode(){
   return out;
 }
 
-function addPaidRequest({clientName, phone, freightType, amount}){
+function calcNpAmount(){
+  const w = parseFloat(document.getElementById("np-weight").value);
+  const r = parseFloat(document.getElementById("np-rate").value);
+  if(!isNaN(w) && !isNaN(r)){
+    document.getElementById("np-amount").value = (w*r).toFixed(2);
+  }
+}
+
+function addPaidRequest({clientName, phone, freightType, amount, weight, rate, notes}){
   const client = findOrCreateClient({name: clientName, phone});
   const invoice = {
     id: uid("inv"),
@@ -424,6 +467,9 @@ function addPaidRequest({clientName, phone, freightType, amount}){
     clientId: client.id,
     shipmentId: null,
     amount: Number(amount),
+    weight: weight ? Number(weight) : null,
+    rate: rate ? Number(rate) : null,
+    notes: notes || "",
     status: "Payé",
     paidAt: new Date().toISOString()
   };
@@ -540,6 +586,7 @@ function topbarHtml(){
     <div class="brand"><span class="mark">MBC</span> MBC Cargo</div>
     <div class="topbar-actions">
       ${saveError ? `<span style="color:var(--rust);font-size:.78rem;">Sauvegarde indisponible</span>` : ``}
+      ${!saveError && pendingSaveCount > 0 ? `<span style="color:var(--muted);font-size:.78rem;">Sauvegarde en cours…</span>` : ``}
       ${view === "public"
         ? `<button class="link-btn" data-action="go-team">Espace équipe</button>`
         : `<button class="link-btn" data-action="go-public">← Voir le site public</button>`}
@@ -696,6 +743,7 @@ function teamHtml(){
   <div class="team-shell">
     <div class="sidebar">
       <div class="role-tag">${role === "admin" ? "Nourou · Admin" : "Assistante"}</div>
+      <button class="nav-item" data-action="refresh-data" style="color:var(--green);margin-bottom:10px;">↻ Actualiser les données</button>
       ${tabs.map(([key,label]) => `<button class="nav-item ${activeTab===key?'active':''}" data-action="set-tab" data-tab="${key}">${label}</button>`).join("")}
       <button class="nav-item" data-action="logout" style="margin-top:16px;color:var(--muted);">Se déconnecter</button>
     </div>
@@ -809,8 +857,13 @@ function devisHtml(){
       <div class="field"><label>Type de fret</label>
         <select id="np-type"><option value="aerien">Aérien</option><option value="maritime">Maritime / Véhicule</option></select>
       </div>
+      <div class="field"><label>Poids (kg, optionnel)</label><input id="np-weight" type="number" step="0.1" oninput="calcNpAmount()"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Prix au kg (CAD, optionnel)</label><input id="np-rate" type="number" step="0.01" oninput="calcNpAmount()"></div>
       <div class="field"><label>Montant reçu (CAD)</label><input id="np-amount" type="number" step="0.01"></div>
     </div>
+    <div class="field"><label>Notes / détails additionnels (optionnel)</label><textarea id="np-notes" placeholder="Ex: frais de dédouanement inclus, remise fidélité..."></textarea></div>
     <button class="btn" data-action="add-paid-request">Confirmer le paiement</button>
   </div>
 
@@ -977,7 +1030,13 @@ function invoicePrintHtml(id){
     ${shipment ? `<div class="kv"><div class="k">N° de suivi</div><div>${shipment.trackingNumber}</div></div>
     <div class="kv"><div class="k">Type de fret</div><div>${shipment.freightType==='aerien'?'Aérien':'Maritime / Véhicule'}</div></div>
     <div class="kv"><div class="k">Description</div><div>${shipment.description || "—"}</div></div>` : ""}
+    ${inv.notes ? `<div class="kv"><div class="k">Notes</div><div>${inv.notes}</div></div>` : ""}
     <table style="width:100%;margin-top:16px;">
+      ${(inv.weight && inv.rate) ? `
+      <tr><td>Poids</td><td style="text-align:right;">${inv.weight} kg</td></tr>
+      <tr><td>Prix au kg</td><td style="text-align:right;">${fmtMoney(inv.rate)}</td></tr>
+      <tr><td>Sous-total</td><td style="text-align:right;">${fmtMoney(inv.weight * inv.rate)}</td></tr>
+      ` : ""}
       <tr class="total-row"><td>Montant total</td><td style="text-align:right;">${fmtMoney(inv.amount)}</td></tr>
     </table>
     <div style="margin-top:14px;"><span class="paid-tag">${inv.status}</span></div>
@@ -1035,6 +1094,7 @@ function handleClick(action, el){
     case "go-team": view = "team"; authError=""; render(); break;
     case "go-public": view = "public"; render(); break;
     case "logout": role = null; clearMyRole(); render(); break;
+    case "refresh-data": refreshState(); break;
 
     case "setup-passwords": {
       const adminPwd = document.getElementById("setup-admin-pwd").value;
@@ -1105,7 +1165,7 @@ function handleClick(action, el){
     }
     case "lookup-phone": {
       const val = document.getElementById("phone-lookup").value.trim();
-      const p = state.pendingRequests.find(p => !p.completed && p.phone.replace(/\s+/g,"") === val.replace(/\s+/g,""));
+      const p = state.pendingRequests.find(p => !p.completed && phoneDigits(p.phone) === phoneDigits(val));
       publicPendingMatch = p || "notfound";
       render();
       break;
@@ -1128,8 +1188,11 @@ function handleClick(action, el){
       const phone = document.getElementById("np-phone").value.trim();
       const freightType = document.getElementById("np-type").value;
       const amount = document.getElementById("np-amount").value;
+      const weight = document.getElementById("np-weight").value;
+      const rate = document.getElementById("np-rate").value;
+      const notes = document.getElementById("np-notes").value.trim();
       if(!clientName || !phone || !amount) { alert("Merci de remplir tous les champs."); return; }
-      addPaidRequest({clientName, phone, freightType, amount});
+      addPaidRequest({clientName, phone, freightType, amount, weight, rate, notes});
       break;
     }
     case "send-link": markLinkSent(el.dataset.id); break;
