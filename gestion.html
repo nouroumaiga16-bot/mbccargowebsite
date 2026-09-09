@@ -535,7 +535,12 @@ function pendingLink(p){
 
 function pendingWhatsAppText(p){
   const link = pendingLink(p);
-  return `Bonjour ${p.clientName}, merci pour votre paiement à MBC Cargo ! `
+  const shipment = state.shipments.find(s => s.id === p.shipmentId);
+  const trackingLine = shipment
+    ? `Votre numéro de suivi est : ${shipment.trackingNumber}\n\n`
+    : "";
+  return `Bonjour ${p.clientName}, merci pour votre paiement à MBC Cargo !\n\n`
+    + trackingLine
     + `Complétez vos informations d'envoi ici : ${link}`;
 }
 
