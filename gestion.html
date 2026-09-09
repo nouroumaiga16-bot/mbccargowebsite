@@ -309,6 +309,7 @@ let publicLookupPhone = "";
 let publicPendingMatch = null;
 let ready = false;
 let saveError = false;
+let localChangeVersion = 0;
 
 function uid(prefix){
   return prefix + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
@@ -364,9 +365,16 @@ async function loadState(){
 }
 
 async function refreshState(){
+  const versionBefore = localChangeVersion;
   try{
     const res = await fetch(APPS_SCRIPT_URL, {method:"GET"});
     const data = await res.json();
+    // Si un changement local a eu lieu pendant qu'on attendait la réponse
+    // (ou qu'une sauvegarde est en cours), on n'écrase surtout pas l'écran :
+    // on ignore simplement cette actualisation, la prochaine s'en chargera.
+    if(localChangeVersion !== versionBefore || pendingSaveCount > 0){
+      return;
+    }
     if(data && data.value){
       const parsed = JSON.parse(data.value);
       state = Object.assign(defaultState(), parsed);
@@ -391,6 +399,7 @@ let saveQueue = Promise.resolve();
 let pendingSaveCount = 0;
 
 function saveState(){
+  localChangeVersion++;
   pendingSaveCount++;
   render();
   // On enchaîne les sauvegardes une par une (jamais deux en même temps)
@@ -754,7 +763,6 @@ function teamHtml(){
   <div class="team-shell">
     <div class="sidebar">
       <div class="role-tag">${role === "admin" ? "Nourou · Admin" : "Assistante"}</div>
-      <div style="font-size:.68rem;color:var(--muted);padding:0 10px 12px;">Synchronisation automatique</div>
       ${tabs.map(([key,label]) => `<button class="nav-item ${activeTab===key?'active':''}" data-action="set-tab" data-tab="${key}">${label}</button>`).join("")}
       <button class="nav-item" data-action="logout" style="margin-top:16px;color:var(--muted);">Se déconnecter</button>
     </div>
