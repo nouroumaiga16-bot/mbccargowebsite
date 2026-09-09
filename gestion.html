@@ -474,6 +474,40 @@ function calcNpAmount(){
   }
 }
 
+function addShipmentByAssistant({clientName, phone, freightType, weight, notes}){
+  const client = findOrCreateClient({name: clientName, phone});
+
+  const shipment = {
+    id: uid("ship"),
+    trackingNumber: nextTrackingNumber(),
+    clientId: client.id,
+    freightType,
+    description: notes || "",
+    weight: weight ? Number(weight) : null,
+    statusIndex: 0,
+    notes: [],
+    deliveredPhoto: null,
+    deliveredAt: null,
+    createdAt: new Date().toISOString()
+  };
+  state.shipments.push(shipment);
+
+  const pending = {
+    id: uid("pend"),
+    clientId: client.id,
+    clientName, phone, freightType,
+    invoiceId: null,
+    shipmentId: shipment.id,
+    code: genCode(),
+    linkSent: false,
+    completed: true,
+    createdAt: new Date().toISOString()
+  };
+  state.pendingRequests.push(pending);
+  saveState();
+  return pending;
+}
+
 function addPaidRequest({clientName, phone, freightType, amount, weight, rate, notes}){
   const client = findOrCreateClient({name: clientName, phone});
 
@@ -534,11 +568,16 @@ function pendingLink(p){
 }
 
 function pendingWhatsAppText(p){
-  const link = pendingLink(p);
   const shipment = state.shipments.find(s => s.id === p.shipmentId);
   const trackingLine = shipment
     ? `Votre numéro de suivi est : ${shipment.trackingNumber}\n\n`
     : "";
+  if(p.completed){
+    return `Bonjour ${p.clientName}, votre envoi a été enregistré chez MBC Cargo !\n\n`
+      + trackingLine
+      + `Vous pouvez suivre l'état de votre colis à tout moment en nous écrivant ici sur WhatsApp.`;
+  }
+  const link = pendingLink(p);
   return `Bonjour ${p.clientName}, merci pour votre paiement à MBC Cargo !\n\n`
     + trackingLine
     + `Complétez vos informations d'envoi ici : ${link}`;
@@ -766,7 +805,7 @@ function teamHtml(){
 
   const tabs = role === "admin"
     ? [["dashboard","Tableau de bord"], ["devis","Devis & Paiement"], ["suivi","Suivi"], ["clients","Clients"], ["factures","Factures"], ["parametres","Paramètres"]]
-    : [["suivi","Suivi"]];
+    : [["envoi","Nouvel envoi"], ["suivi","Suivi"]];
 
   if(!tabs.find(t => t[0] === activeTab)) activeTab = tabs[0][0];
 
@@ -792,6 +831,7 @@ function renderTab(){
   switch(activeTab){
     case "dashboard": return dashboardHtml();
     case "devis": return devisHtml();
+    case "envoi": return envoiHtml();
     case "suivi": return suiviHtml();
     case "clients": return clientsHtml();
     case "factures": return facturesHtml();
@@ -868,6 +908,44 @@ function dashboardHtml(){
 }
 
 /* --- DEVIS & PAIEMENT --- */
+function envoiHtml(){
+  const rows = state.pendingRequests.slice().reverse().slice(0, 15).map(p => {
+    const shipment = state.shipments.find(s => s.id === p.shipmentId);
+    return `
+    <tr>
+      <td>${p.clientName}<br><span style="color:var(--muted);font-size:.78rem;">${p.phone}</span></td>
+      <td><span class="badge ${p.freightType==='aerien'?'aerien':'maritime'}">${p.freightType==='aerien'?'Aérien':'Maritime/Véhicule'}</span></td>
+      <td>${shipment ? shipment.trackingNumber : "—"}</td>
+      <td>${p.linkSent ? '<span class="badge remis">Message envoyé</span>' : '<span class="badge attente">À envoyer</span>'}</td>
+      <td><button class="btn small" data-action="copy-link" data-id="${p.id}">${p.linkSent ? "Renvoyer" : "Envoyer"} sur WhatsApp</button></td>
+    </tr>`;
+  }).join("");
+
+  return `
+  <h1>Nouvel envoi</h1>
+  <div class="card" style="max-width:480px;">
+    <h3>CLIENT</h3>
+    <h2>Enregistrer un envoi</h2>
+    <div class="field"><label>Nom du client</label><input id="ns-name"></div>
+    <div class="field"><label>Téléphone (WhatsApp)</label><input id="ns-phone" placeholder="+226 70 00 00 00"></div>
+    <div class="row2">
+      <div class="field"><label>Type de fret</label>
+        <select id="ns-type"><option value="aerien">Aérien</option><option value="maritime">Maritime / Véhicule</option></select>
+      </div>
+      <div class="field"><label>Poids (kg, optionnel)</label><input id="ns-weight" type="number" step="0.1"></div>
+    </div>
+    <div class="field"><label>Contenu / notes (optionnel)</label><textarea id="ns-notes" placeholder="Ex: 2 valises, ville de destination..."></textarea></div>
+    <button class="btn" data-action="add-shipment-assistant">Enregistrer l'envoi</button>
+  </div>
+
+  <div class="section-title">ENVOIS RÉCENTS</div>
+  <table>
+    <thead><tr><th>Client</th><th>Fret</th><th>Suivi</th><th>Statut</th><th></th></tr></thead>
+    <tbody>${rows || `<tr><td colspan="5" class="empty">Aucun envoi pour le moment.</td></tr>`}</tbody>
+  </table>
+  `;
+}
+
 function devisHtml(){
   const rows = state.pendingRequests.slice().reverse().map(p => {
     const inv = state.invoices.find(i => i.id === p.invoiceId);
@@ -1240,6 +1318,16 @@ function handleClick(action, el){
       const notes = document.getElementById("np-notes").value.trim();
       if(!clientName || !phone || !amount) { alert("Merci de remplir tous les champs."); return; }
       addPaidRequest({clientName, phone, freightType, amount, weight, rate, notes});
+      break;
+    }
+    case "add-shipment-assistant": {
+      const clientName = document.getElementById("ns-name").value.trim();
+      const phone = document.getElementById("ns-phone").value.trim();
+      const freightType = document.getElementById("ns-type").value;
+      const weight = document.getElementById("ns-weight").value;
+      const notes = document.getElementById("ns-notes").value.trim();
+      if(!clientName || !phone) { alert("Merci de remplir au moins le nom et le téléphone."); return; }
+      addShipmentByAssistant({clientName, phone, freightType, weight, notes});
       break;
     }
     case "send-link": markLinkSent(el.dataset.id); break;
