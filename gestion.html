@@ -461,11 +461,29 @@ function calcNpAmount(){
 
 function addPaidRequest({clientName, phone, freightType, amount, weight, rate, notes}){
   const client = findOrCreateClient({name: clientName, phone});
+
+  // Le colis doit apparaître dans Suivi dès l'enregistrement du paiement —
+  // on ne dépend plus du client pour créer l'entrée.
+  const shipment = {
+    id: uid("ship"),
+    trackingNumber: nextTrackingNumber(),
+    clientId: client.id,
+    freightType,
+    description: "",
+    weight: weight ? Number(weight) : null,
+    statusIndex: 0,
+    notes: [],
+    deliveredPhoto: null,
+    deliveredAt: null,
+    createdAt: new Date().toISOString()
+  };
+  state.shipments.push(shipment);
+
   const invoice = {
     id: uid("inv"),
     invoiceNumber: nextInvoiceNumber(),
     clientId: client.id,
-    shipmentId: null,
+    shipmentId: shipment.id,
     amount: Number(amount),
     weight: weight ? Number(weight) : null,
     rate: rate ? Number(rate) : null,
@@ -479,6 +497,7 @@ function addPaidRequest({clientName, phone, freightType, amount, weight, rate, n
     clientId: client.id,
     clientName, phone, freightType,
     invoiceId: invoice.id,
+    shipmentId: shipment.id,
     code: genCode(),
     linkSent: false,
     completed: false,
@@ -521,22 +540,14 @@ function completeClientForm(pendingId, {city, content, weight}){
   if(!p) return null;
   const client = getClient(p.clientId);
   if(city) client.city = city;
-  const shipment = {
-    id: uid("ship"),
-    trackingNumber: nextTrackingNumber(),
-    clientId: client.id,
-    freightType: p.freightType,
-    description: content,
-    weight: weight,
-    statusIndex: 0,
-    notes: [],
-    deliveredPhoto: null,
-    deliveredAt: null,
-    createdAt: new Date().toISOString()
-  };
-  state.shipments.push(shipment);
-  const inv = state.invoices.find(i => i.id === p.invoiceId);
-  if(inv) inv.shipmentId = shipment.id;
+
+  // Le colis existe déjà depuis la confirmation du paiement — on complète
+  // simplement ses détails plutôt que d'en créer un second.
+  const shipment = state.shipments.find(s => s.id === p.shipmentId);
+  if(shipment){
+    if(content) shipment.description = content;
+    if(weight) shipment.weight = weight;
+  }
   p.completed = true;
   saveState();
   return shipment;
@@ -743,7 +754,7 @@ function teamHtml(){
   <div class="team-shell">
     <div class="sidebar">
       <div class="role-tag">${role === "admin" ? "Nourou · Admin" : "Assistante"}</div>
-      <button class="nav-item" data-action="refresh-data" style="color:var(--green);margin-bottom:10px;">↻ Actualiser les données</button>
+      <div style="font-size:.68rem;color:var(--muted);padding:0 10px 12px;">Synchronisation automatique</div>
       ${tabs.map(([key,label]) => `<button class="nav-item ${activeTab===key?'active':''}" data-action="set-tab" data-tab="${key}">${label}</button>`).join("")}
       <button class="nav-item" data-action="logout" style="margin-top:16px;color:var(--muted);">Se déconnecter</button>
     </div>
@@ -1094,7 +1105,6 @@ function handleClick(action, el){
     case "go-team": view = "team"; authError=""; render(); break;
     case "go-public": view = "public"; render(); break;
     case "logout": role = null; clearMyRole(); render(); break;
-    case "refresh-data": refreshState(); break;
 
     case "setup-passwords": {
       const adminPwd = document.getElementById("setup-admin-pwd").value;
@@ -1177,8 +1187,12 @@ function handleClick(action, el){
       const weight = document.getElementById("cf-weight").value.trim();
       const shipment = completeClientForm(id, {city, content, weight});
       publicPendingMatch = null;
-      publicTrackResult = shipment;
-      alert("Merci ! Votre numéro de suivi est : " + shipment.trackingNumber);
+      publicTrackResult = shipment || "notfound";
+      if(shipment){
+        alert("Merci ! Votre colis est enregistré sous le numéro : " + shipment.trackingNumber);
+      } else {
+        alert("Merci ! Vos informations ont été enregistrées.");
+      }
       render();
       break;
     }
@@ -1230,6 +1244,20 @@ function handleClick(action, el){
 }
 
 loadState();
+
+// Synchronisation automatique en arrière-plan : toutes les 20 secondes,
+// on va chercher les dernières données côté serveur (ex: un nouveau colis
+// ajouté par l'autre personne de l'équipe). On ne le fait JAMAIS si une
+// sauvegarde est en cours, ni si quelqu'un est en train de taper dans un
+// champ — pour ne jamais effacer une saisie en cours (c'était le vrai bug
+// de l'ancien bouton "Actualiser").
+setInterval(() => {
+  const activeTag = document.activeElement ? document.activeElement.tagName : "";
+  const isTyping = ["INPUT", "TEXTAREA", "SELECT"].includes(activeTag);
+  if(ready && view === "team" && pendingSaveCount === 0 && !isTyping){
+    refreshState();
+  }
+}, 20000);
 
 if ("serviceWorker" in navigator){
   window.addEventListener("load", () => {
