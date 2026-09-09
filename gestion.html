@@ -215,10 +215,16 @@
   .note-line{font-size:.8rem;color:var(--cream-dim);background:var(--panel-2);padding:7px 10px;border-radius:6px;}
   .warn-box{background:rgba(200,161,92,.12);border:1px solid rgba(200,161,92,.3);color:var(--amber);
     border-radius:8px;padding:12px 14px;font-size:.8rem;margin-bottom:18px;line-height:1.5;}
+  .mobile-tab-select{display:none;}
   @media (max-width:720px){
     .team-shell{flex-direction:column;}
-    .sidebar{width:100%;display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);}
-    .nav-item{white-space:nowrap;}
+    .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);padding:14px 16px;}
+    .tabs-row{display:none;}
+    .mobile-tab-select{
+      display:block;width:100%;background:var(--panel);color:var(--cream);
+      border:1px solid var(--border);border-radius:8px;padding:12px 14px;
+      font-size:.95rem;margin-bottom:12px;appearance:none;-webkit-appearance:none;
+    }
     .row2{grid-template-columns:1fr;}
   }
 </style>
@@ -763,7 +769,12 @@ function teamHtml(){
   <div class="team-shell">
     <div class="sidebar">
       <div class="role-tag">${role === "admin" ? "Nourou · Admin" : "Assistante"}</div>
-      ${tabs.map(([key,label]) => `<button class="nav-item ${activeTab===key?'active':''}" data-action="set-tab" data-tab="${key}">${label}</button>`).join("")}
+      ${tabs.length > 1 ? `<select class="mobile-tab-select" data-action="mobile-tab-change">
+        ${tabs.map(([key,label]) => `<option value="${key}" ${activeTab===key?'selected':''}>${label}</option>`).join("")}
+      </select>` : ""}
+      <div class="tabs-row">
+        ${tabs.map(([key,label]) => `<button class="nav-item ${activeTab===key?'active':''}" data-action="set-tab" data-tab="${key}">${label}</button>`).join("")}
+      </div>
       <button class="nav-item" data-action="logout" style="margin-top:16px;color:var(--muted);">Se déconnecter</button>
     </div>
     <div class="content">
@@ -1079,6 +1090,15 @@ function bindEvents(){
     }
     if(el.tagName === "SELECT" && action === "change-client-status"){
       el.addEventListener("change", () => { getClient(el.dataset.id).status = el.value; saveState(); });
+      return;
+    }
+    if(el.tagName === "SELECT" && action === "mobile-tab-change"){
+      el.addEventListener("change", () => {
+        activeTab = el.value;
+        selectedClientId = null;
+        selectedInvoiceId = null;
+        render();
+      });
       return;
     }
     if(el.tagName === "INPUT" && action === "upload-photo"){
