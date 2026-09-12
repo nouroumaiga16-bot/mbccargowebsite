@@ -311,6 +311,7 @@ let activeTab = "dashboard";
 let selectedClientId = null;
 let selectedInvoiceId = null;
 let publicTrackResult = null;
+let suiviSearchQuery = "";
 let publicLookupPhone = "";
 let publicPendingMatch = null;
 let ready = false;
@@ -396,9 +397,15 @@ async function refreshState(){
 function checkUrlForCompletionCode(){
   const params = new URLSearchParams(window.location.search);
   const code = params.get("complete");
-  if(!code) return;
-  const p = state.pendingRequests.find(p => p.code === code.toUpperCase() && !p.completed);
-  publicPendingMatch = p || "notfound";
+  if(code){
+    const p = state.pendingRequests.find(p => p.code === code.toUpperCase() && !p.completed);
+    publicPendingMatch = p || "notfound";
+  }
+  const trackingNumber = params.get("track");
+  if(trackingNumber){
+    const s = state.shipments.find(s => s.trackingNumber.toLowerCase() === trackingNumber.toLowerCase());
+    publicTrackResult = s || "notfound";
+  }
 }
 
 let saveQueue = Promise.resolve();
@@ -472,6 +479,11 @@ function calcNpAmount(){
   if(!isNaN(w) && !isNaN(r)){
     document.getElementById("np-amount").value = (w*r).toFixed(2);
   }
+}
+
+function onSuiviSearch(val){
+  suiviSearchQuery = val;
+  render();
 }
 
 function addShipmentByAssistant({clientName, phone, freightType, weight, notes}){
@@ -567,15 +579,21 @@ function pendingLink(p){
   return base + "?complete=" + p.code;
 }
 
+function trackLink(trackingNumber){
+  const base = window.location.origin + window.location.pathname;
+  return base + "?track=" + encodeURIComponent(trackingNumber);
+}
+
 function pendingWhatsAppText(p){
   const shipment = state.shipments.find(s => s.id === p.shipmentId);
   const trackingLine = shipment
     ? `Votre numéro de suivi est : ${shipment.trackingNumber}\n\n`
     : "";
   if(p.completed){
+    const link = shipment ? trackLink(shipment.trackingNumber) : "";
     return `Bonjour ${p.clientName}, votre envoi a été enregistré chez MBC Cargo !\n\n`
       + trackingLine
-      + `Vous pouvez suivre l'état de votre colis à tout moment en nous écrivant ici sur WhatsApp.`;
+      + (link ? `Suivez votre colis ici à tout moment : ${link}` : "");
   }
   const link = pendingLink(p);
   return `Bonjour ${p.clientName}, merci pour votre paiement à MBC Cargo !\n\n`
@@ -646,8 +664,26 @@ function render(){
     root.innerHTML = `<div style="padding:60px;text-align:center;color:var(--muted)">Chargement…</div>`;
     return;
   }
+  // On mémorise le champ actuellement en train d'être tapé (id + position du
+  // curseur) pour le restaurer après le rendu — sinon chaque lettre tapée
+  // dans une recherche en direct ferait perdre le focus du clavier.
+  const active = document.activeElement;
+  const activeId = active && active.id;
+  const selStart = active && typeof active.selectionStart === "number" ? active.selectionStart : null;
+  const selEnd = active && typeof active.selectionEnd === "number" ? active.selectionEnd : null;
+
   root.innerHTML = topbarHtml() + (view === "public" ? publicHtml() : teamHtml());
   bindEvents();
+
+  if(activeId){
+    const el = document.getElementById(activeId);
+    if(el){
+      el.focus();
+      if(selStart !== null && el.setSelectionRange){
+        try{ el.setSelectionRange(selStart, selEnd); }catch(e){}
+      }
+    }
+  }
 }
 
 function topbarHtml(){
@@ -917,7 +953,10 @@ function envoiHtml(){
       <td><span class="badge ${p.freightType==='aerien'?'aerien':'maritime'}">${p.freightType==='aerien'?'Aérien':'Maritime/Véhicule'}</span></td>
       <td>${shipment ? shipment.trackingNumber : "—"}</td>
       <td>${p.linkSent ? '<span class="badge remis">Message envoyé</span>' : '<span class="badge attente">À envoyer</span>'}</td>
-      <td><button class="btn small" data-action="copy-link" data-id="${p.id}">${p.linkSent ? "Renvoyer" : "Envoyer"} sur WhatsApp</button></td>
+      <td>
+        <button class="btn small" data-action="copy-link" data-id="${p.id}">${p.linkSent ? "Renvoyer" : "Envoyer"} sur WhatsApp</button>
+        <button class="btn small secondary" data-action="copy-message" data-id="${p.id}" style="margin-left:4px;">Copier le message</button>
+      </td>
     </tr>`;
   }).join("");
 
@@ -955,7 +994,10 @@ function devisHtml(){
       <td><span class="badge ${p.freightType==='aerien'?'aerien':'maritime'}">${p.freightType==='aerien'?'Aérien':'Maritime/Véhicule'}</span></td>
       <td>${inv ? fmtMoney(inv.amount) : "—"}</td>
       <td>${p.completed ? '<span class="badge remis">Dossier complété</span>' : (p.linkSent ? '<span class="badge attente">Lien envoyé</span>' : '<span class="badge attente">Lien à envoyer</span>')}</td>
-      <td>${!p.linkSent ? `<button class="btn small" data-action="copy-link" data-id="${p.id}">Envoyer sur WhatsApp</button>` : (p.linkSent && !p.completed ? `<button class="btn small secondary" data-action="copy-link" data-id="${p.id}">Renvoyer sur WhatsApp</button>` : "")}</td>
+      <td>
+        ${!p.linkSent ? `<button class="btn small" data-action="copy-link" data-id="${p.id}">Envoyer sur WhatsApp</button>` : (p.linkSent && !p.completed ? `<button class="btn small secondary" data-action="copy-link" data-id="${p.id}">Renvoyer sur WhatsApp</button>` : "")}
+        <button class="btn small secondary" data-action="copy-message" data-id="${p.id}" style="margin-left:4px;">Copier le message</button>
+      </td>
     </tr>`;
   }).join("");
 
@@ -990,7 +1032,18 @@ function devisHtml(){
 
 /* --- SUIVI --- */
 function suiviHtml(){
-  const shipments = state.shipments.slice().reverse();
+  const q = suiviSearchQuery.trim().toLowerCase();
+  const qDigits = phoneDigits(suiviSearchQuery);
+  const allShipments = state.shipments.slice().reverse();
+  const shipments = !q ? allShipments : allShipments.filter(s => {
+    const client = getClient(s.clientId);
+    const name = client ? client.name.toLowerCase() : "";
+    const phone = client ? phoneDigits(client.phone) : "";
+    const tracking = s.trackingNumber.toLowerCase();
+    return name.includes(q)
+      || tracking.includes(q)
+      || (qDigits.length >= 3 && phone.includes(qDigits));
+  });
   const rows = shipments.map(s => {
     const client = getClient(s.clientId);
     const statuses = statusesFor(s.freightType);
@@ -1016,9 +1069,12 @@ function suiviHtml(){
 
   return `
   <h1>Suivi des colis</h1>
+  <div class="field" style="max-width:420px;">
+    <input id="suivi-search" placeholder="Rechercher par nom, téléphone ou numéro de suivi…" value="${suiviSearchQuery}" oninput="onSuiviSearch(this.value)">
+  </div>
   <table>
     <thead><tr><th>Colis</th><th>Type</th><th>Statut</th><th>Notes</th><th>Photo de remise</th></tr></thead>
-    <tbody>${rows || `<tr><td colspan="5" class="empty">Aucun colis enregistré pour le moment.</td></tr>`}</tbody>
+    <tbody>${rows || `<tr><td colspan="5" class="empty">${q ? "Aucun colis ne correspond à cette recherche." : "Aucun colis enregistré pour le moment."}</td></tr>`}</tbody>
   </table>
   `;
 }
@@ -1342,6 +1398,21 @@ function handleClick(action, el){
       }
       window.open(whatsappSendUrl(p), "_blank");
       markLinkSent(p.id);
+      break;
+    }
+    case "copy-message": {
+      const p = state.pendingRequests.find(p => p.id === el.dataset.id);
+      if(!p) return;
+      const text = pendingWhatsAppText(p);
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(() => {
+          alert("Message copié ! Tu peux le coller par SMS ou tout autre moyen.");
+        }).catch(() => {
+          prompt("Copie ce message manuellement (Ctrl+C / appui long) :", text);
+        });
+      } else {
+        prompt("Copie ce message manuellement (Ctrl+C / appui long) :", text);
+      }
       break;
     }
 
