@@ -1031,11 +1031,12 @@ function devisHtml(){
 }
 
 /* --- SUIVI --- */
-function suiviHtml(){
+function filteredShipments(){
   const q = suiviSearchQuery.trim().toLowerCase();
   const qDigits = phoneDigits(suiviSearchQuery);
   const allShipments = state.shipments.slice().reverse();
-  const shipments = !q ? allShipments : allShipments.filter(s => {
+  if(!q) return allShipments;
+  return allShipments.filter(s => {
     const client = getClient(s.clientId);
     const name = client ? client.name.toLowerCase() : "";
     const phone = client ? phoneDigits(client.phone) : "";
@@ -1044,6 +1045,10 @@ function suiviHtml(){
       || tracking.includes(q)
       || (qDigits.length >= 3 && phone.includes(qDigits));
   });
+}
+
+function suiviRowsHtml(shipments){
+  const q = suiviSearchQuery.trim().toLowerCase();
   const rows = shipments.map(s => {
     const client = getClient(s.clientId);
     const statuses = statusesFor(s.freightType);
@@ -1066,7 +1071,11 @@ function suiviHtml(){
       </td>
     </tr>`;
   }).join("");
+  return rows || `<tr><td colspan="5" class="empty">${q ? "Aucun colis ne correspond à cette recherche." : "Aucun colis enregistré pour le moment."}</td></tr>`;
+}
 
+function suiviHtml(){
+  const shipments = filteredShipments();
   return `
   <h1>Suivi des colis</h1>
   <div class="field" style="max-width:420px;">
@@ -1074,7 +1083,7 @@ function suiviHtml(){
   </div>
   <table>
     <thead><tr><th>Colis</th><th>Type</th><th>Statut</th><th>Notes</th><th>Photo de remise</th></tr></thead>
-    <tbody>${rows || `<tr><td colspan="5" class="empty">${q ? "Aucun colis ne correspond à cette recherche." : "Aucun colis enregistré pour le moment."}</td></tr>`}</tbody>
+    <tbody id="suivi-tbody">${suiviRowsHtml(shipments)}</tbody>
   </table>
   `;
 }
@@ -1218,8 +1227,10 @@ function invoicePrintHtml(id){
 /* ---------------- EVENTS ---------------- */
 
 function bindEvents(){
-  const root = document.getElementById("root");
+  bindActionsIn(document.getElementById("root"));
+}
 
+function bindActionsIn(root){
   root.querySelectorAll("[data-action]").forEach(el => {
     const action = el.dataset.action;
 
@@ -1261,10 +1272,17 @@ function bindEvents(){
 
     el.addEventListener("click", () => handleClick(action, el));
   });
+}
 
-  // re-bind plain selects/inputs without data-action separately handled above already via querySelectorAll data-action
-  const cs = document.getElementById("client-search");
-  if(cs && !cs.dataset.bound){ cs.dataset.bound="1"; }
+function onSuiviSearch(val){
+  suiviSearchQuery = val;
+  const tbody = document.getElementById("suivi-tbody");
+  if(!tbody) { render(); return; }
+  // Mise à jour ciblée : seul le contenu du tableau change, le champ de
+  // recherche lui-même n'est jamais recréé — le clavier du téléphone ne
+  // se ferme donc jamais entre deux lettres tapées.
+  tbody.innerHTML = suiviRowsHtml(filteredShipments());
+  bindActionsIn(tbody);
 }
 
 function handleClick(action, el){
