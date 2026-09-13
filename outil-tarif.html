@@ -61,6 +61,11 @@
     font-family:inherit;font-size:16px;color:var(--text);background:#fbfcfd;
   }
   input:focus{outline:none;border-color:var(--steel);box-shadow:0 0 0 3px rgba(58,95,125,0.12);}
+  select{
+    width:100%;padding:10px 12px;border:1px solid #c7d0d8;border-radius:6px;
+    font-family:inherit;font-size:14px;color:var(--text);background:#fbfcfd;
+  }
+  select:focus{outline:none;border-color:var(--steel);box-shadow:0 0 0 3px rgba(58,95,125,0.12);}
   .weight-input{font-size:20px;font-weight:700;padding:12px 14px;}
   .result{background:linear-gradient(155deg, var(--navy) 0%, var(--navy-dark) 100%);color:#fff;border-radius:8px;padding:22px 20px;}
   .result h2{color:#8fa8bb;margin-bottom:16px;}
@@ -91,6 +96,49 @@
     background:var(--navy);color:#fff;border:none;padding:8px 14px;border-radius:6px;
     font-size:13px;font-weight:600;cursor:pointer;
   }
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:18px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:4px;
+  }
+  .tab-btn{
+    flex:1;
+    padding:10px 12px;
+    border:none;
+    background:transparent;
+    border-radius:6px;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+    color:var(--muted);
+    cursor:pointer;
+  }
+  .tab-btn.active{
+    background:var(--navy);
+    color:#fff;
+  }
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 0;
+  }
+  .checkbox-row input[type=checkbox]{width:auto;}
+  .checkbox-row label{margin:0;font-size:13px;color:var(--text);font-weight:500;}
+  .info-line{
+    font-size:12px;
+    color:var(--muted);
+    padding:6px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .info-line:last-child{border-bottom:none;}
+  .info-line strong{color:var(--text);}
 </style>
 </head>
 <body>
@@ -106,46 +154,123 @@
     <p class="sub">Prix, coûts et rentabilité — en dollars canadiens et en francs CFA</p>
   </header>
 
-  <div class="card">
-    <h2>Paramètres</h2>
-    <div class="grid3">
-      <div><label for="costCad">Coût Canada ($CAD/kg)</label><input type="number" id="costCad" value="8.70" step="0.10"></div>
-      <div><label for="feesFcfa">Frais Ouaga (FCFA/kg)</label><input type="number" id="feesFcfa" value="2000" step="50"></div>
-      <div><label for="rate">Taux de change (1 CAD =)</label><input type="number" id="rate" value="425" step="1"></div>
-    </div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tabBtnColis" onclick="switchTab('colis')">Colis</button>
+    <button class="tab-btn" id="tabBtnVehicule" onclick="switchTab('vehicule')">Véhicule</button>
   </div>
 
-  <div class="card">
-    <h2>Prix de vente</h2>
-    <div class="grid">
-      <div><label for="priceCad">Prix de vente ($CAD/kg)</label><input type="number" id="priceCad" value="19" step="0.5"></div>
-      <div><label for="weight">Poids du colis (kg)</label><input type="number" id="weight" class="weight-input" value="30" step="1"></div>
-    </div>
-  </div>
-
-  <div class="result">
-    <h2>Résultat</h2>
-    <div class="currency-cols">
-      <div>
-        <div class="curr-title">DOLLARS CANADIENS</div>
-        <div class="line"><span class="label">Coût total (Canada + Ouaga)</span><span id="costCadKg">—</span></div>
-        <div class="line"><span class="label">Prix de vente au kg</span><span id="priceCadKg">—</span></div>
-        <div class="line total"><span>Total facturé</span><span id="totalCad">—</span></div>
-      </div>
-      <div>
-        <div class="curr-title">FRANCS CFA</div>
-        <div class="line"><span class="label">Coût total (Canada + Ouaga)</span><span id="costFcfaKg">—</span></div>
-        <div class="line"><span class="label">Prix de vente au kg</span><span id="priceFcfaKg">—</span></div>
-        <div class="line total"><span>Total facturé</span><span id="totalFcfa">—</span></div>
+  <!-- PANEL COLIS -->
+  <div class="panel active" id="panelColis">
+    <div class="card">
+      <h2>Paramètres</h2>
+      <div class="grid3">
+        <div><label for="costCad">Coût Canada ($CAD/kg)</label><input type="number" id="costCad" value="8.70" step="0.10"></div>
+        <div><label for="feesFcfa">Frais Ouaga (FCFA/kg)</label><input type="number" id="feesFcfa" value="2000" step="50"></div>
+        <div><label for="rate">Taux de change (1 CAD =)</label><input type="number" id="rate" value="425" step="1"></div>
       </div>
     </div>
-    <div class="margin-box">
-      <div><div class="sub-label">Marge par kg</div><div class="amount" id="marginKg">—</div></div>
-      <div><div class="sub-label">Profit total</div><div class="amount" id="marginTotal">—</div></div>
+
+    <div class="card">
+      <h2>Prix de vente</h2>
+      <div class="grid">
+        <div><label for="priceCad">Prix de vente ($CAD/kg)</label><input type="number" id="priceCad" value="19" step="0.5"></div>
+        <div><label for="weight">Poids du colis (kg)</label><input type="number" id="weight" class="weight-input" value="30" step="1"></div>
+      </div>
     </div>
+
+    <div class="result">
+      <h2>Résultat</h2>
+      <div class="currency-cols">
+        <div>
+          <div class="curr-title">DOLLARS CANADIENS</div>
+          <div class="line"><span class="label">Coût total (Canada + Ouaga)</span><span id="costCadKg">—</span></div>
+          <div class="line"><span class="label">Prix de vente au kg</span><span id="priceCadKg">—</span></div>
+          <div class="line total"><span>Total facturé</span><span id="totalCad">—</span></div>
+        </div>
+        <div>
+          <div class="curr-title">FRANCS CFA</div>
+          <div class="line"><span class="label">Coût total (Canada + Ouaga)</span><span id="costFcfaKg">—</span></div>
+          <div class="line"><span class="label">Prix de vente au kg</span><span id="priceFcfaKg">—</span></div>
+          <div class="line total"><span>Total facturé</span><span id="totalFcfa">—</span></div>
+        </div>
+      </div>
+      <div class="margin-box">
+        <div><div class="sub-label">Marge par kg</div><div class="amount" id="marginKg">—</div></div>
+        <div><div class="sub-label">Profit total</div><div class="amount" id="marginTotal">—</div></div>
+      </div>
+    </div>
+
+    <p class="note">Coût total au kg = coût Canada (CAD) + frais Ouaga (FCFA converti en CAD au taux du jour). Mets le taux de change à jour régulièrement.</p>
   </div>
 
-  <p class="note">Coût total au kg = coût Canada (CAD) + frais Ouaga (FCFA converti en CAD au taux du jour). Mets le taux de change à jour régulièrement.</p>
+  <!-- PANEL VEHICULE -->
+  <div class="panel" id="panelVehicule">
+    <div class="card">
+      <h2>Type de véhicule</h2>
+      <div class="grid">
+        <div>
+          <label for="vType">Véhicule</label>
+          <select id="vType" onchange="applyVehicleDefault()">
+            <option value="3800">Voiture (3800$)</option>
+            <option value="1200">Moto (1200$)</option>
+            <option value="custom">Autre (montant personnalisé)</option>
+          </select>
+        </div>
+        <div><label for="vBasePrice">Prix de la voiture ($CAD)</label><input type="number" id="vBasePrice" value="3800" step="50"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Taxes et frais de courtage</h2>
+      <div class="grid">
+        <div><label for="vTaxRate">Taxes (%)</label><input type="number" id="vTaxRate" value="15" step="1"></div>
+        <div><label for="vCourtage">Frais de courtage MBC Cargo ($CAD, min. 1000$)</label><input type="number" id="vCourtage" value="1000" step="50" min="1000"></div>
+      </div>
+      <div><label for="vRate" style="margin-top:12px;">Taux de change (1 CAD =)</label><input type="number" id="vRate" value="425" step="1"></div>
+    </div>
+
+    <div class="card">
+      <h2>Protection additionnelle</h2>
+      <div class="checkbox-row">
+        <input type="checkbox" id="vProtection">
+        <label for="vProtection">Ajouter la protection tous risques (aucun dommage toléré)</label>
+      </div>
+      <div class="grid">
+        <div><label for="vProtectionCost">Coût de la protection ($CAD)</label><input type="number" id="vProtectionCost" value="750" step="50" min="500" max="1000"></div>
+      </div>
+    </div>
+
+    <div class="result">
+      <h2>Résultat</h2>
+      <div class="currency-cols">
+        <div>
+          <div class="curr-title">DOLLARS CANADIENS</div>
+          <div class="line"><span class="label">Prix de la voiture</span><span id="vBaseCad">—</span></div>
+          <div class="line"><span class="label">Taxes</span><span id="vTaxCad">—</span></div>
+          <div class="line"><span class="label">Frais de courtage MBC Cargo</span><span id="vCourtageCad">—</span></div>
+          <div class="line"><span class="label">Protection additionnelle</span><span id="vProtCad">—</span></div>
+          <div class="line total"><span>Total facturé</span><span id="vTotalCad">—</span></div>
+        </div>
+        <div>
+          <div class="curr-title">FRANCS CFA</div>
+          <div class="line"><span class="label">Prix de la voiture</span><span id="vBaseFcfa">—</span></div>
+          <div class="line"><span class="label">Taxes</span><span id="vTaxFcfa">—</span></div>
+          <div class="line"><span class="label">Frais de courtage MBC Cargo</span><span id="vCourtageFcfa">—</span></div>
+          <div class="line"><span class="label">Protection additionnelle</span><span id="vProtFcfa">—</span></div>
+          <div class="line total"><span>Total facturé</span><span id="vTotalFcfa">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Conditions à rappeler au client</h2>
+      <div class="info-line">Durée de transport : <strong>45 à 60 jours</strong></div>
+      <div class="info-line">Dépôt d'annulation après remise du véhicule : <strong>150$ à 200$</strong></div>
+      <div class="info-line">Sans protection additionnelle : égratignures/bosses mineures normales (conteneur partagé)</div>
+      <div class="info-line">Réclamation acceptée seulement dans les <strong>5 jours</strong> suivant réception, avec photos/vidéos</div>
+      <div class="info-line">Dédouanement à l'arrivée à Ouagadougou : à la charge du client</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -184,6 +309,54 @@ function calculate(){
   document.getElementById(id).addEventListener('input', calculate);
 });
 calculate();
+
+// --- Onglet Véhicule ---
+function applyVehicleDefault(){
+  const type = document.getElementById('vType').value;
+  if (type !== 'custom') {
+    document.getElementById('vBasePrice').value = type;
+  }
+  calculateVehicule();
+}
+
+function calculateVehicule(){
+  const basePrice = parseFloat(document.getElementById('vBasePrice').value) || 0;
+  const taxRate = parseFloat(document.getElementById('vTaxRate').value) || 0;
+  const courtage = parseFloat(document.getElementById('vCourtage').value) || 0;
+  const rate = parseFloat(document.getElementById('vRate').value) || 1;
+  const useProtection = document.getElementById('vProtection').checked;
+  const protectionCost = useProtection ? (parseFloat(document.getElementById('vProtectionCost').value) || 0) : 0;
+
+  const taxAmount = basePrice * (taxRate / 100);
+  const totalCad = basePrice + taxAmount + courtage + protectionCost;
+
+  document.getElementById('vBaseCad').textContent = fmtCad(basePrice);
+  document.getElementById('vTaxCad').textContent = fmtCad(taxAmount) + ` (${taxRate}%)`;
+  document.getElementById('vCourtageCad').textContent = fmtCad(courtage);
+  document.getElementById('vProtCad').textContent = useProtection ? fmtCad(protectionCost) : 'Non incluse';
+  document.getElementById('vTotalCad').textContent = fmtCad(totalCad);
+
+  document.getElementById('vBaseFcfa').textContent = fmtFcfa(basePrice * rate);
+  document.getElementById('vTaxFcfa').textContent = fmtFcfa(taxAmount * rate) + ` (${taxRate}%)`;
+  document.getElementById('vCourtageFcfa').textContent = fmtFcfa(courtage * rate);
+  document.getElementById('vProtFcfa').textContent = useProtection ? fmtFcfa(protectionCost * rate) : 'Non incluse';
+  document.getElementById('vTotalFcfa').textContent = fmtFcfa(totalCad * rate);
+}
+
+['vBasePrice','vTaxRate','vCourtage','vRate','vProtection','vProtectionCost'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener(el.type === 'checkbox' ? 'change' : 'input', calculateVehicule);
+});
+calculateVehicule();
+
+// --- Switch de tabs ---
+function switchTab(tab){
+  const isColis = tab === 'colis';
+  document.getElementById('panelColis').classList.toggle('active', isColis);
+  document.getElementById('panelVehicule').classList.toggle('active', !isColis);
+  document.getElementById('tabBtnColis').classList.toggle('active', isColis);
+  document.getElementById('tabBtnVehicule').classList.toggle('active', !isColis);
+}
 
 // PWA: enregistrement du service worker
 if ('serviceWorker' in navigator) {
