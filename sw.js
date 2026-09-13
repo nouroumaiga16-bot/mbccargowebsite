@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mbc-tarif-v1';
+const CACHE_NAME = 'mbc-tarif-v2';
 const FILES_TO_CACHE = [
   './outil-tarif.html',
   './manifest.json',
@@ -22,8 +22,16 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Stratégie "réseau d'abord" : va toujours chercher la dernière version en ligne.
+// Si pas de connexion, sert la copie en cache comme secours.
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
