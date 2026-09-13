@@ -1,37 +1,392 @@
-const CACHE_NAME = 'mbc-tarif-v2';
-const FILES_TO_CACHE = [
-  './outil-tarif.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
-];
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#132a3a">
+<title>MBC Cargo — Outil de tarif</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tarif MBC">
+<style>
+  :root{
+    --navy:#132a3a;
+    --navy-dark:#0b1c28;
+    --steel:#3a5f7d;
+    --slate:#5c7080;
+    --bg:#f4f6f8;
+    --panel:#ffffff;
+    --line:#dde3e8;
+    --text:#1c2830;
+    --muted:#6b7885;
+    --accent:#c8942c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter','Segoe UI',Helvetica,Arial,sans-serif;
+    padding:24px 16px 60px;
+    -webkit-font-smoothing:antialiased;
+    padding-top:calc(24px + env(safe-area-inset-top));
+    padding-bottom:calc(60px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:800px;margin:0 auto;}
+  header{
+    margin-bottom:24px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{font-size:12px;font-weight:700;letter-spacing:1.5px;color:var(--navy);text-transform:uppercase;}
+  h1{font-size:22px;margin:4px 0 0;font-weight:600;color:var(--navy);letter-spacing:-0.2px;}
+  .sub{font-size:13px;color:var(--muted);margin:0;}
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px;
+    margin-bottom:16px;
+    box-shadow:0 1px 2px rgba(19,42,58,0.04);
+  }
+  .card h2{font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:0 0 14px;color:var(--slate);font-weight:700;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  @media (max-width:520px){.grid3{grid-template-columns:1fr;}}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+  input{
+    width:100%;padding:10px 12px;border:1px solid #c7d0d8;border-radius:6px;
+    font-family:inherit;font-size:16px;color:var(--text);background:#fbfcfd;
+  }
+  input:focus{outline:none;border-color:var(--steel);box-shadow:0 0 0 3px rgba(58,95,125,0.12);}
+  select{
+    width:100%;padding:10px 12px;border:1px solid #c7d0d8;border-radius:6px;
+    font-family:inherit;font-size:14px;color:var(--text);background:#fbfcfd;
+  }
+  select:focus{outline:none;border-color:var(--steel);box-shadow:0 0 0 3px rgba(58,95,125,0.12);}
+  .weight-input{font-size:20px;font-weight:700;padding:12px 14px;}
+  .result{background:linear-gradient(155deg, var(--navy) 0%, var(--navy-dark) 100%);color:#fff;border-radius:8px;padding:22px 20px;}
+  .result h2{color:#8fa8bb;margin-bottom:16px;}
+  .currency-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media (max-width:520px){.currency-cols{grid-template-columns:1fr;gap:14px;}}
+  .curr-title{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--accent);margin-bottom:10px;}
+  .line{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08);}
+  .line .label{color:#a9bcc9;}
+  .line.total{font-size:18px;font-weight:700;border-bottom:none;padding-top:10px;color:#fff;}
+  .margin-box{margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .margin-box .sub-label{font-size:11px;letter-spacing:0.5px;text-transform:uppercase;color:#8fa8bb;margin-bottom:2px;}
+  .margin-box .amount{font-size:20px;font-weight:700;color:#fff;}
+  .note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6;}
+  .install-banner{
+    display:none;
+    background:var(--accent);
+    color:#1c2830;
+    border-radius:8px;
+    padding:12px 16px;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:16px;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .install-banner button{
+    background:var(--navy);color:#fff;border:none;padding:8px 14px;border-radius:6px;
+    font-size:13px;font-weight:600;cursor:pointer;
+  }
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:18px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:4px;
+  }
+  .tab-btn{
+    flex:1;
+    padding:10px 12px;
+    border:none;
+    background:transparent;
+    border-radius:6px;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+    color:var(--muted);
+    cursor:pointer;
+  }
+  .tab-btn.active{
+    background:var(--navy);
+    color:#fff;
+  }
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 0;
+  }
+  .checkbox-row input[type=checkbox]{width:auto;}
+  .checkbox-row label{margin:0;font-size:13px;color:var(--text);font-weight:500;}
+  .info-line{
+    font-size:12px;
+    color:var(--muted);
+    padding:6px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .info-line:last-child{border-bottom:none;}
+  .info-line strong{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="install-banner" id="installBanner">
+    <span>Installe cet outil comme application sur ton téléphone</span>
+    <button id="installBtn">Installer</button>
+  </div>
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE))
-  );
-  self.skipWaiting();
+  <header>
+    <div class="brand">MBC Cargo</div>
+    <h1>Calculateur de tarif et de marge</h1>
+    <p class="sub">Prix, coûts et rentabilité — en dollars canadiens et en francs CFA</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabBtnColis" onclick="switchTab('colis')">Colis</button>
+    <button class="tab-btn" id="tabBtnVehicule" onclick="switchTab('vehicule')">Véhicule</button>
+  </div>
+
+  <!-- PANEL COLIS -->
+  <div class="panel active" id="panelColis">
+    <div class="card">
+      <h2>Paramètres</h2>
+      <div class="grid3">
+        <div><label for="costCad">Coût Canada ($CAD/kg)</label><input type="number" id="costCad" value="8.70" step="0.10"></div>
+        <div><label for="feesFcfa">Frais Ouaga (FCFA/kg)</label><input type="number" id="feesFcfa" value="2000" step="50"></div>
+        <div><label for="rate">Taux de change (1 CAD =)</label><input type="number" id="rate" value="425" step="1"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Prix de vente</h2>
+      <div class="grid">
+        <div><label for="priceCad">Prix de vente ($CAD/kg)</label><input type="number" id="priceCad" value="19" step="0.5"></div>
+        <div><label for="weight">Poids du colis (kg)</label><input type="number" id="weight" class="weight-input" value="30" step="1"></div>
+      </div>
+    </div>
+
+    <div class="result">
+      <h2>Résultat</h2>
+      <div class="currency-cols">
+        <div>
+          <div class="curr-title">DOLLARS CANADIENS</div>
+          <div class="line"><span class="label">Coût total (Canada + Ouaga)</span><span id="costCadKg">—</span></div>
+          <div class="line"><span class="label">Prix de vente au kg</span><span id="priceCadKg">—</span></div>
+          <div class="line total"><span>Total facturé</span><span id="totalCad">—</span></div>
+        </div>
+        <div>
+          <div class="curr-title">FRANCS CFA</div>
+          <div class="line"><span class="label">Coût total (Canada + Ouaga)</span><span id="costFcfaKg">—</span></div>
+          <div class="line"><span class="label">Prix de vente au kg</span><span id="priceFcfaKg">—</span></div>
+          <div class="line total"><span>Total facturé</span><span id="totalFcfa">—</span></div>
+        </div>
+      </div>
+      <div class="margin-box">
+        <div><div class="sub-label">Marge par kg</div><div class="amount" id="marginKg">—</div></div>
+        <div><div class="sub-label">Profit total</div><div class="amount" id="marginTotal">—</div></div>
+      </div>
+    </div>
+
+    <p class="note">Coût total au kg = coût Canada (CAD) + frais Ouaga (FCFA converti en CAD au taux du jour). Mets le taux de change à jour régulièrement.</p>
+  </div>
+
+  <!-- PANEL VEHICULE -->
+  <div class="panel" id="panelVehicule">
+    <div class="card">
+      <h2>Type de véhicule</h2>
+      <div class="grid">
+        <div>
+          <label for="vType">Véhicule</label>
+          <select id="vType" onchange="applyVehicleDefault()">
+            <option value="3800">Voiture (3800$)</option>
+            <option value="1200">Moto (1200$)</option>
+            <option value="custom">Autre (montant personnalisé)</option>
+          </select>
+        </div>
+        <div><label for="vBasePrice">Prix de la voiture ($CAD)</label><input type="number" id="vBasePrice" value="3800" step="50"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Taxes et frais de courtage</h2>
+      <div class="grid">
+        <div><label for="vTaxRate">Taxes (%)</label><input type="number" id="vTaxRate" value="15" step="1"></div>
+        <div><label for="vCourtage">Frais de courtage MBC Cargo ($CAD, min. 1000$)</label><input type="number" id="vCourtage" value="1000" step="50" min="1000"></div>
+      </div>
+      <div><label for="vRate" style="margin-top:12px;">Taux de change (1 CAD =)</label><input type="number" id="vRate" value="425" step="1"></div>
+    </div>
+
+    <div class="card">
+      <h2>Protection additionnelle</h2>
+      <div class="checkbox-row">
+        <input type="checkbox" id="vProtection">
+        <label for="vProtection">Ajouter la protection tous risques (aucun dommage toléré)</label>
+      </div>
+      <div class="grid">
+        <div><label for="vProtectionCost">Coût de la protection ($CAD)</label><input type="number" id="vProtectionCost" value="750" step="50" min="500" max="1000"></div>
+      </div>
+    </div>
+
+    <div class="result">
+      <h2>Résultat</h2>
+      <div class="currency-cols">
+        <div>
+          <div class="curr-title">DOLLARS CANADIENS</div>
+          <div class="line"><span class="label">Prix de la voiture</span><span id="vBaseCad">—</span></div>
+          <div class="line"><span class="label">Taxes</span><span id="vTaxCad">—</span></div>
+          <div class="line"><span class="label">Frais de courtage MBC Cargo</span><span id="vCourtageCad">—</span></div>
+          <div class="line"><span class="label">Protection additionnelle</span><span id="vProtCad">—</span></div>
+          <div class="line total"><span>Total facturé</span><span id="vTotalCad">—</span></div>
+        </div>
+        <div>
+          <div class="curr-title">FRANCS CFA</div>
+          <div class="line"><span class="label">Prix de la voiture</span><span id="vBaseFcfa">—</span></div>
+          <div class="line"><span class="label">Taxes</span><span id="vTaxFcfa">—</span></div>
+          <div class="line"><span class="label">Frais de courtage MBC Cargo</span><span id="vCourtageFcfa">—</span></div>
+          <div class="line"><span class="label">Protection additionnelle</span><span id="vProtFcfa">—</span></div>
+          <div class="line total"><span>Total facturé</span><span id="vTotalFcfa">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Conditions à rappeler au client</h2>
+      <div class="info-line">Durée de transport : <strong>45 à 60 jours</strong></div>
+      <div class="info-line">Dépôt d'annulation après remise du véhicule : <strong>150$ à 200$</strong></div>
+      <div class="info-line">Sans protection additionnelle : égratignures/bosses mineures normales (conteneur partagé)</div>
+      <div class="info-line">Réclamation acceptée seulement dans les <strong>5 jours</strong> suivant réception, avec photos/vidéos</div>
+      <div class="info-line">Dédouanement à l'arrivée à Ouagadougou : à la charge du client</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function fmtCad(n){ return n.toLocaleString('fr-CA', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' $'; }
+function fmtFcfa(n){ return Math.round(n).toLocaleString('fr-FR') + ' FCFA'; }
+
+function calculate(){
+  const costCad = parseFloat(document.getElementById('costCad').value) || 0;
+  const feesFcfa = parseFloat(document.getElementById('feesFcfa').value) || 0;
+  const rate = parseFloat(document.getElementById('rate').value) || 1;
+  const priceCad = parseFloat(document.getElementById('priceCad').value) || 0;
+  const weight = parseFloat(document.getElementById('weight').value) || 0;
+
+  const feesCad = feesFcfa / rate;
+  const totalCostCadKg = costCad + feesCad;
+  const totalCostFcfaKg = totalCostCadKg * rate;
+  const priceFcfaKg = priceCad * rate;
+  const marginCadKg = priceCad - totalCostCadKg;
+  const marginFcfaKg = marginCadKg * rate;
+  const totalCad = priceCad * weight;
+  const totalFcfa = priceFcfaKg * weight;
+  const marginTotalCad = marginCadKg * weight;
+  const marginTotalFcfa = marginFcfaKg * weight;
+
+  document.getElementById('costCadKg').textContent = fmtCad(totalCostCadKg) + '/kg';
+  document.getElementById('priceCadKg').textContent = fmtCad(priceCad) + '/kg';
+  document.getElementById('totalCad').textContent = fmtCad(totalCad);
+  document.getElementById('costFcfaKg').textContent = fmtFcfa(totalCostFcfaKg) + '/kg';
+  document.getElementById('priceFcfaKg').textContent = fmtFcfa(priceFcfaKg) + '/kg';
+  document.getElementById('totalFcfa').textContent = fmtFcfa(totalFcfa);
+  document.getElementById('marginKg').textContent = fmtCad(marginCadKg) + ' / ' + fmtFcfa(marginFcfaKg);
+  document.getElementById('marginTotal').textContent = fmtCad(marginTotalCad) + ' / ' + fmtFcfa(marginTotalFcfa);
+}
+
+['costCad','feesFcfa','rate','priceCad','weight'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calculate);
+});
+calculate();
+
+// --- Onglet Véhicule ---
+function applyVehicleDefault(){
+  const type = document.getElementById('vType').value;
+  if (type !== 'custom') {
+    document.getElementById('vBasePrice').value = type;
+  }
+  calculateVehicule();
+}
+
+function calculateVehicule(){
+  const basePrice = parseFloat(document.getElementById('vBasePrice').value) || 0;
+  const taxRate = parseFloat(document.getElementById('vTaxRate').value) || 0;
+  const courtage = parseFloat(document.getElementById('vCourtage').value) || 0;
+  const rate = parseFloat(document.getElementById('vRate').value) || 1;
+  const useProtection = document.getElementById('vProtection').checked;
+  const protectionCost = useProtection ? (parseFloat(document.getElementById('vProtectionCost').value) || 0) : 0;
+
+  const taxAmount = basePrice * (taxRate / 100);
+  const totalCad = basePrice + taxAmount + courtage + protectionCost;
+
+  document.getElementById('vBaseCad').textContent = fmtCad(basePrice);
+  document.getElementById('vTaxCad').textContent = fmtCad(taxAmount) + ` (${taxRate}%)`;
+  document.getElementById('vCourtageCad').textContent = fmtCad(courtage);
+  document.getElementById('vProtCad').textContent = useProtection ? fmtCad(protectionCost) : 'Non incluse';
+  document.getElementById('vTotalCad').textContent = fmtCad(totalCad);
+
+  document.getElementById('vBaseFcfa').textContent = fmtFcfa(basePrice * rate);
+  document.getElementById('vTaxFcfa').textContent = fmtFcfa(taxAmount * rate) + ` (${taxRate}%)`;
+  document.getElementById('vCourtageFcfa').textContent = fmtFcfa(courtage * rate);
+  document.getElementById('vProtFcfa').textContent = useProtection ? fmtFcfa(protectionCost * rate) : 'Non incluse';
+  document.getElementById('vTotalFcfa').textContent = fmtFcfa(totalCad * rate);
+}
+
+['vBasePrice','vTaxRate','vCourtage','vRate','vProtection','vProtectionCost'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener(el.type === 'checkbox' ? 'change' : 'input', calculateVehicule);
+});
+calculateVehicule();
+
+// --- Switch de tabs ---
+function switchTab(tab){
+  const isColis = tab === 'colis';
+  document.getElementById('panelColis').classList.toggle('active', isColis);
+  document.getElementById('panelVehicule').classList.toggle('active', !isColis);
+  document.getElementById('tabBtnColis').classList.toggle('active', isColis);
+  document.getElementById('tabBtnVehicule').classList.toggle('active', !isColis);
+}
+
+// PWA: enregistrement du service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+  });
+}
+
+// PWA: bouton d'installation (Android/Chrome)
+let deferredPrompt;
+const banner = document.getElementById('installBanner');
+const installBtn = document.getElementById('installBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  banner.style.display = 'flex';
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
-    )
-  );
-  self.clients.claim();
+installBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  banner.style.display = 'none';
 });
 
-// Stratégie "réseau d'abord" : va toujours chercher la dernière version en ligne.
-// Si pas de connexion, sert la copie en cache comme secours.
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        return response;
-      })
-      .catch(() => caches.match(event.request))
-  );
+window.addEventListener('appinstalled', () => {
+  banner.style.display = 'none';
 });
+</script>
+</body>
+</html>
