@@ -290,4 +290,117 @@ function calculate(){
   const costCad = parseFloat(document.getElementById('costCad').value) || 0;
   const feesFcfa = parseFloat(document.getElementById('feesFcfa').value) || 0;
   const rate = parseFloat(document.getElementById('rate').value) || 1;
-  const priceCad = parseFloat
+  const priceCad = parseFloat(document.getElementById('priceCad').value) || 0;
+  const weight = parseFloat(document.getElementById('weight').value) || 0;
+
+  const feesCad = feesFcfa / rate;
+  const totalCostCadKg = costCad + feesCad;
+  const totalCostFcfaKg = totalCostCadKg * rate;
+  const priceFcfaKg = priceCad * rate;
+  const marginCadKg = priceCad - totalCostCadKg;
+  const marginFcfaKg = marginCadKg * rate;
+  const totalCad = priceCad * weight;
+  const totalFcfa = priceFcfaKg * weight;
+  const marginTotalCad = marginCadKg * weight;
+  const marginTotalFcfa = marginFcfaKg * weight;
+
+  document.getElementById('costCadKg').textContent = fmtCad(totalCostCadKg) + '/kg';
+  document.getElementById('priceCadKg').textContent = fmtCad(priceCad) + '/kg';
+  document.getElementById('totalCad').textContent = fmtCad(totalCad);
+  document.getElementById('costFcfaKg').textContent = fmtFcfa(totalCostFcfaKg) + '/kg';
+  document.getElementById('priceFcfaKg').textContent = fmtFcfa(priceFcfaKg) + '/kg';
+  document.getElementById('totalFcfa').textContent = fmtFcfa(totalFcfa);
+  document.getElementById('marginKg').textContent = fmtCad(marginCadKg) + ' / ' + fmtFcfa(marginFcfaKg);
+  document.getElementById('marginTotal').textContent = fmtCad(marginTotalCad) + ' / ' + fmtFcfa(marginTotalFcfa);
+}
+
+['costCad','feesFcfa','rate','priceCad','weight'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calculate);
+});
+calculate();
+
+// --- Onglet Véhicule ---
+function applyVehicleDefault(){
+  const type = document.getElementById('vType').value;
+  if (type !== 'custom') {
+    document.getElementById('vBasePrice').value = type;
+  }
+  calculateVehicule();
+}
+
+function calculateVehicule(){
+  const transportFee = parseFloat(document.getElementById('vBasePrice').value) || 0;
+  const carPrice = parseFloat(document.getElementById('vCarPrice').value) || 0;
+  const taxRate = parseFloat(document.getElementById('vTaxRate').value) || 0;
+  const courtage = parseFloat(document.getElementById('vCourtage').value) || 0;
+  const rate = parseFloat(document.getElementById('vRate').value) || 1;
+  const useProtection = document.getElementById('vProtection').checked;
+  const protectionCost = useProtection ? (parseFloat(document.getElementById('vProtectionCost').value) || 0) : 0;
+
+  // Les taxes s'appliquent uniquement sur le prix d'achat du véhicule,
+  // pas sur le frais de transport.
+  const taxAmount = carPrice * (taxRate / 100);
+  const totalCad = carPrice + transportFee + taxAmount + courtage + protectionCost;
+
+  document.getElementById('vCarPriceCad').textContent = fmtCad(carPrice);
+  document.getElementById('vBaseCad').textContent = fmtCad(transportFee);
+  document.getElementById('vTaxCad').textContent = fmtCad(taxAmount) + ` (${taxRate}%)`;
+  document.getElementById('vCourtageCad').textContent = fmtCad(courtage);
+  document.getElementById('vProtCad').textContent = useProtection ? fmtCad(protectionCost) : 'Non incluse';
+  document.getElementById('vTotalCad').textContent = fmtCad(totalCad);
+
+  document.getElementById('vCarPriceFcfa').textContent = fmtFcfa(carPrice * rate);
+  document.getElementById('vBaseFcfa').textContent = fmtFcfa(transportFee * rate);
+  document.getElementById('vTaxFcfa').textContent = fmtFcfa(taxAmount * rate) + ` (${taxRate}%)`;
+  document.getElementById('vCourtageFcfa').textContent = fmtFcfa(courtage * rate);
+  document.getElementById('vProtFcfa').textContent = useProtection ? fmtFcfa(protectionCost * rate) : 'Non incluse';
+  document.getElementById('vTotalFcfa').textContent = fmtFcfa(totalCad * rate);
+}
+
+['vBasePrice','vCarPrice','vTaxRate','vCourtage','vRate','vProtection','vProtectionCost'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener(el.type === 'checkbox' ? 'change' : 'input', calculateVehicule);
+});
+calculateVehicule();
+
+// --- Switch de tabs ---
+function switchTab(tab){
+  const isColis = tab === 'colis';
+  document.getElementById('panelColis').classList.toggle('active', isColis);
+  document.getElementById('panelVehicule').classList.toggle('active', !isColis);
+  document.getElementById('tabBtnColis').classList.toggle('active', isColis);
+  document.getElementById('tabBtnVehicule').classList.toggle('active', !isColis);
+}
+
+// PWA: enregistrement du service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+  });
+}
+
+// PWA: bouton d'installation (Android/Chrome)
+let deferredPrompt;
+const banner = document.getElementById('installBanner');
+const installBtn = document.getElementById('installBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  banner.style.display = 'flex';
+});
+
+installBtn.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  banner.style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  banner.style.display = 'none';
+});
+</script>
+</body>
+</html>
