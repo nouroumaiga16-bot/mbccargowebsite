@@ -191,8 +191,9 @@
   .section-head p{margin-top:14px; font-size:1.02rem; color:var(--ink-soft); line-height:1.6;}
 
   /* reveal-on-scroll: a wipe, not a generic fade */
-  .reveal{clip-path:inset(0 0 100% 0); opacity:0; transition:clip-path .8s cubic-bezier(.2,.7,.2,1), opacity .5s ease;}
-  .reveal.in{clip-path:inset(0 0 0% 0); opacity:1;}
+  .reveal{opacity:1;}
+  .reveal.armed{clip-path:inset(0 0 100% 0); opacity:0; transition:clip-path .8s cubic-bezier(.2,.7,.2,1), opacity .5s ease;}
+  .reveal.armed.in{clip-path:inset(0 0 0% 0); opacity:1;}
 
   .services-list{border-top:1px solid var(--line-on-paper);}
   .service-row{display:grid; grid-template-columns:220px 1fr; gap:24px; padding:28px 0; border-bottom:1px solid var(--line-on-paper); align-items:baseline; transition:padding-left .3s ease, background .3s ease;}
@@ -575,220 +576,241 @@
 
 <script>
 (function(){
-  // price calculator
-  var calcAmount = document.getElementById('calcAmount');
-  var calcAmountVal = document.getElementById('calcAmountVal');
-  var calcAmountLabel = document.getElementById('calcAmountLabel');
-  var calcAmountField = document.getElementById('calcAmountField');
-  var calcMode = document.getElementById('calcMode');
-  var calcTotal = document.getElementById('calcTotal');
-  var calcNote = document.getElementById('calcNote');
+  function safe(fn){ try { fn(); } catch (e) { if (window.console) console.error(e); } }
 
-  function applyModeDefaults(mode){
-    if (mode === 'maritime') {
-      calcAmount.min = 0.1; calcAmount.max = 15; calcAmount.step = 0.1; calcAmount.value = 1;
-      calcAmountLabel.textContent = 'Volume estimé du colis';
-    } else if (mode === 'aerien') {
-      calcAmount.min = 1; calcAmount.max = 100; calcAmount.step = 1; calcAmount.value = 10;
-      calcAmountLabel.textContent = 'Poids estimé du colis';
-    }
-  }
+  safe(function(){
+    // price calculator
+    var calcAmount = document.getElementById('calcAmount');
+    var calcAmountVal = document.getElementById('calcAmountVal');
+    var calcAmountLabel = document.getElementById('calcAmountLabel');
+    var calcAmountField = document.getElementById('calcAmountField');
+    var calcMode = document.getElementById('calcMode');
+    var calcTotal = document.getElementById('calcTotal');
+    var calcNote = document.getElementById('calcNote');
 
-  function updateCalc(){
-    if (!calcAmount) return;
-    var mode = calcMode.value;
-    if (mode === 'vehicule') {
-      calcAmountField.style.display = 'none';
-      calcTotal.textContent = 'dès 3 500 $';
-      calcNote.textContent = 'Tarif de base pour le Burkina Faso — le prix varie selon le pays de destination. Devis final confirmé par nos équipes.';
-    } else {
-      calcAmountField.style.display = '';
-      var val = parseFloat(calcAmount.value);
-      var rate = mode === 'maritime' ? 400 : 18;
-      var unit = mode === 'maritime' ? 'CBM' : 'kg';
-      calcAmountVal.textContent = (mode === 'maritime' ? val.toFixed(1) : val) + ' ' + unit;
-      calcTotal.textContent = Math.round(val * rate).toLocaleString('fr-CA') + ' $';
-      calcNote.textContent = 'Prix indicatif — devis final confirmé par nos équipes.';
+    function applyModeDefaults(mode){
+      if (mode === 'maritime') {
+        calcAmount.min = 0.1; calcAmount.max = 15; calcAmount.step = 0.1; calcAmount.value = 1;
+        calcAmountLabel.textContent = 'Volume estimé du colis';
+      } else if (mode === 'aerien') {
+        calcAmount.min = 1; calcAmount.max = 100; calcAmount.step = 1; calcAmount.value = 10;
+        calcAmountLabel.textContent = 'Poids estimé du colis';
+      }
     }
-  }
-  if (calcAmount) {
-    applyModeDefaults(calcMode.value);
-    calcAmount.addEventListener('input', updateCalc);
-    calcMode.addEventListener('change', function(){
+
+    function updateCalc(){
+      if (!calcAmount) return;
+      var mode = calcMode.value;
+      if (mode === 'vehicule') {
+        calcAmountField.style.display = 'none';
+        calcTotal.textContent = 'dès 3 500 $';
+        calcNote.textContent = 'Tarif de base pour le Burkina Faso — le prix varie selon le pays de destination. Devis final confirmé par nos équipes.';
+      } else {
+        calcAmountField.style.display = '';
+        var val = parseFloat(calcAmount.value);
+        var rate = mode === 'maritime' ? 400 : 18;
+        var unit = mode === 'maritime' ? 'CBM' : 'kg';
+        calcAmountVal.textContent = (mode === 'maritime' ? val.toFixed(1) : val) + ' ' + unit;
+        calcTotal.textContent = Math.round(val * rate).toLocaleString('fr-CA') + ' $';
+        calcNote.textContent = 'Prix indicatif — devis final confirmé par nos équipes.';
+      }
+    }
+    if (calcAmount) {
       applyModeDefaults(calcMode.value);
+      calcAmount.addEventListener('input', updateCalc);
+      calcMode.addEventListener('change', function(){
+        applyModeDefaults(calcMode.value);
+        updateCalc();
+      });
       updateCalc();
-    });
-    updateCalc();
-  }
-
-  // contact form -> pre-filled WhatsApp message
-  var quoteForm = document.getElementById('quoteForm');
-  if (quoteForm) {
-    quoteForm.addEventListener('submit', function(e){
-      e.preventDefault();
-      var type = document.getElementById('type').value;
-      var dest = document.getElementById('dest').value;
-      var name = document.getElementById('name').value.trim();
-      var phone = document.getElementById('phone').value.trim();
-      var msg = 'Bonjour, je souhaite un devis.\n'
-        + 'Type d\'envoi : ' + type + '\n'
-        + 'Destination : ' + dest + '\n'
-        + (name ? 'Nom : ' + name + '\n' : '')
-        + (phone ? 'Téléphone : ' + phone : '');
-      window.open('https://wa.me/14188129289?text=' + encodeURIComponent(msg), '_blank');
-    });
-  }
-
-  // mobile menu
-  var menuBtn = document.getElementById('menuBtn');
-  var menuClose = document.getElementById('menuClose');
-  var mobileMenu = document.getElementById('mobileMenu');
-  function openMenu(){ mobileMenu.classList.add('open'); menuBtn.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
-  function closeMenu(){ mobileMenu.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
-  menuBtn.addEventListener('click', openMenu);
-  menuClose.addEventListener('click', closeMenu);
-  mobileMenu.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeMenu); });
-
-  // ticker: rotate through served countries
-  var tickerItems = document.querySelectorAll('#tickerRotator .ticker-item');
-  if (tickerItems.length) {
-    var tickerIndex = 0;
-    setInterval(function(){
-      tickerItems[tickerIndex].classList.remove('active');
-      tickerIndex = (tickerIndex + 1) % tickerItems.length;
-      tickerItems[tickerIndex].classList.add('active');
-    }, 2600);
-  }
-
-  // hero route map: cycle through destination countries/cities
-  var routeSets = document.querySelectorAll('.route-set');
-  var captionFlag = document.querySelector('#routeCaption .flag');
-  var captionTxt = document.querySelector('#routeCaption .txt');
-  var heroFlagBig = document.getElementById('heroFlagBig');
-  if (routeSets.length) {
-    var routeIndex = 0;
-    function showRoute(i){
-      routeSets.forEach(function(s, j){
-        if (j === i) {
-          s.classList.add('active');
-          void s.offsetWidth;
-          s.classList.add('drawn');
-        } else {
-          s.classList.remove('active');
-          s.classList.remove('drawn');
-        }
-      });
-      if (captionTxt) {
-        captionTxt.classList.remove('show');
-        captionFlag.classList.remove('show');
-      }
-      if (heroFlagBig) heroFlagBig.classList.remove('show');
-      setTimeout(function(){
-        var flag = routeSets[i].getAttribute('data-flag');
-        if (captionTxt) {
-          captionFlag.textContent = flag;
-          captionTxt.textContent = routeSets[i].getAttribute('data-country') + ' — ' + routeSets[i].getAttribute('data-city');
-          captionFlag.classList.add('show');
-          captionTxt.classList.add('show');
-        }
-        if (heroFlagBig) {
-          heroFlagBig.textContent = flag;
-          heroFlagBig.classList.add('show');
-        }
-      }, 300);
     }
-    showRoute(0);
-    setInterval(function(){
-      routeIndex = (routeIndex + 1) % routeSets.length;
-      showRoute(routeIndex);
-    }, 4800);
-  }
+  });
 
-  // journey progress bar
-  var fill = document.getElementById('journeyFill');
-  function onScroll(){
-    var h = document.documentElement;
-    var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
-    fill.style.width = scrolled + '%';
-  }
-  document.addEventListener('scroll', onScroll, {passive:true});
-  onScroll();
-
-  // cursor glow, desktop only
-  if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
-    var glow = document.getElementById('cursorGlow');
-    document.addEventListener('mousemove', function(e){
-      glow.style.opacity = 1;
-      glow.style.left = e.clientX + 'px';
-      glow.style.top = e.clientY + 'px';
-    });
-    document.addEventListener('mouseleave', function(){ glow.style.opacity = 0; });
-
-    // magnetic buttons
-    document.querySelectorAll('.magnetic').forEach(function(btn){
-      btn.addEventListener('mousemove', function(e){
-        var r = btn.getBoundingClientRect();
-        var x = e.clientX - r.left - r.width/2;
-        var y = e.clientY - r.top - r.height/2;
-        btn.style.transform = 'translate(' + (x*0.25) + 'px,' + (y*0.35) + 'px)';
+  safe(function(){
+    // contact form -> pre-filled WhatsApp message
+    var quoteForm = document.getElementById('quoteForm');
+    if (quoteForm) {
+      quoteForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        var type = document.getElementById('type').value;
+        var dest = document.getElementById('dest').value;
+        var name = document.getElementById('name').value.trim();
+        var phone = document.getElementById('phone').value.trim();
+        var msg = 'Bonjour, je souhaite un devis.\n'
+          + 'Type d\'envoi : ' + type + '\n'
+          + 'Destination : ' + dest + '\n'
+          + (name ? 'Nom : ' + name + '\n' : '')
+          + (phone ? 'Téléphone : ' + phone : '');
+        window.open('https://wa.me/14188129289?text=' + encodeURIComponent(msg), '_blank');
       });
-      btn.addEventListener('mouseleave', function(){ btn.style.transform = 'translate(0,0)'; });
-    });
+    }
+  });
 
-    // price card spotlight
-    document.querySelectorAll('.price-card').forEach(function(card){
-      card.addEventListener('mousemove', function(e){
-        var r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-        card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  safe(function(){
+    // mobile menu
+    var menuBtn = document.getElementById('menuBtn');
+    var menuClose = document.getElementById('menuClose');
+    var mobileMenu = document.getElementById('mobileMenu');
+    function openMenu(){ mobileMenu.classList.add('open'); menuBtn.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
+    function closeMenu(){ mobileMenu.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
+    menuBtn.addEventListener('click', openMenu);
+    menuClose.addEventListener('click', closeMenu);
+    mobileMenu.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeMenu); });
+  });
+
+  safe(function(){
+    // ticker: rotate through served countries
+    var tickerItems = document.querySelectorAll('#tickerRotator .ticker-item');
+    if (tickerItems.length) {
+      var tickerIndex = 0;
+      setInterval(function(){
+        tickerItems[tickerIndex].classList.remove('active');
+        tickerIndex = (tickerIndex + 1) % tickerItems.length;
+        tickerItems[tickerIndex].classList.add('active');
+      }, 2600);
+    }
+  });
+
+  safe(function(){
+    // hero route map: cycle through destination countries/cities
+    var routeSets = document.querySelectorAll('.route-set');
+    var captionFlag = document.querySelector('#routeCaption .flag');
+    var captionTxt = document.querySelector('#routeCaption .txt');
+    var heroFlagBig = document.getElementById('heroFlagBig');
+    if (routeSets.length) {
+      var routeIndex = 0;
+      function showRoute(i){
+        routeSets.forEach(function(s, j){
+          if (j === i) {
+            s.classList.add('active');
+            void s.offsetWidth;
+            s.classList.add('drawn');
+          } else {
+            s.classList.remove('active');
+            s.classList.remove('drawn');
+          }
+        });
+        if (captionTxt) {
+          captionTxt.classList.remove('show');
+          captionFlag.classList.remove('show');
+        }
+        if (heroFlagBig) heroFlagBig.classList.remove('show');
+        setTimeout(function(){
+          var flag = routeSets[i].getAttribute('data-flag');
+          if (captionTxt) {
+            captionFlag.textContent = flag;
+            captionTxt.textContent = routeSets[i].getAttribute('data-country') + ' — ' + routeSets[i].getAttribute('data-city');
+            captionFlag.classList.add('show');
+            captionTxt.classList.add('show');
+          }
+          if (heroFlagBig) {
+            heroFlagBig.textContent = flag;
+            heroFlagBig.classList.add('show');
+          }
+        }, 300);
+      }
+      showRoute(0);
+      setInterval(function(){
+        routeIndex = (routeIndex + 1) % routeSets.length;
+        showRoute(routeIndex);
+      }, 4800);
+    }
+  });
+
+  safe(function(){
+    // journey progress bar
+    var fill = document.getElementById('journeyFill');
+    function onScroll(){
+      var h = document.documentElement;
+      var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      fill.style.width = scrolled + '%';
+    }
+    document.addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+  });
+
+  safe(function(){
+    // cursor glow, magnetic buttons, price card spotlight — desktop only
+    if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
+      var glow = document.getElementById('cursorGlow');
+      document.addEventListener('mousemove', function(e){
+        glow.style.opacity = 1;
+        glow.style.left = e.clientX + 'px';
+        glow.style.top = e.clientY + 'px';
       });
-    });
-  }
+      document.addEventListener('mouseleave', function(){ glow.style.opacity = 0; });
 
-  // scroll reveal
-  var revealEls = document.querySelectorAll('.reveal');
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in');
-        io.unobserve(entry.target);
-      }
-    });
-  }, {threshold:0.15});
-  revealEls.forEach(function(el){ io.observe(el); });
+      document.querySelectorAll('.magnetic').forEach(function(btn){
+        btn.addEventListener('mousemove', function(e){
+          var r = btn.getBoundingClientRect();
+          var x = e.clientX - r.left - r.width/2;
+          var y = e.clientY - r.top - r.height/2;
+          btn.style.transform = 'translate(' + (x*0.25) + 'px,' + (y*0.35) + 'px)';
+        });
+        btn.addEventListener('mouseleave', function(){ btn.style.transform = 'translate(0,0)'; });
+      });
 
-  // process step highlight
-  var steps = document.querySelectorAll('.p-step');
-  var io2 = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if (entry.isIntersecting) entry.target.classList.add('in');
-    });
-  }, {threshold:0.5});
-  steps.forEach(function(el){ io2.observe(el); });
+      document.querySelectorAll('.price-card').forEach(function(card){
+        card.addEventListener('mousemove', function(e){
+          var r = card.getBoundingClientRect();
+          card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+          card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+      });
+    }
+  });
 
-  // animated counters
-  var counters = document.querySelectorAll('[data-count]');
-  var io3 = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if (!entry.isIntersecting) return;
-      io3.unobserve(entry.target);
-      var el = entry.target;
-      var target = parseInt(el.getAttribute('data-count'), 10);
-      var suffix = el.getAttribute('data-suffix') || '';
-      var start = null;
-      var dur = 1400;
-      function step(ts){
-        if (!start) start = ts;
-        var progress = Math.min((ts - start) / dur, 1);
-        var eased = 1 - Math.pow(1 - progress, 3);
-        var val = Math.floor(eased * target);
-        el.textContent = val.toLocaleString('fr-CA') + suffix;
-        if (progress < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    });
-  }, {threshold:0.6});
-  counters.forEach(function(el){ io3.observe(el); });
+  safe(function(){
+    // scroll reveal
+    var revealEls = document.querySelectorAll('.reveal');
+    revealEls.forEach(function(el){ el.classList.add('armed'); });
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.15});
+    revealEls.forEach(function(el){ io.observe(el); });
+  });
+
+  safe(function(){
+    // process step highlight
+    var steps = document.querySelectorAll('.p-step');
+    var io2 = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) entry.target.classList.add('in');
+      });
+    }, {threshold:0.5});
+    steps.forEach(function(el){ io2.observe(el); });
+  });
+
+  safe(function(){
+    // animated counters
+    var counters = document.querySelectorAll('[data-count]');
+    var io3 = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        io3.unobserve(entry.target);
+        var el = entry.target;
+        var target = parseInt(el.getAttribute('data-count'), 10);
+        var suffix = el.getAttribute('data-suffix') || '';
+        var start = null;
+        var dur = 1400;
+        function step(ts){
+          if (!start) start = ts;
+          var progress = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          var val = Math.floor(eased * target);
+          el.textContent = val.toLocaleString('fr-CA') + suffix;
+          if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      });
+    }, {threshold:0.6});
+    counters.forEach(function(el){ io3.observe(el); });
+  });
 })();
 </script>
 </body>
