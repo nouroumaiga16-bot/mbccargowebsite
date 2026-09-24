@@ -242,13 +242,23 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9L5c9zw3Icw1n
 
 // Toutes les demandes passent par le serveur sécurisé.
 async function api(action, payload){
-  const res = await fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    headers: {"Content-Type": "text/plain;charset=utf-8"},
-    body: JSON.stringify(Object.assign({action}, payload || {}))
-  });
-  return res.json();
+  // Délai maximum de 20 s : sur un réseau mobile lent, on ne reste jamais bloqué sur un écran vide
+  const ctrl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), 20000) : null;
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify(Object.assign({action}, payload || {})),
+      signal: ctrl ? ctrl.signal : undefined
+    });
+    return await res.json();
+  } finally {
+    if(timer) clearTimeout(timer);
+  }
 }
+
+let serverDown = false;
 
 const STORAGE_KEY = "mbc-cargo-app-state";
 
@@ -386,14 +396,15 @@ function fmtDate(iso){
 
 async function loadState(){
   try{ token = localStorage.getItem(TOKEN_KEY) || null; }catch(e){ token = null; }
-  try{
-    const st = await api("status");
+  render(); // affiche « Chargement… » tout de suite
+  serverDown = false;
+  const statusCall = api("status").then(st => {
     configured = !!(st && st.configured);
-  }catch(e){
+  }).catch(e => {
+    serverDown = true;
     console.error("Serveur injoignable:", e);
-  }
-  await fetchTeamState();
-  await checkUrlForCompletionCode();
+  });
+  await Promise.all([statusCall, fetchTeamState(), checkUrlForCompletionCode()]);
   ready = true;
   render();
 }
@@ -693,7 +704,8 @@ function attachDeliveryPhoto(shipmentId, dataUrl){
 function render(){
   const root = document.getElementById("root");
   if(!ready){
-    root.innerHTML = `<div style="padding:60px;text-align:center;color:var(--muted)">Chargement…</div>`;
+    root.innerHTML = `<div style="padding:80px 24px;text-align:center;color:#9a968c;font-family:system-ui,sans-serif;">
+      <div style="font-size:1.6rem;margin-bottom:12px;">📦</div>Chargement de MBC Cargo…</div>`;
     return;
   }
   // On mémorise le champ actuellement en train d'être tapé (id + position du
@@ -719,7 +731,9 @@ function render(){
 }
 
 function topbarHtml(){
-  return `
+  const downBanner = serverDown ? `<div style="background:#3a1c14;color:#f0b8a4;padding:10px 16px;text-align:center;font-size:.85rem;">
+      Connexion au serveur impossible pour le moment. <button class="link-btn" data-action="retry-load" style="color:#f0b8a4;text-decoration:underline;">Réessayer</button></div>` : "";
+  return downBanner + `
   <div class="topbar">
     <div class="brand"><span class="mark">MBC</span> MBC Cargo</div>
     <div class="topbar-actions">
@@ -1320,6 +1334,7 @@ function handleClick(action, el){
   switch(action){
     case "go-team": view = "team"; authError=""; render(); break;
     case "go-public": view = "public"; render(); break;
+    case "retry-load": ready = false; loadState(); break;
     case "logout": {
       const t = token;
       forgetSession();
