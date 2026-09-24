@@ -2,136 +2,335 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Suivi de colis — MBC Cargo</title>
+<meta name="theme-color" content="#0F1B2D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bleu-ciel: #2FA8E0;
-    --bleu-ciel-clair: #EAF6FD;
-    --bleu-marine: #0E3A5F;
-    --bleu-marine-2: #123f66;
-    --gris: #5b6b78;
-    --blanc: #ffffff;
-    --bordure: #dbeaf3;
+    --ink:#0F1B2D;
+    --ink-2:#16263C;
+    --ink-3:#1E3049;
+    --paper:#F3EFE4;
+    --marigold:#E8A33D;
+    --clay:#C9603C;
+    --green:#5FB58A;
+    --ink-soft:#8394AA;
+    --line-on-ink:rgba(243,239,228,0.14);
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-body:'Inter', system-ui, sans-serif;
   }
-  *{box-sizing:border-box;margin:0;padding:0;}
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
   body{
-    background: var(--blanc);
-    color: var(--bleu-marine);
-    font-family: 'IBM Plex Sans', sans-serif;
-    min-height:100vh;
-    line-height:1.5;
+    background:var(--ink); color:var(--paper); font-family:var(--font-body);
+    line-height:1.5; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+    min-height:100vh; display:flex; flex-direction:column;
+    padding-bottom:env(safe-area-inset-bottom,0px);
   }
-  .wrap{max-width:640px;margin:0 auto;padding:32px 20px 80px;}
+  a{color:inherit;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px; position:relative; width:100%;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+  h1,h2,h3{font-family:var(--font-display); margin:0; font-weight:600; letter-spacing:-0.01em;}
+  p{margin:0;}
 
-  header{text-align:center;margin-bottom:36px;}
-  .eyebrow{
-    font-size:11px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--bleu-ciel);font-weight:600;margin-bottom:10px;
+  .grain{
+    position:fixed; inset:0; z-index:200; pointer-events:none; opacity:0.035; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  h1{
-    font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(26px,7vw,34px);
-    letter-spacing:-.01em;color:var(--bleu-marine);
+
+  /* ---------- barre de navigation (identique au site) ---------- */
+  header.nav{
+    position:sticky; top:0; z-index:42; background:rgba(15,27,45,0.86); backdrop-filter:blur(14px) saturate(140%);
+    border-bottom:1px solid var(--line-on-ink); padding-top:env(safe-area-inset-top,0px);
   }
-  .sous-titre{color:var(--gris);font-size:14px;margin-top:8px;}
+  .nav-inner{display:flex; align-items:center; justify-content:space-between; height:76px; gap:16px;}
+  .brand{font-family:var(--font-display); font-weight:700; font-size:1.2rem; color:var(--paper); text-decoration:none;}
+  .brand span{color:var(--marigold);}
+  nav.links{display:flex; gap:30px; align-items:center;}
+  nav.links a{font-size:0.94rem; text-decoration:none; color:var(--paper); opacity:0.82; transition:opacity .15s;}
+  nav.links a:hover, nav.links a.active{opacity:1;}
+  nav.links a.active{color:var(--marigold);}
+  .nav-cta{background:var(--marigold); color:var(--ink); padding:10px 20px; border-radius:3px; font-weight:600; font-size:0.9rem; text-decoration:none; white-space:nowrap;}
+  .home-link{display:none; font-size:0.92rem; text-decoration:none; opacity:0.85;}
+  @media (max-width:860px){ nav.links{display:none;} .home-link{display:inline;} }
+  @media (max-width:420px){ .nav-cta{padding:9px 14px; font-size:0.85rem;} }
 
-  form{display:flex;gap:8px;margin:28px 0;}
-  input[type=text]{
-    flex:1;background:var(--blanc);border:1.5px solid var(--bordure);color:var(--bleu-marine);
-    padding:14px 16px;border-radius:8px;font-size:15px;font-family:'IBM Plex Sans',sans-serif;
+  /* ---------- en-tête ---------- */
+  main{flex:1;}
+  .hero{padding:70px 0 40px; position:relative; overflow:hidden;}
+  .hero::before{
+    content:""; position:absolute; width:640px; height:640px; border-radius:50%;
+    background:radial-gradient(circle, rgba(232,163,61,0.14), transparent 65%);
+    top:-280px; right:-200px; filter:blur(10px); pointer-events:none;
   }
-  input[type=text]:focus{outline:none;border-color:var(--bleu-ciel);box-shadow:0 0 0 3px rgba(47,168,224,.15);}
-  input[type=text]::placeholder{color:#9fb3c2;}
-  button{
-    background:var(--bleu-ciel);color:var(--blanc);border:none;border-radius:8px;
-    padding:0 22px;font-weight:600;font-size:14px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;
-    transition:background .15s;
+  .inner{max-width:720px; margin:0 auto; position:relative;}
+  .kicker{color:var(--marigold); font-family:var(--font-display); font-size:0.95rem; font-weight:600; margin-bottom:16px; animation:rise .7s ease both .05s;}
+  .hero h1{font-size:clamp(2.2rem, 5vw, 3.3rem); line-height:1.05; animation:rise .7s ease both .15s;}
+  .hero h1 em{font-style:normal; color:var(--marigold);}
+  .lede{margin-top:18px; font-size:1.05rem; color:var(--ink-soft); max-width:50ch; line-height:1.6; animation:rise .7s ease both .25s;}
+  @keyframes rise{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:none;} }
+
+  /* ---------- recherche ---------- */
+  .search{display:flex; gap:10px; margin-top:32px; animation:rise .7s ease both .35s;}
+  .search input{
+    flex:1; min-width:0; background:var(--ink-2); border:1px solid var(--line-on-ink); color:var(--paper);
+    padding:16px; border-radius:3px; font-family:var(--font-display); font-size:1.05rem; letter-spacing:.04em;
+    text-transform:uppercase; transition:border-color .2s;
   }
-  button:hover{background:var(--bleu-marine);}
-  button:focus-visible{outline:2px solid var(--bleu-marine);outline-offset:2px;}
-
-  #message{font-size:14px;color:var(--gris);min-height:20px;margin-bottom:6px;}
-  #message.erreur{color:#c94f4f;}
-
-  .resultat{display:none;background:var(--bleu-ciel-clair);border:1px solid var(--bordure);border-radius:14px;padding:24px 22px;margin-top:18px;}
-  .resultat.visible{display:block;}
-  .resultat .num{font-family:'Sora',sans-serif;font-weight:600;font-size:19px;color:var(--bleu-marine);}
-  .resultat .meta{color:var(--gris);font-size:13px;margin-top:4px;}
-
-  .corridor{margin:26px 0 6px;position:relative;height:6px;background:#d3e8f4;border-radius:3px;overflow:hidden;}
-  .corridor-fill{position:absolute;top:0;left:0;height:100%;background:linear-gradient(90deg,var(--bleu-marine),var(--bleu-ciel));border-radius:3px;transition:width 1s ease;width:0%;}
-  .villes{display:flex;justify-content:space-between;font-size:11px;color:var(--gris);margin-top:6px;letter-spacing:.03em;font-weight:500;}
-
-  .etapes{list-style:none;margin-top:26px;display:flex;flex-direction:column;gap:0;}
-  .etape{display:flex;gap:14px;padding:10px 0;position:relative;}
-  .etape:not(:last-child)::before{
-    content:'';position:absolute;left:11px;top:34px;bottom:-6px;width:1px;background:var(--bordure);
+  .search input::placeholder{color:var(--ink-soft); text-transform:none; letter-spacing:0; font-family:var(--font-body);}
+  .search input:focus{outline:none; border-color:var(--marigold);}
+  .btn-primary{
+    background:var(--marigold); color:var(--ink); padding:0 28px; border-radius:3px; font-weight:600;
+    font-size:1rem; border:1px solid var(--marigold); cursor:pointer; font-family:var(--font-body); transition:filter .15s;
   }
-  .puce{width:23px;height:23px;border-radius:50%;border:1.5px solid var(--bordure);flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gris);
-    background:var(--blanc);margin-top:1px;}
-  .etape.fait .puce{background:var(--bleu-ciel);border-color:var(--bleu-ciel);color:var(--blanc);}
-  .etape.actuel .puce{border-color:var(--bleu-marine);color:var(--bleu-marine);box-shadow:0 0 0 3px rgba(14,58,95,.12);}
-  .etape-texte .titre{font-size:14px;font-weight:500;}
-  .etape.fait .etape-texte .titre, .etape.actuel .etape-texte .titre{color:var(--bleu-marine);}
-  .etape:not(.fait):not(.actuel) .etape-texte .titre{color:#9fb3c2;}
-  .etape-texte .date{font-size:12px;color:var(--gris);margin-top:2px;}
+  .btn-primary:hover{filter:brightness(1.07);}
+  .btn-primary:disabled{opacity:.6; cursor:wait;}
+  @media (max-width:520px){ .search{flex-direction:column;} .btn-primary{padding:15px;} }
 
-  .note{background:rgba(47,168,224,.1);border-left:2px solid var(--bleu-ciel);padding:10px 14px;
-    font-size:13px;color:var(--bleu-marine-2);margin-top:20px;border-radius:0 6px 6px 0;}
+  .msg{margin-top:18px; padding:14px 16px; border-radius:3px; font-size:0.95rem; border:1px solid var(--line-on-ink); background:var(--ink-2);}
+  .msg.err{border-color:rgba(201,96,60,.5); color:#F0B8A4;}
+  .msg a{color:var(--marigold);}
 
-  footer{text-align:center;margin-top:44px;font-size:12px;color:var(--gris);}
-  footer a{color:var(--bleu-ciel);text-decoration:none;font-weight:500;}
+  /* ---------- résultat ---------- */
+  .result{margin-top:28px; background:var(--ink-2); border:1px solid var(--line-on-ink); border-radius:4px; padding:28px; display:none;}
+  .result.show{display:block; animation:rise .5s ease both;}
+  @media (max-width:520px){ .result{padding:22px 18px;} }
+  .result-top{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;}
+  .num{font-family:var(--font-display); font-size:1.35rem; font-weight:700; letter-spacing:.03em;}
+  .tag{font-size:0.8rem; color:var(--ink); background:var(--marigold); padding:4px 10px; border-radius:20px; font-weight:600; white-space:nowrap;}
+  .tag.done{background:var(--green);}
+  .status-msg{margin-top:18px; font-size:1.05rem; line-height:1.55; color:var(--paper);}
 
-  @media (prefers-reduced-motion: reduce){
-    .corridor-fill{transition:none;}
+  /* corridor Montréal → Ouagadougou */
+  .corridor{margin-top:26px;}
+  .track{position:relative; height:4px; background:var(--line-on-ink); border-radius:4px; margin:0 10px;}
+  .fill{position:absolute; left:0; top:0; bottom:0; width:0; background:linear-gradient(90deg,var(--clay),var(--marigold)); border-radius:4px; transition:width 1.2s cubic-bezier(.2,.7,.2,1);}
+  .plane{position:absolute; top:50%; left:0; transform:translate(-50%,-50%); font-size:18px; color:var(--marigold); transition:left 1.2s cubic-bezier(.2,.7,.2,1); line-height:1;}
+  .cities{display:flex; justify-content:space-between; margin-top:14px; font-size:0.85rem; color:var(--ink-soft); gap:10px;}
+  .cities span:last-child{text-align:right;}
+  .cities b{color:var(--paper); font-weight:500;}
+  .cities i{font-style:normal;}
+  @media (max-width:520px){ .cities .pays{display:none;} }
+
+  /* étapes */
+  .steps{list-style:none; margin:28px 0 0; padding:0; border-top:1px solid var(--line-on-ink);}
+  .step{display:flex; gap:14px; align-items:center; padding:12px 0; border-bottom:1px solid var(--line-on-ink); font-size:0.95rem; color:var(--ink-soft);}
+  .dot{width:22px; height:22px; border-radius:50%; flex:none; border:1.5px solid var(--line-on-ink); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;}
+  .step.done{color:var(--paper);}
+  .step.done .dot{background:var(--marigold); border-color:var(--marigold); color:var(--ink);}
+  .step.current{color:var(--marigold); font-weight:600;}
+  .step.current .dot{border-color:var(--marigold); box-shadow:0 0 0 4px rgba(232,163,61,.18);}
+  .step.current .dot::after{content:""; width:8px; height:8px; border-radius:50%; background:var(--marigold); animation:blink 1.6s ease-in-out infinite;}
+  @keyframes blink{50%{opacity:.3;}}
+
+  .help{margin-top:26px; font-size:0.9rem; color:var(--ink-soft);}
+  .help a{color:var(--marigold); text-decoration:none; font-weight:500;}
+
+  /* ---------- pied de page ---------- */
+  footer{border-top:1px solid var(--line-on-ink); padding:30px 0; margin-top:60px;}
+  .foot{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:0.84rem; color:var(--ink-soft);}
+  .foot a{text-decoration:none; color:var(--paper); opacity:.85;}
+  .foot a:hover{color:var(--marigold); opacity:1;}
+
+  /* bouton WhatsApp flottant */
+  .wa-float{
+    position:fixed; right:20px; bottom:calc(20px + env(safe-area-inset-bottom,0px)); z-index:50;
+    width:58px; height:58px; border-radius:50%; background:#25D366; color:#0F1B2D;
+    display:flex; align-items:center; justify-content:center; text-decoration:none;
+    box-shadow:0 8px 24px rgba(0,0,0,0.35); transition:transform .2s ease;
+  }
+  .wa-float:hover{transform:scale(1.08);}
+  .wa-float svg{width:28px; height:28px; position:relative;}
+  .wa-pulse{position:absolute; inset:0; border-radius:50%; background:#25D366; animation:wapulse 2.2s ease-out infinite;}
+  @keyframes wapulse{ 0%{transform:scale(1); opacity:0.45;} 100%{transform:scale(1.8); opacity:0;} }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important; transition:none !important;}
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="eyebrow">MBC Cargo · Montréal — Ouagadougou</div>
-    <h1>Où est votre colis ?</h1>
-    <p class="sous-titre">Entrez le numéro de suivi reçu par WhatsApp ou par courriel.</p>
-  </header>
+<div class="grain"></div>
 
-  <form id="form-suivi">
-    <input type="text" id="input-suivi" placeholder="Ex. MBC-2026-0142" autocomplete="off" autocapitalize="characters">
-    <button type="submit">Suivre</button>
-  </form>
-  <div id="message"></div>
-
-  <div class="resultat" id="resultat">
-    <div class="num" id="res-num"></div>
-    <div class="meta" id="res-meta"></div>
-
-    <div class="corridor"><div class="corridor-fill" id="corridor-fill"></div></div>
-    <div class="villes"><span id="ville-origine">Montréal</span><span id="ville-dest">Ouagadougou</span></div>
-
-    <ul class="etapes" id="etapes"></ul>
-
-    <div class="note" id="note" style="display:none;"></div>
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/">MBC <span>Cargo</span></a>
+    <nav class="links">
+      <a href="/#services">Services</a>
+      <a href="/#how">Processus</a>
+      <a href="/#destinations">Destinations</a>
+      <a href="/#tarifs">Tarifs</a>
+      <a href="/suivi.html" class="active">Suivi de colis</a>
+    </nav>
+    <a class="home-link" href="/">← Accueil</a>
+    <a class="nav-cta" href="/#contact">Devis gratuit</a>
   </div>
+</header>
 
-  <footer>Un problème avec votre suivi ? <a href="https://wa.me/14188129289">Écrivez-nous sur WhatsApp</a></footer>
-</div>
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="inner">
+        <div class="kicker">Suivi en direct · Canada → Afrique de l'Ouest</div>
+        <h1>Où est votre <em>colis</em> ?</h1>
+        <p class="lede">Entrez le numéro de suivi reçu par WhatsApp. La position de votre envoi s'affiche tout de suite.</p>
+
+        <form class="search" id="form-suivi" autocomplete="off">
+          <input type="text" id="input-suivi" placeholder="Ex. MBC-2609-0001" autocapitalize="characters" spellcheck="false" aria-label="Numéro de suivi">
+          <button class="btn-primary" type="submit" id="btn-suivi">Suivre</button>
+        </form>
+
+        <div id="message"></div>
+
+        <div class="result" id="resultat" aria-live="polite">
+          <div class="result-top">
+            <div class="num" id="res-num"></div>
+            <span class="tag" id="res-tag"></span>
+          </div>
+          <p class="status-msg" id="res-msg"></p>
+
+          <div class="corridor">
+            <div class="track"><div class="fill" id="fill"></div><div class="plane" id="plane">✈</div></div>
+            <div class="cities"><span><b>Montréal</b><i class="pays"> · Canada</i></span><span><b>Ouagadougou</b><i class="pays"> · Burkina Faso</i></span></div>
+          </div>
+
+          <ul class="steps" id="etapes"></ul>
+        </div>
+
+        <p class="help">Un problème avec votre suivi ? <a href="https://wa.me/14188129289" target="_blank" rel="noopener">Écrivez-nous sur WhatsApp</a></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>© 2026 MBC Cargo · Montréal, Canada</span>
+    <span><a href="/">Accueil</a> · <a href="/#tarifs">Tarifs</a> · <a href="/#contact">Contact</a></span>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/14188129289?text=Bonjour%2C%20j%27ai%20une%20question%20sur%20le%20suivi%20de%20mon%20colis." target="_blank" rel="noopener" aria-label="Contacter MBC Cargo sur WhatsApp">
+  <span class="wa-pulse"></span>
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.1c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.79-4.17-4.94-4.37-.15-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.2 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.83 2 .9 2.14.07.15.11.32.02.52-.09.2-.14.32-.27.49-.14.17-.29.38-.41.5-.14.14-.28.29-.12.57.16.29.72 1.19 1.54 1.93 1.06.95 1.95 1.24 2.24 1.38.29.14.46.12.63-.07.17-.2.72-.84.91-1.12.2-.29.39-.24.66-.14.27.1 1.7.8 1.99.94.29.15.48.22.55.34.07.13.07.72-.17 1.4Z"/></svg>
+</a>
 
 <script>
-const APP_URL = "/gestion.html";
+// Serveur sécurisé MBC Cargo : il ne renvoie QUE le statut du colis demandé.
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9L5c9zw3Icw1nfEO8_ExV_27mB-YpNMj6A0ODfVI6Cdx8KdxwIpsK8jkKhCvTEt9DAA/exec";
 
-function chercherColis(numero) {
-  var n = (numero || "").trim().toUpperCase();
-  if (!n) return;
-  window.location.href = APP_URL + "?track=" + encodeURIComponent(n);
+const AERIEN = [
+  "Devis confirmé","Reçu au dépôt Canada","Emballé / Préparé pour expédition",
+  "En vol","Arrivé à Ouagadougou","Dédouanement en cours",
+  "Prêt pour remise","Remis au client"
+];
+const MARITIME = [
+  "Devis confirmé","Reçu au dépôt Canada","Chargé en conteneur/navire",
+  "Parti du port (Canada)","En mer","Arrivé au port de destination",
+  "Dédouanement en cours","Dédouané — en transit vers Ouagadougou",
+  "Arrivé à Ouagadougou","Prêt pour remise","Remis au client"
+];
+const MESSAGES = {
+  "Devis confirmé": "Votre commande est confirmée, {name}. On prépare tout dès réception de votre colis.",
+  "Reçu au dépôt Canada": "Bonne nouvelle {name}, votre colis est arrivé à notre dépôt au Canada.",
+  "Emballé / Préparé pour expédition": "Votre colis est emballé avec soin et prêt à partir, {name}.",
+  "Chargé en conteneur/navire": "Votre colis est chargé et prêt pour la traversée, {name}.",
+  "Parti du port (Canada)": "Le navire a quitté le port canadien avec votre colis à bord.",
+  "En vol": "Votre colis est en plein vol vers l'Afrique, {name}.",
+  "En mer": "Votre colis traverse l'Atlantique en ce moment même.",
+  "Arrivé au port de destination": "Votre colis a atteint le port de destination.",
+  "Dédouanement en cours": "Votre colis est en cours de dédouanement, {name} — encore un peu de patience.",
+  "Dédouané — en transit vers Ouagadougou": "Dédouanement terminé ! Direction Ouagadougou.",
+  "Arrivé à Ouagadougou": "Votre colis est arrivé à Ouagadougou, {name} !",
+  "Prêt pour remise": "Votre colis vous attend, {name}, prêt à être récupéré.",
+  "Remis au client": "Merci {name} pour votre confiance ! Votre colis a été remis avec succès. 🎉"
+};
+
+const form = document.getElementById("form-suivi");
+const input = document.getElementById("input-suivi");
+const btn = document.getElementById("btn-suivi");
+const message = document.getElementById("message");
+const resultat = document.getElementById("resultat");
+
+function texte(t){ return String(t == null ? "" : t).replace(/[<>&"']/g, ""); }
+
+function afficherMessage(html, erreur){
+  message.innerHTML = html ? `<div class="msg ${erreur ? "err" : ""}">${html}</div>` : "";
 }
 
-document.getElementById("form-suivi").addEventListener("submit", function (e) {
+function afficherResultat(data){
+  const s = data.shipment;
+  const etapes = s.freightType === "aerien" ? AERIEN : MARITIME;
+  const i = Math.max(0, Math.min(Number(s.statusIndex) || 0, etapes.length - 1));
+  const livre = i === etapes.length - 1;
+  const prenom = texte(data.firstName) || "cher client";
+  const label = etapes[i];
+
+  document.getElementById("res-num").textContent = s.trackingNumber;
+  const tag = document.getElementById("res-tag");
+  tag.textContent = livre ? "Livré ✓" : (s.freightType === "aerien" ? "Fret aérien" : "Fret maritime / véhicule");
+  tag.classList.toggle("done", livre);
+  document.getElementById("res-msg").textContent =
+    (MESSAGES[label] || "Votre colis progresse bien, {name}.").replace("{name}", prenom);
+
+  document.getElementById("etapes").innerHTML = etapes.map((e, k) => {
+    const fait = k < i || (k === i && livre);
+    const cls = fait ? "done" : (k === i ? "current" : "");
+    return `<li class="step ${cls}"><span class="dot">${fait ? "✓" : ""}</span>${e}</li>`;
+  }).join("");
+
+  resultat.classList.remove("show");
+  void resultat.offsetWidth; // relance l'animation
+  resultat.classList.add("show");
+
+  const pct = etapes.length > 1 ? (i / (etapes.length - 1)) * 100 : 100;
+  const fill = document.getElementById("fill"), plane = document.getElementById("plane");
+  fill.style.width = "0%"; plane.style.left = "0%";
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    fill.style.width = pct + "%";
+    plane.style.left = pct + "%";
+  }));
+}
+
+async function chercherColis(numero){
+  const n = (numero || "").trim().toUpperCase();
+  if(!n) return;
+  input.value = n;
+  btn.disabled = true; btn.textContent = "Recherche…";
+  afficherMessage("");
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify({action: "track", num: n})
+    });
+    const data = await res.json();
+    if(data && data.found){
+      afficherResultat(data);
+      history.replaceState(null, "", "?track=" + encodeURIComponent(n));
+    } else {
+      resultat.classList.remove("show");
+      afficherMessage(`Aucun colis trouvé avec le numéro <b>${texte(n)}</b>. Vérifiez le numéro reçu par WhatsApp, ou <a href="https://wa.me/14188129289" target="_blank" rel="noopener">écrivez-nous</a>.`, true);
+    }
+  }catch(e){
+    resultat.classList.remove("show");
+    afficherMessage("Connexion impossible pour le moment. Vérifiez votre internet et réessayez.", true);
+  }finally{
+    btn.disabled = false; btn.textContent = "Suivre";
+  }
+}
+
+form.addEventListener("submit", function(e){
   e.preventDefault();
-  chercherColis(document.getElementById("input-suivi").value);
+  chercherColis(input.value);
 });
+
+// Lien direct : mbccargo.com/suivi.html?track=MBC-XXXX-XXXX
+const depuisLien = new URLSearchParams(location.search).get("track");
+if(depuisLien) chercherColis(depuisLien);
 </script>
 </body>
 </html>
