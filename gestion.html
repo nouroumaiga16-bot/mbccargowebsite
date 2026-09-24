@@ -1471,7 +1471,7 @@ setInterval(() => {
 
 if ("serviceWorker" in navigator){
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw-gestion.js").catch(() => {});
+    navigator.serviceWorker.register("sw-gestion.js", {scope: "./gestion"}).catch(() => {});
   });
 }
 </script>

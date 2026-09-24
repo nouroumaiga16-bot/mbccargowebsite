@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MBC Cargo — Canada vers l'Afrique de l'Ouest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F1B2D;
+    --ink-2:#16263C;
+    --ink-3:#1E3049;
+    --paper:#F3EFE4;
+    --paper-2:#EAE3D2;
+    --marigold:#E8A33D;
+    --clay:#C9603C;
+    --ink-soft:#8394AA;
+    --paper-soft:#B9AF95;
+    --line-on-ink:rgba(243,239,228,0.14);
+    --line-on-paper:rgba(15,27,45,0.13);
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-body:'Inter', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth; scroll-padding-top: calc(116px + env(safe-area-inset-top,0px));}
+  body{
+    margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body);
+    line-height:1.5; padding-bottom:env(safe-area-inset-bottom,0px); -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img{max-width:100%;display:block;}
+  a{color:inherit;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px; position:relative;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+  h1,h2,h3{font-family:var(--font-display); margin:0; font-weight:600; letter-spacing:-0.01em;}
+  p{margin:0;}
+
+  /* film grain overlay */
+  .grain{
+    position:fixed; inset:0; z-index:200; pointer-events:none; opacity:0.035; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* custom cursor glow, desktop only */
+  .cursor-glow{
+    position:fixed; width:380px; height:380px; border-radius:50%; pointer-events:none; z-index:5;
+    background:radial-gradient(circle, rgba(232,163,61,0.10) 0%, rgba(232,163,61,0) 70%);
+    transform:translate(-50%,-50%); left:0; top:0; opacity:0; transition:opacity .3s;
+  }
+  @media (hover:none), (pointer:coarse){ .cursor-glow{display:none;} }
+
+  /* scroll progress: journey line under nav */
+  .journey-bar{position:sticky; top:0; z-index:41; height:3px; background:var(--line-on-ink);}
+  .journey-fill{height:100%; width:0%; background:linear-gradient(90deg,var(--clay),var(--marigold)); position:relative; transition:width .05s linear;}
+  .journey-fill::after{
+    content:"✈"; position:absolute; right:-9px; top:-11px; font-size:13px; color:var(--marigold);
+  }
+
+  header.nav{
+    position:sticky; top:0; z-index:42; background:rgba(15,27,45,0.86); backdrop-filter:blur(14px) saturate(140%);
+    border-bottom:1px solid var(--line-on-ink); padding-top:env(safe-area-inset-top,0px);
+  }
+  .nav-inner{display:flex; align-items:center; justify-content:space-between; height:76px; color:var(--paper);}
+  .brand{font-family:var(--font-display); font-weight:700; font-size:1.2rem; color:var(--paper); text-decoration:none;}
+  .brand span{color:var(--marigold);}
+  nav.links{display:flex; gap:30px; align-items:center;}
+  nav.links a{font-size:0.94rem; text-decoration:none; color:var(--paper); opacity:0.82; transition:opacity .15s;}
+  nav.links a:hover{opacity:1;}
+  .nav-cta{background:var(--marigold); color:var(--ink); padding:10px 20px; border-radius:3px; font-weight:600; font-size:0.9rem; text-decoration:none; white-space:nowrap; display:inline-block;}
+  .menu-btn{display:none; background:none; border:1px solid var(--line-on-ink); color:var(--paper); width:40px; height:40px; border-radius:3px; font-size:1.1rem; cursor:pointer; align-items:center; justify-content:center;}
+  @media (max-width:860px){ nav.links{display:none;} .menu-btn{display:flex;} }
+
+  .mobile-menu{
+    position:fixed; inset:0; z-index:60; background:var(--ink); color:var(--paper);
+    display:flex; flex-direction:column; padding:24px 24px calc(24px + env(safe-area-inset-bottom,0px));
+    padding-top:calc(24px + env(safe-area-inset-top,0px));
+    transform:translateX(100%); transition:transform .35s ease; visibility:hidden;
+  }
+  .mobile-menu.open{transform:translateX(0); visibility:visible;}
+  .mobile-menu-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:40px;}
+  .mobile-menu-close{background:none; border:1px solid var(--line-on-ink); color:var(--paper); width:40px; height:40px; border-radius:3px; font-size:1.2rem; cursor:pointer;}
+  .mobile-menu nav{display:flex; flex-direction:column; gap:6px;}
+  .mobile-menu nav a{
+    font-family:var(--font-display); font-size:1.5rem; text-decoration:none; color:var(--paper);
+    padding:14px 0; border-bottom:1px solid var(--line-on-ink);
+  }
+  .mobile-menu .nav-cta{margin-top:auto; text-align:center; padding:16px;}
+
+  /* status ticker — rotates through served countries, grounded in cargo/airline subject */
+  .ticker{background:var(--ink-2); border-bottom:1px solid var(--line-on-ink); padding:11px 0;}
+  .ticker-line{display:flex; align-items:center; justify-content:center; gap:10px;}
+  .ticker-intro{font-size:0.84rem; color:var(--paper-soft); flex:none;}
+  .ticker-rotator{position:relative; height:20px; width:260px; display:flex; align-items:center; justify-content:flex-start;}
+  @media (max-width:480px){ .ticker-line{gap:6px;} .ticker-intro{font-size:0.76rem;} .ticker-rotator{width:auto; flex:1;} }
+  .ticker-item{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:flex-start; gap:9px;
+    opacity:0; transform:translateY(8px); transition:opacity .5s ease, transform .5s ease;
+    font-size:0.84rem; color:var(--ink-soft); white-space:nowrap; letter-spacing:0.01em;
+  }
+  .ticker-item.active{opacity:1; transform:translateY(0);}
+  .ticker-item .flag{font-size:1rem;}
+  .ticker-item b{color:var(--marigold); font-weight:600;}
+  @media (prefers-reduced-motion:reduce){
+    .ticker-item{transition:opacity .3s ease; transform:none;}
+  }
+
+  .hero-visual{display:flex; align-items:center; gap:20px;}
+  .route-svg{flex:1; min-width:0; height:auto;}
+  .hero-flag-display{
+    flex:none; font-size:56px; line-height:1; opacity:0; transform:scale(0.82) translateX(-6px);
+    transition:opacity .6s ease, transform .6s ease;
+    filter:drop-shadow(0 8px 20px rgba(0,0,0,0.4));
+  }
+  .hero-flag-display.show{opacity:1; transform:scale(1) translateX(0);}
+  @media (max-width:640px){ .hero-flag-display{font-size:40px;} .hero-visual{gap:12px;} }
+  @media (prefers-reduced-motion:reduce){ .hero-flag-display{transition:opacity .3s ease; transform:none !important;} }
+  .hero{background:var(--ink); color:var(--paper); padding:74px 0 60px; overflow:hidden; position:relative;}
+  .hero::before{
+    content:""; position:absolute; width:640px; height:640px; border-radius:50%;
+    background:radial-gradient(circle, rgba(232,163,61,0.14), transparent 65%);
+    top:-260px; right:-180px; filter:blur(10px);
+  }
+  .hero-grid{display:grid; grid-template-columns:1.05fr 0.95fr; gap:40px; align-items:center; position:relative;}
+  @media (max-width:900px){ .hero-grid{grid-template-columns:1fr;} }
+  .kicker{color:var(--marigold); font-family:var(--font-display); font-size:0.95rem; font-weight:600; margin-bottom:18px; opacity:0; animation:rise .7s ease forwards .1s;}
+  .hero h1{font-size:clamp(2.4rem, 5vw, 3.6rem); line-height:1.05; opacity:0; animation:rise .7s ease forwards .25s;}
+  .hero h1 em{font-style:normal; color:var(--marigold);}
+  .hero p.lede{margin-top:22px; font-size:1.1rem; color:var(--ink-soft); max-width:46ch; line-height:1.6; opacity:0; animation:rise .7s ease forwards .4s;}
+  .hero-ctas{display:flex; gap:14px; margin-top:34px; flex-wrap:wrap; opacity:0; animation:rise .7s ease forwards .55s;}
+  .trust-badges{display:flex; gap:18px; flex-wrap:wrap; margin-top:26px; opacity:0; animation:rise .7s ease forwards .68s;}
+  .trust-badges span{font-size:0.84rem; color:var(--ink-soft);}
+  @keyframes rise{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
+
+  .btn-primary{background:var(--marigold); color:var(--ink); padding:15px 26px; border-radius:3px; font-weight:600; text-decoration:none; font-size:0.98rem; border:1px solid var(--marigold); display:inline-block; will-change:transform;}
+  .btn-ghost{background:transparent; color:var(--paper); padding:15px 26px; border-radius:3px; font-weight:600; text-decoration:none; font-size:0.98rem; border:1px solid var(--line-on-ink); display:inline-block; will-change:transform;}
+  .magnetic{transition:transform .15s ease-out;}
+
+  .stat-row{display:flex; gap:44px; margin-top:56px; flex-wrap:wrap;}
+
+  /* floating WhatsApp button */
+  .wa-float{
+    position:fixed; right:20px; bottom:calc(20px + env(safe-area-inset-bottom,0px)); z-index:50;
+    width:58px; height:58px; border-radius:50%; background:#25D366; color:#0F1B2D;
+    display:flex; align-items:center; justify-content:center; text-decoration:none;
+    box-shadow:0 8px 24px rgba(0,0,0,0.35); transition:transform .2s ease;
+  }
+  .wa-float:hover{transform:scale(1.08);}
+  .wa-float svg{width:28px; height:28px;}
+  .wa-pulse{
+    position:absolute; inset:0; border-radius:50%; background:#25D366; opacity:0.5;
+    animation:wapulse 2.2s ease-out infinite;
+  }
+  @keyframes wapulse{ 0%{transform:scale(1); opacity:0.45;} 100%{transform:scale(1.8); opacity:0;} }
+  @media (prefers-reduced-motion:reduce){ .wa-pulse{animation:none; display:none;} }
+  .stat b{display:block; font-family:var(--font-display); font-size:2rem; color:var(--paper); font-variant-numeric:tabular-nums;}
+  .stat span{font-size:0.86rem; color:var(--ink-soft);}
+
+  .route-set{opacity:0; transition:opacity .6s ease;}
+  .route-set.active{opacity:1;}
+  .route-path{fill:none; stroke:var(--marigold); stroke-width:2; stroke-dasharray:900; stroke-dashoffset:900;}
+  .route-set.drawn .route-path{animation:draw 1.8s ease forwards;}
+  .route-dot{fill:var(--paper); opacity:0;}
+  .route-set.drawn .route-dot.d1{animation:pop .45s ease forwards .1s;}
+  .route-set.drawn .route-dot.d2{animation:pop .45s ease forwards .8s;}
+  .route-set.drawn .route-dot.d3{animation:pop .45s ease forwards 1.7s;}
+  .route-label{fill:var(--ink-soft); font-family:'Inter',sans-serif; font-size:11px;}
+  .plane-icon{opacity:0;}
+  .route-set.drawn .plane-icon{animation:popfade .4s ease forwards 1.9s;}
+  .route-caption{display:flex; align-items:center; gap:9px; margin-top:18px; height:20px; overflow:hidden;}
+  .route-caption .flag{font-size:1.05rem; opacity:0; transition:opacity .5s ease;}
+  .route-caption .flag.show{opacity:1;}
+  .route-caption span.txt{font-family:var(--font-display); font-size:0.95rem; color:var(--paper); opacity:0; transform:translateY(6px); transition:opacity .5s ease, transform .5s ease;}
+  .route-caption span.txt.show{opacity:1; transform:translateY(0);}
+  @keyframes draw{to{stroke-dashoffset:0;}}
+  @keyframes pop{from{opacity:0; transform:scale(0.5);} to{opacity:1; transform:scale(1);}}
+  @keyframes popfade{ to{opacity:1;} }
+  @media (prefers-reduced-motion:reduce){
+    .route-path{animation:none !important; stroke-dashoffset:0;}
+    .route-dot,.plane-icon{animation:none !important; opacity:1;}
+    .route-set{transition:opacity .3s ease;}
+    .route-caption .flag, .route-caption span.txt{transition:opacity .3s ease; transform:none;}
+    .kicker,.hero h1,.hero p.lede,.hero-ctas,.trust-badges{animation:none; opacity:1;}
+    .ticker-item{transition:opacity .3s ease; transform:none;}
+  }
+
+  section{padding:84px 0;}
+  .section-head{max-width:640px; margin-bottom:48px;}
+  .section-head h2{font-size:clamp(1.7rem,3vw,2.3rem);}
+  .section-head p{margin-top:14px; font-size:1.02rem; color:var(--ink-soft); line-height:1.6;}
+
+  /* reveal-on-scroll: montée douce (sans clip-path, qui bloquait l'affichage sur Chrome/Edge ordinateur) */
+  .reveal{opacity:1;}
+  .reveal.armed{opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .8s cubic-bezier(.2,.7,.2,1);}
+  .reveal.armed.in{opacity:1; transform:none;}
+  @media (prefers-reduced-motion:reduce){ .reveal.armed{opacity:1; transform:none; transition:none;} }
+
+  .services-list{border-top:1px solid var(--line-on-paper);}
+  .service-row{display:grid; grid-template-columns:220px 1fr; gap:24px; padding:28px 0; border-bottom:1px solid var(--line-on-paper); align-items:baseline; transition:padding-left .3s ease, background .3s ease;}
+  .service-row:hover{padding-left:14px; background:rgba(201,96,60,0.04);}
+  @media (max-width:700px){ .service-row{grid-template-columns:1fr;} }
+  .service-row h3{font-size:1.2rem; display:flex; align-items:center; gap:10px;}
+  .service-row h3::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--clay); flex:none; transition:transform .3s;}
+  .service-row:hover h3::before{transform:scale(1.6);}
+  .service-row p{color:var(--ink-soft); font-size:0.98rem; max-width:56ch;}
+
+  .process{background:var(--ink); color:var(--paper);}
+  .process .section-head p{color:var(--ink-soft);}
+  .process-line{position:relative; margin-top:20px;}
+  .process-line::before{content:""; position:absolute; left:19px; top:8px; bottom:8px; width:1px; background:var(--line-on-ink);}
+  @media (max-width:700px){ .process-line::before{left:15px;} }
+  .p-step{display:grid; grid-template-columns:40px 1fr; gap:22px; padding:26px 0; position:relative;}
+  @media (max-width:700px){ .p-step{grid-template-columns:32px 1fr;} }
+  .p-num{width:40px; height:40px; border-radius:50%; background:var(--ink); border:1px solid var(--marigold); color:var(--marigold); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:600; z-index:1; transition:background .3s,color .3s;}
+  @media (max-width:700px){ .p-num{width:32px; height:32px; font-size:0.85rem;} }
+  .p-step.in .p-num{background:var(--marigold); color:var(--ink);}
+  .p-step h3{font-size:1.1rem; margin-bottom:6px;} .p-step p{color:var(--ink-soft); font-size:0.96rem; max-width:52ch;}
+
+  .dest-groups{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:0; border-top:1px solid var(--line-on-paper); border-left:1px solid var(--line-on-paper);}
+  .dest-group{padding:26px; border-right:1px solid var(--line-on-paper); border-bottom:1px solid var(--line-on-paper); transition:background .3s;}
+  .dest-group:hover{background:rgba(232,163,61,0.06);}
+  .dest-group h3{font-size:0.98rem; color:var(--clay); margin-bottom:12px; font-weight:600;}
+  .dest-group ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+  .dest-group li{font-size:0.98rem;}
+
+  .pricing{background:var(--ink); color:var(--paper);}
+  .price-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-on-ink); border:1px solid var(--line-on-ink);}
+  @media (max-width:860px){ .price-grid{grid-template-columns:1fr;} }
+
+  .calc-box{background:var(--ink-2); border:1px solid var(--line-on-ink); padding:28px 30px; margin-bottom:44px; border-radius:4px;}
+  .calc-row{display:grid; grid-template-columns:1.4fr 1fr; gap:28px; align-items:end;}
+  @media (max-width:700px){ .calc-row{grid-template-columns:1fr;} }
+  .calc-field label{display:block; font-size:0.85rem; color:var(--ink-soft); margin-bottom:10px;}
+  .calc-input-wrap{display:flex; align-items:center; gap:14px;}
+  .calc-input-wrap input[type="range"]{
+    flex:1; accent-color:var(--marigold); height:4px; background:transparent; cursor:pointer;
+  }
+  .calc-value{font-family:var(--font-display); color:var(--marigold); font-weight:600; min-width:56px; text-align:right;}
+  .calc-field select{width:100%; background:var(--ink); border:1px solid var(--line-on-ink); color:var(--paper); padding:13px 14px; border-radius:3px; font-family:var(--font-body); font-size:0.95rem;}
+  .calc-result{
+    display:flex; align-items:baseline; gap:14px; margin-top:26px; padding-top:22px;
+    border-top:1px solid var(--line-on-ink); flex-wrap:wrap;
+  }
+  .calc-result span{font-size:0.86rem; color:var(--ink-soft);}
+  .calc-result b{font-family:var(--font-display); font-size:1.8rem; color:var(--paper); font-variant-numeric:tabular-nums;}
+  .calc-result small{width:100%; font-size:0.78rem; color:var(--paper-soft);}
+  .price-card{background:var(--ink); padding:34px 30px; position:relative; overflow:hidden;}
+  .price-card.featured{background:var(--ink-2);}
+  .price-card::before{
+    content:""; position:absolute; inset:0; opacity:0; transition:opacity .3s;
+    background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%), rgba(232,163,61,0.12), transparent 60%);
+  }
+  .price-card:hover::before{opacity:1;}
+  .price-tag{position:absolute; top:0; right:0; background:var(--marigold); color:var(--ink); font-size:0.76rem; font-weight:600; padding:5px 12px; z-index:1;}
+  .price-card h3{font-size:1.05rem; color:var(--ink-soft); font-weight:500; margin-bottom:4px; position:relative;}
+  .price-card .amount{font-family:var(--font-display); font-size:2.1rem; color:var(--paper); margin:10px 0 22px; position:relative;}
+  .price-card .amount sub{font-size:0.9rem; color:var(--ink-soft); font-family:var(--font-body);}
+  .price-card ul{list-style:none; margin:0 0 28px; padding:0; display:flex; flex-direction:column; gap:11px; position:relative;}
+  .price-card li{font-size:0.92rem; color:var(--ink-soft); padding-left:18px; position:relative;}
+  .price-card li::before{content:"—"; position:absolute; left:0; color:var(--marigold);}
+  .price-card .btn-primary, .price-card .btn-ghost{display:inline-block; width:100%; text-align:center; padding:13px 20px; font-size:0.92rem; position:relative;}
+
+  .quotes{display:grid; grid-template-columns:repeat(3,1fr); gap:36px;}
+  @media (max-width:860px){ .quotes{grid-template-columns:1fr;} }
+  .quote{border-top:2px solid var(--clay); padding-top:20px; transition:transform .3s;}
+  .quote:hover{transform:translateY(-4px);}
+  .quote p.txt{font-size:1.02rem; line-height:1.6;}
+  .quote .who{display:flex; align-items:center; gap:12px; margin-top:20px;}
+  .quote .avatar{width:38px; height:38px; border-radius:50%; background:var(--ink); color:var(--paper); font-family:var(--font-display); font-size:0.82rem; display:flex; align-items:center; justify-content:center; font-weight:600;}
+  .quote .who b{display:block; font-size:0.92rem;} .quote .who span{font-size:0.82rem; color:var(--ink-soft);}
+
+  .contact{background:var(--ink); color:var(--paper);}
+  .contact-grid{display:grid; grid-template-columns:1fr 1fr; gap:56px;}
+  @media (max-width:860px){ .contact-grid{grid-template-columns:1fr;} }
+  .contact h2{font-size:clamp(1.7rem,3vw,2.3rem); max-width:14ch; margin-bottom:16px;}
+  .contact p.lede{color:var(--ink-soft); max-width:42ch; margin-bottom:32px;}
+  .contact-detail{display:flex; gap:14px; padding:16px 0; border-top:1px solid var(--line-on-ink);}
+  .contact-detail:last-child{border-bottom:1px solid var(--line-on-ink);}
+  .contact-detail b{display:block; font-size:0.88rem; color:var(--ink-soft); font-weight:500;}
+  .contact-detail a, .contact-detail span.val{font-size:1.02rem; text-decoration:none;}
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-size:0.85rem; color:var(--ink-soft); margin-bottom:7px;}
+  .field select, .field input{width:100%; background:var(--ink-2); border:1px solid var(--line-on-ink); color:var(--paper); padding:13px 14px; border-radius:3px; font-family:var(--font-body); font-size:0.96rem; transition:border-color .2s;}
+  .field select:focus, .field input:focus{outline:none; border-color:var(--marigold);}
+  form .btn-primary{width:100%; text-align:center; border:none; cursor:pointer; margin-top:8px; font-size:1rem; padding:16px;}
+
+  footer{background:var(--ink); border-top:1px solid var(--line-on-ink); padding:50px 0 30px; color:var(--paper);}
+  .foot-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:32px; padding-bottom:36px;}
+  @media (max-width:700px){ .foot-grid{grid-template-columns:1fr 1fr;} }
+  .foot-brand p{color:var(--ink-soft); font-size:0.92rem; margin-top:14px; max-width:32ch; line-height:1.6;}
+  footer h4{font-size:0.86rem; color:var(--ink-soft); font-weight:500; margin-bottom:14px;}
+  footer ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;}
+  footer a{text-decoration:none; font-size:0.92rem; color:var(--paper); opacity:0.85; transition:opacity .2s;}
+  footer a:hover{opacity:1; color:var(--marigold);}
+  .foot-bottom{border-top:1px solid var(--line-on-ink); padding-top:22px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:0.82rem; color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<div class="journey-bar"><div class="journey-fill" id="journeyFill"></div></div>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">MBC <span>Cargo</span></a>
+    <nav class="links">
+      <a href="#services">Services</a>
+      <a href="#how">Processus</a>
+      <a href="#destinations">Destinations</a>
+      <a href="#tarifs">Tarifs</a>
+      <a href="https://mbccargo.com/suivi.html">Suivi de colis</a>
+    </nav>
+    <a class="nav-cta magnetic" href="#contact">Devis gratuit</a>
+    <button class="menu-btn" id="menuBtn" aria-label="Ouvrir le menu" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-top">
+    <a class="brand" href="#top">MBC <span>Cargo</span></a>
+    <button class="mobile-menu-close" id="menuClose" aria-label="Fermer le menu">✕</button>
+  </div>
+  <nav>
+    <a href="#services">Services</a>
+    <a href="#how">Processus</a>
+    <a href="#destinations">Destinations</a>
+    <a href="#tarifs">Tarifs</a>
+    <a href="https://mbccargo.com/suivi.html">Suivi de colis</a>
+  </nav>
+  <a class="nav-cta" href="#contact">Devis gratuit</a>
+</div>
+<div class="ticker">
+  <div class="wrap">
+    <div class="ticker-line">
+      <span class="ticker-intro">Nous desservons</span>
+      <div class="ticker-rotator" id="tickerRotator">
+        <span class="ticker-item active"><span class="flag">🇧🇫</span> <b>Burkina Faso</b> — Ouagadougou, Bobo-Dioulasso</span>
+        <span class="ticker-item"><span class="flag">🇸🇳</span> <b>Sénégal</b> — Dakar</span>
+        <span class="ticker-item"><span class="flag">🇨🇮</span> <b>Côte d'Ivoire</b> — Abidjan</span>
+        <span class="ticker-item"><span class="flag">🇲🇱</span> <b>Mali</b> — Bamako</span>
+        <span class="ticker-item"><span class="flag">🇳🇪</span> <b>Niger</b> — Niamey</span>
+        <span class="ticker-item"><span class="flag">🇹🇬</span> <b>Togo</b> — Lomé</span>
+        <span class="ticker-item"><span class="flag">🇬🇭</span> <b>Ghana</b> — Accra</span>
+        <span class="ticker-item"><span class="flag">🇧🇯</span> <b>Bénin</b> — Cotonou</span>
+        <span class="ticker-item"><span class="flag">🇨🇲</span> <b>Cameroun</b> — Douala</span>
+        <span class="ticker-item"><span class="flag">🇬🇳</span> <b>Guinée</b> — Conakry</span>
+        <span class="ticker-item"><span class="flag">🇲🇷</span> <b>Mauritanie</b> — Nouakchott</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="kicker">Du Canada à vos côtés en Afrique — votre cargaison, notre priorité</div>
+      <h1>Votre colis part d'ici,<br>votre famille le reçoit <em>là-bas</em>.</h1>
+      <p class="lede">MBC Cargo expédie colis et véhicules entre le Canada et l'Afrique de l'Ouest depuis plus de 8 ans — dédouanement géré, suivi en direct sur WhatsApp, sans surprise sur le prix.</p>
+      <div class="hero-ctas">
+        <a class="btn-primary magnetic" href="#contact">Expédier maintenant</a>
+        <a class="btn-ghost magnetic" href="#how">Comment ça marche</a>
+      </div>
+      <div class="trust-badges">
+        <span>🛡 Envois assurés</span>
+        <span>✅ Dédouanement certifié</span>
+        <span>💬 Réponse sous 2h</span>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><b data-count="8" data-suffix="+">0</b><span>années d'expérience</span></div>
+        <div class="stat"><b data-count="2400" data-suffix="+">0</b><span>clients satisfaits</span></div>
+        <div class="stat"><b data-count="12" data-suffix="">0</b><span>pays desservis</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="hero-visual">
+      <svg class="route-svg" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg">
+        <g class="route-set" data-flag="🇧🇫" data-country="Burkina Faso" data-city="Ouagadougou">
+          <path class="route-path" d="M60,80 Q 90,230 200,260 T 340,330"/>
+          <circle class="route-dot d1" cx="60" cy="80" r="6"/>
+          <text class="route-label" x="72" y="76">Montréal</text>
+          <circle class="route-dot d2" cx="150" cy="230" r="4"/>
+          <text class="route-label" x="160" y="228">Atlantique</text>
+          <circle class="route-dot d3" cx="340" cy="330" r="6"/>
+          <text class="route-label" x="285" y="352">Ouagadougou</text>
+          <text class="plane-icon" x="330" y="322" font-size="16" fill="#E8A33D">✈</text>
+        </g>
+        <g class="route-set" data-flag="🇸🇳" data-country="Sénégal" data-city="Dakar">
+          <path class="route-path" d="M60,80 Q 80,220 180,250 T 300,290"/>
+          <circle class="route-dot d1" cx="60" cy="80" r="6"/>
+          <text class="route-label" x="72" y="76">Montréal</text>
+          <circle class="route-dot d2" cx="150" cy="225" r="4"/>
+          <text class="route-label" x="160" y="223">Atlantique</text>
+          <circle class="route-dot d3" cx="300" cy="290" r="6"/>
+          <text class="route-label" x="250" y="312">Dakar</text>
+          <text class="plane-icon" x="290" y="282" font-size="16" fill="#E8A33D">✈</text>
+        </g>
+        <g class="route-set" data-flag="🇨🇮" data-country="Côte d'Ivoire" data-city="Abidjan">
+          <path class="route-path" d="M60,80 Q 100,240 210,275 T 350,350"/>
+          <circle class="route-dot d1" cx="60" cy="80" r="6"/>
+          <text class="route-label" x="72" y="76">Montréal</text>
+          <circle class="route-dot d2" cx="160" cy="235" r="4"/>
+          <text class="route-label" x="170" y="233">Atlantique</text>
+          <circle class="route-dot d3" cx="350" cy="350" r="6"/>
+          <text class="route-label" x="292" y="372">Abidjan</text>
+          <text class="plane-icon" x="340" y="342" font-size="16" fill="#E8A33D">✈</text>
+        </g>
+        <g class="route-set" data-flag="🇲🇱" data-country="Mali" data-city="Bamako">
+          <path class="route-path" d="M60,80 Q 85,225 190,255 T 310,270"/>
+          <circle class="route-dot d1" cx="60" cy="80" r="6"/>
+          <text class="route-label" x="72" y="76">Montréal</text>
+          <circle class="route-dot d2" cx="150" cy="220" r="4"/>
+          <text class="route-label" x="160" y="218">Atlantique</text>
+          <circle class="route-dot d3" cx="310" cy="270" r="6"/>
+          <text class="route-label" x="258" y="292">Bamako</text>
+          <text class="plane-icon" x="300" y="262" font-size="16" fill="#E8A33D">✈</text>
+        </g>
+      </svg>
+      <span class="hero-flag-display" id="heroFlagBig">🇧🇫</span>
+      </div>
+      <div class="route-caption" id="routeCaption">
+        <span class="flag">🇧🇫</span><span class="txt">Burkina Faso — Ouagadougou</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="wrap">
+    <div class="section-head reveal"><h2>Ce qu'on transporte pour vous</h2>
+      <p>De l'enveloppe au conteneur, du colis au véhicule — chaque envoi traité avec la même rigueur, du dépôt à Montréal jusqu'à la remise en main propre.</p>
+    </div>
+    <div class="services-list">
+      <div class="service-row reveal"><h3>Fret aérien</h3><p>Livraison en 5 à 8 jours pour les envois urgents ou les marchandises de valeur. Suivi en temps réel à chaque étape.</p></div>
+      <div class="service-row reveal"><h3>Fret maritime</h3><p>La solution économique pour les grands volumes — comptez 35 à 60 jours, avec le même suivi complet que le fret aérien.</p></div>
+      <div class="service-row reveal"><h3>Expédition de véhicules</h3><p>Voiture, moto ou utilitaire, envoyés en conteneur sécurisé depuis le Canada, documentation et dédouanement inclus.</p></div>
+      <div class="service-row reveal"><h3>Formalités douanières</h3><p>Gestion complète au Burkina Faso, Sénégal, Côte d'Ivoire et partout ailleurs en Afrique de l'Ouest — vous n'avez rien à faire.</p></div>
+      <div class="service-row reveal"><h3>Service diaspora</h3><p>Conseil personnalisé en français, disponible 7j/7 sur WhatsApp. Pensé pour la communauté africaine du Canada.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="process" id="how">
+  <div class="wrap">
+    <div class="section-head reveal"><h2>4 étapes, zéro stress</h2><p>Simple et transparent, de chez vous jusqu'à votre destinataire.</p></div>
+    <div class="process-line">
+      <div class="p-step reveal"><div class="p-num">1</div><div><h3>Contactez-nous</h3><p>WhatsApp, appel ou formulaire — devis gratuit en moins de 2 heures.</p></div></div>
+      <div class="p-step reveal"><div class="p-num">2</div><div><h3>Déposez votre colis</h3><p>Au bureau de Montréal ou par enlèvement à domicile — on s'adapte à votre horaire.</p></div></div>
+      <div class="p-step reveal"><div class="p-num">3</div><div><h3>Suivez en direct</h3><p>Mises à jour régulières par WhatsApp, à chaque étape du trajet.</p></div></div>
+      <div class="p-step reveal"><div class="p-num">4</div><div><h3>Livraison confirmée</h3><p>Notification dès la remise à votre destinataire — vous êtes rassuré en même temps que lui.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="destinations">
+  <div class="wrap">
+    <div class="section-head reveal"><h2>L'Afrique de l'Ouest, notre terrain</h2><p>12 pays desservis, avec des partenaires locaux de confiance sur le terrain.</p></div>
+    <div class="dest-groups reveal">
+      <div class="dest-group"><h3>Burkina Faso</h3><ul><li>Ouagadougou</li><li>Bobo-Dioulasso</li></ul></div>
+      <div class="dest-group"><h3>Sénégal</h3><ul><li>Dakar</li></ul></div>
+      <div class="dest-group"><h3>Côte d'Ivoire</h3><ul><li>Abidjan</li></ul></div>
+      <div class="dest-group"><h3>Mali</h3><ul><li>Bamako</li></ul></div>
+      <div class="dest-group"><h3>Niger</h3><ul><li>Niamey</li></ul></div>
+      <div class="dest-group"><h3>Togo</h3><ul><li>Lomé</li></ul></div>
+      <div class="dest-group"><h3>Ghana</h3><ul><li>Accra</li></ul></div>
+      <div class="dest-group"><h3>Bénin</h3><ul><li>Cotonou</li></ul></div>
+      <div class="dest-group"><h3>Cameroun</h3><ul><li>Douala</li></ul></div>
+      <div class="dest-group"><h3>Guinée</h3><ul><li>Conakry</li></ul></div>
+      <div class="dest-group"><h3>Mauritanie</h3><ul><li>Nouakchott</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="tarifs">
+  <div class="wrap">
+    <div class="section-head reveal"><h2>Prix clairs, zéro surprise</h2><p>Manutention, suivi WhatsApp et assistance douanière de base inclus dans tous nos tarifs.</p></div>
+
+    <div class="calc-box reveal">
+      <div class="calc-row">
+        <div class="calc-field" id="calcAmountField">
+          <label for="calcAmount" id="calcAmountLabel">Poids estimé du colis</label>
+          <div class="calc-input-wrap">
+            <input type="range" id="calcAmount" min="1" max="100" value="10" step="1">
+            <span class="calc-value" id="calcAmountVal">10 kg</span>
+          </div>
+        </div>
+        <div class="calc-field">
+          <label for="calcMode">Mode d'envoi</label>
+          <select id="calcMode">
+            <option value="maritime">Fret maritime — 400$/CBM</option>
+            <option value="aerien">Fret aérien — 18$/kg</option>
+            <option value="vehicule">Véhicule — dès 3 500$ (Burkina Faso)</option>
+          </select>
+        </div>
+      </div>
+      <div class="calc-result">
+        <span>Estimation</span>
+        <b id="calcTotal">400 $</b>
+        <small id="calcNote">Prix indicatif — devis final confirmé par nos équipes</small>
+      </div>
+    </div>
+
+    <div class="price-grid reveal">
+      <div class="price-card">
+        <h3>Colis — Fret maritime</h3><div class="amount">400$<sub>/CBM, à partir de</sub></div>
+        <ul><li>Délai 35 à 45 jours (jusqu'à 60)</li><li>Suivi WhatsApp inclus</li><li>Assistance douanière</li><li>Idéal grands volumes</li></ul>
+        <a class="btn-ghost magnetic" href="#contact">Obtenir un devis</a>
+      </div>
+      <div class="price-card featured">
+        <span class="price-tag">Populaire</span>
+        <h3>Colis urgent — Fret aérien</h3><div class="amount">18$<sub>/kg, à partir de</sub></div>
+        <ul><li>Livraison en 5 à 8 jours</li><li>Suivi en temps réel</li><li>Priorité de traitement</li><li>Assurance incluse</li></ul>
+        <a class="btn-primary magnetic" href="#contact">Expédier maintenant</a>
+      </div>
+      <div class="price-card">
+        <h3>Véhicule — Transport auto</h3><div class="amount">3 500$<sub>CAD, à partir de — Burkina Faso</sub></div>
+        <ul><li>Conteneur sécurisé</li><li>Documentation complète</li><li>Dédouanement inclus</li><li>Assurance tous risques</li><li>Tarif variable selon le pays de destination</li></ul>
+        <a class="btn-ghost magnetic" href="#contact">Obtenir un devis</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head reveal"><h2>Ils nous font confiance</h2></div>
+    <div class="quotes reveal">
+      <div class="quote"><p class="txt">« J'envoie des colis à ma famille à Ouaga depuis 4 ans avec MBC. Jamais de problème, toujours dans les délais. »</p><div class="who"><div class="avatar">SK</div><div><b>Seydou Kaboré</b><span>Montréal, QC</span></div></div></div>
+      <div class="quote"><p class="txt">« MBC m'a aidé à envoyer ma voiture au Sénégal. Tout le dédouanement était géré — zéro stress. »</p><div class="who"><div class="avatar">FD</div><div><b>Fatou Diallo</b><span>Laval, QC</span></div></div></div>
+      <div class="quote"><p class="txt">« J'importe des marchandises de Côte d'Ivoire régulièrement. Rapport qualité-prix imbattable. »</p><div class="who"><div class="avatar">MT</div><div><b>Moussa Traoré</b><span>Toronto, ON</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="wrap contact-grid">
+    <div class="reveal">
+      <h2>Prêt à expédier vers l'Afrique ?</h2>
+      <p class="lede">Devis gratuit en moins de 2 heures. Remplissez le formulaire ou contactez-nous directement.</p>
+      <div class="contact-detail"><div><b>WhatsApp — 7j/7</b><a href="tel:+14188129289">+1 (418) 812-9289</a></div></div>
+      <div class="contact-detail"><div><b>Email</b><a href="mailto:mbccargo.service@gmail.com">mbccargo.service@gmail.com</a></div></div>
+      <div class="contact-detail"><div><b>Bureau</b><span class="val">Montréal, Québec, Canada</span></div></div>
+    </div>
+    <div class="reveal">
+      <form id="quoteForm">
+        <div class="field"><label for="type">Type d'envoi</label>
+          <select id="type"><option>Colis — Fret aérien</option><option>Colis — Fret maritime</option><option>Véhicule</option><option>Conteneur / grand volume</option></select>
+        </div>
+        <div class="field"><label for="dest">Destination</label>
+          <select id="dest"><option>Ouagadougou, Burkina Faso</option><option>Bobo-Dioulasso, Burkina Faso</option><option>Dakar, Sénégal</option><option>Abidjan, Côte d'Ivoire</option><option>Bamako, Mali</option><option>Autre</option></select>
+        </div>
+        <div class="field"><label for="name">Nom complet</label><input id="name" type="text" placeholder="Votre nom"></div>
+        <div class="field"><label for="phone">Téléphone ou WhatsApp</label><input id="phone" type="tel" placeholder="+1 ..."></div>
+        <button class="btn-primary magnetic" type="submit">Demander mon devis gratuit</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand"><a class="brand" href="#top">MBC <span>Cargo</span></a><p>Spécialiste de l'expédition de colis et véhicules entre le Canada et l'Afrique de l'Ouest depuis plus de 8 ans.</p></div>
+      <div><h4>Services</h4><ul><li><a href="#services">Fret aérien</a></li><li><a href="#services">Fret maritime</a></li><li><a href="#services">Véhicules</a></li><li><a href="https://mbccargo.com/suivi.html">Suivi colis</a></li></ul></div>
+      <div><h4>Destinations</h4><ul><li><a href="#destinations">Burkina Faso</a></li><li><a href="#destinations">Sénégal</a></li><li><a href="#destinations">Côte d'Ivoire</a></li><li><a href="#destinations">Mali</a></li></ul></div>
+      <div><h4>Infos</h4><ul><li><a href="#tarifs">Tarifs</a></li><li><a href="#contact">Contact</a></li><li><a href="https://mbccargo.com/formulaire.html">Enregistrer un envoi</a></li></ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 MBC Cargo Inc. Tous droits réservés. Montréal, Canada.</span><span>Confidentialité · Conditions</span></div>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/14188129289?text=Bonjour%2C%20je%20souhaite%20un%20devis%20pour%20un%20envoi." target="_blank" rel="noopener" aria-label="Contacter MBC Cargo sur WhatsApp">
+  <span class="wa-pulse"></span>
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.1c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.79-4.17-4.94-4.37-.15-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.2 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.83 2 .9 2.14.07.15.11.32.02.52-.09.2-.14.32-.27.49-.14.17-.29.38-.41.5-.14.14-.28.29-.12.57.16.29.72 1.19 1.54 1.93 1.06.95 1.95 1.24 2.24 1.38.29.14.46.12.63-.07.17-.2.72-.84.91-1.12.2-.29.39-.24.66-.14.27.1 1.7.8 1.99.94.29.15.48.22.55.34.07.13.07.72-.17 1.4Z"/></svg>
+</a>
+
+<script>
+(function(){
+  function safe(fn){ try { fn(); } catch (e) { if (window.console) console.error(e); } }
+
+  safe(function(){
+    // price calculator
+    var calcAmount = document.getElementById('calcAmount');
+    var calcAmountVal = document.getElementById('calcAmountVal');
+    var calcAmountLabel = document.getElementById('calcAmountLabel');
+    var calcAmountField = document.getElementById('calcAmountField');
+    var calcMode = document.getElementById('calcMode');
+    var calcTotal = document.getElementById('calcTotal');
+    var calcNote = document.getElementById('calcNote');
+
+    function applyModeDefaults(mode){
+      if (mode === 'maritime') {
+        calcAmount.min = 0.1; calcAmount.max = 15; calcAmount.step = 0.1; calcAmount.value = 1;
+        calcAmountLabel.textContent = 'Volume estimé du colis';
+      } else if (mode === 'aerien') {
+        calcAmount.min = 1; calcAmount.max = 100; calcAmount.step = 1; calcAmount.value = 10;
+        calcAmountLabel.textContent = 'Poids estimé du colis';
+      }
+    }
+
+    function updateCalc(){
+      if (!calcAmount) return;
+      var mode = calcMode.value;
+      if (mode === 'vehicule') {
+        calcAmountField.style.display = 'none';
+        calcTotal.textContent = 'dès 3 500 $';
+        calcNote.textContent = 'Tarif de base pour le Burkina Faso — le prix varie selon le pays de destination. Devis final confirmé par nos équipes.';
+      } else {
+        calcAmountField.style.display = '';
+        var val = parseFloat(calcAmount.value);
+        var rate = mode === 'maritime' ? 400 : 18;
+        var unit = mode === 'maritime' ? 'CBM' : 'kg';
+        calcAmountVal.textContent = (mode === 'maritime' ? val.toFixed(1) : val) + ' ' + unit;
+        calcTotal.textContent = Math.round(val * rate).toLocaleString('fr-CA') + ' $';
+        calcNote.textContent = 'Prix indicatif — devis final confirmé par nos équipes.';
+      }
+    }
+    if (calcAmount) {
+      applyModeDefaults(calcMode.value);
+      calcAmount.addEventListener('input', updateCalc);
+      calcMode.addEventListener('change', function(){
+        applyModeDefaults(calcMode.value);
+        updateCalc();
+      });
+      updateCalc();
+    }
+  });
+
+  safe(function(){
+    // contact form -> pre-filled WhatsApp message
+    var quoteForm = document.getElementById('quoteForm');
+    if (quoteForm) {
+      quoteForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        var type = document.getElementById('type').value;
+        var dest = document.getElementById('dest').value;
+        var name = document.getElementById('name').value.trim();
+        var phone = document.getElementById('phone').value.trim();
+        var msg = 'Bonjour, je souhaite un devis.\n'
+          + 'Type d\'envoi : ' + type + '\n'
+          + 'Destination : ' + dest + '\n'
+          + (name ? 'Nom : ' + name + '\n' : '')
+          + (phone ? 'Téléphone : ' + phone : '');
+        window.open('https://wa.me/14188129289?text=' + encodeURIComponent(msg), '_blank');
+      });
+    }
+  });
+
+  safe(function(){
+    // mobile menu
+    var menuBtn = document.getElementById('menuBtn');
+    var menuClose = document.getElementById('menuClose');
+    var mobileMenu = document.getElementById('mobileMenu');
+    function openMenu(){ mobileMenu.classList.add('open'); menuBtn.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
+    function closeMenu(){ mobileMenu.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
+    menuBtn.addEventListener('click', openMenu);
+    menuClose.addEventListener('click', closeMenu);
+    mobileMenu.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeMenu); });
+  });
+
+  safe(function(){
+    // ticker: rotate through served countries
+    var tickerItems = document.querySelectorAll('#tickerRotator .ticker-item');
+    if (tickerItems.length) {
+      var tickerIndex = 0;
+      setInterval(function(){
+        tickerItems[tickerIndex].classList.remove('active');
+        tickerIndex = (tickerIndex + 1) % tickerItems.length;
+        tickerItems[tickerIndex].classList.add('active');
+      }, 2600);
+    }
+  });
+
+  safe(function(){
+    // hero route map: cycle through destination countries/cities
+    var routeSets = document.querySelectorAll('.route-set');
+    var captionFlag = document.querySelector('#routeCaption .flag');
+    var captionTxt = document.querySelector('#routeCaption .txt');
+    var heroFlagBig = document.getElementById('heroFlagBig');
+    if (routeSets.length) {
+      var routeIndex = 0;
+      function showRoute(i){
+        routeSets.forEach(function(s, j){
+          if (j === i) {
+            s.classList.add('active');
+            void s.offsetWidth;
+            s.classList.add('drawn');
+          } else {
+            s.classList.remove('active');
+            s.classList.remove('drawn');
+          }
+        });
+        if (captionTxt) {
+          captionTxt.classList.remove('show');
+          captionFlag.classList.remove('show');
+        }
+        if (heroFlagBig) heroFlagBig.classList.remove('show');
+        setTimeout(function(){
+          var flag = routeSets[i].getAttribute('data-flag');
+          if (captionTxt) {
+            captionFlag.textContent = flag;
+            captionTxt.textContent = routeSets[i].getAttribute('data-country') + ' — ' + routeSets[i].getAttribute('data-city');
+            captionFlag.classList.add('show');
+            captionTxt.classList.add('show');
+          }
+          if (heroFlagBig) {
+            heroFlagBig.textContent = flag;
+            heroFlagBig.classList.add('show');
+          }
+        }, 300);
+      }
+      showRoute(0);
+      setInterval(function(){
+        routeIndex = (routeIndex + 1) % routeSets.length;
+        showRoute(routeIndex);
+      }, 4800);
+    }
+  });
+
+  safe(function(){
+    // journey progress bar
+    var fill = document.getElementById('journeyFill');
+    function onScroll(){
+      var h = document.documentElement;
+      var scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      fill.style.width = scrolled + '%';
+    }
+    document.addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+  });
+
+  safe(function(){
+    // cursor glow, magnetic buttons, price card spotlight — desktop only
+    if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
+      var glow = document.getElementById('cursorGlow');
+      document.addEventListener('mousemove', function(e){
+        glow.style.opacity = 1;
+        glow.style.left = e.clientX + 'px';
+        glow.style.top = e.clientY + 'px';
+      });
+      document.addEventListener('mouseleave', function(){ glow.style.opacity = 0; });
+
+      document.querySelectorAll('.magnetic').forEach(function(btn){
+        btn.addEventListener('mousemove', function(e){
+          var r = btn.getBoundingClientRect();
+          var x = e.clientX - r.left - r.width/2;
+          var y = e.clientY - r.top - r.height/2;
+          btn.style.transform = 'translate(' + (x*0.25) + 'px,' + (y*0.35) + 'px)';
+        });
+        btn.addEventListener('mouseleave', function(){ btn.style.transform = 'translate(0,0)'; });
+      });
+
+      document.querySelectorAll('.price-card').forEach(function(card){
+        card.addEventListener('mousemove', function(e){
+          var r = card.getBoundingClientRect();
+          card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+          card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+      });
+    }
+  });
+
+  safe(function(){
+    // scroll reveal
+    var revealEls = document.querySelectorAll('.reveal');
+    // Navigateur trop ancien : on affiche tout directement
+    if (!('IntersectionObserver' in window)) return;
+    revealEls.forEach(function(el){ el.classList.add('armed'); });
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0, rootMargin:'0px 0px -8% 0px'});
+    revealEls.forEach(function(el){ io.observe(el); });
+    // Filet de sécurité : jamais de section invisible plus de 4 secondes après un défilement
+    var t;
+    window.addEventListener('scroll', function(){
+      clearTimeout(t);
+      t = setTimeout(function(){
+        revealEls.forEach(function(el){
+          if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('in');
+        });
+      }, 400);
+    }, {passive:true});
+  });
+
+  safe(function(){
+    // process step highlight
+    var steps = document.querySelectorAll('.p-step');
+    var io2 = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) entry.target.classList.add('in');
+      });
+    }, {threshold:0.5});
+    steps.forEach(function(el){ io2.observe(el); });
+  });
+
+  safe(function(){
+    // animated counters
+    var counters = document.querySelectorAll('[data-count]');
+    var io3 = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        io3.unobserve(entry.target);
+        var el = entry.target;
+        var target = parseInt(el.getAttribute('data-count'), 10);
+        var suffix = el.getAttribute('data-suffix') || '';
+        var start = null;
+        var dur = 1400;
+        function step(ts){
+          if (!start) start = ts;
+          var progress = Math.min((ts - start) / dur, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          var val = Math.floor(eased * target);
+          el.textContent = val.toLocaleString('fr-CA') + suffix;
+          if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      });
+    }, {threshold:0.6});
+    counters.forEach(function(el){ io3.observe(el); });
+  });
+})();
+</script>
+<script>
+// Nettoyage : retire les anciens service workers enregistrés à la racine du site
+// (ils servaient des versions périmées des pages sur ordinateur)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(r){
+      if (r.scope === location.origin + '/') r.unregister();
+    });
+  }).catch(function(){});
+}
+</script>
+</body>
+</html>
