@@ -667,10 +667,10 @@ function arrivalMessage(s){
   const firstName = client ? client.name.trim().split(/\s+/)[0] : "";
   const cfg = shopSettings();
   return `Bonjour ${firstName} 👋\n\n`
-    + `Merci d'avoir fait confiance à MBC Cargo ! 🙏\n\n`
     + `Bonne nouvelle : votre colis ${s.trackingNumber} est arrivé et vous attend actuellement à notre boutique de ${cfg.shopArea}, à Ouagadougou. 📦\n\n`
+    + `Merci d'avoir fait confiance à MBC Cargo ! 🙏\n\n`
     + (cfg.mapsLink ? `📍 Localisation : ${cfg.mapsLink}\n\n` : "")
-    + (cfg.helpPhone ? `Si vous rencontrez un problème pour nous trouver, appelez le ${cfg.helpPhone}, on vous guidera.\n\n` : "")
+    + (cfg.helpPhone ? `Si vous rencontrez un problème pour nous trouver ou si vous souhaitez vous faire livrer, appelez le ${cfg.helpPhone}, on vous guidera.\n\n` : "")
     + `À très bientôt !\nL'équipe MBC Cargo`;
 }
 
