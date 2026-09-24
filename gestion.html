@@ -238,7 +238,17 @@
    Stockage : Google Sheets via Apps Script — voir APPS_SCRIPT_URL ci-dessous
    ============================================================ */
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyO2JnmKlU_54uSan-T54-FwbFvGaa27FONpbMQ5MZCAHbnVU0whF7nxFYaB_C3v8fu/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9L5c9zw3Icw1nfEO8_ExV_27mB-YpNMj6A0ODfVI6Cdx8KdxwIpsK8jkKhCvTEt9DAA/exec";
+
+// Toutes les demandes passent par le serveur sécurisé.
+async function api(action, payload){
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: {"Content-Type": "text/plain;charset=utf-8"},
+    body: JSON.stringify(Object.assign({action}, payload || {}))
+  });
+  return res.json();
+}
 
 const STORAGE_KEY = "mbc-cargo-app-state";
 
@@ -278,8 +288,7 @@ function statusMessage(label, name){
 function statusesFor(type){ return type === "aerien" ? AERIEN_STATUSES : MARITIME_STATUSES; }
 
 function defaultState(){
-  return { clients: [], shipments: [], invoices: [], pendingRequests: [],
-    auth: { adminHash: null, assistantHash: null } };
+  return { clients: [], shipments: [], invoices: [], pendingRequests: [] };
 }
 
 async function sha256(text){
@@ -288,18 +297,40 @@ async function sha256(text){
   return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,"0")).join("");
 }
 
-const MY_ROLE_KEY = "mbc-cargo-my-role";
+const TOKEN_KEY = "mbc-cargo-session";
+let token = null;
+let configured = true;
+let loginRoleChoice = "admin";
 
-async function loadMyRole(){
-  try{ role = localStorage.getItem(MY_ROLE_KEY) || null; }catch(e){ role = null; }
+function rememberSession(t){
+  token = t;
+  try{ localStorage.setItem(TOKEN_KEY, t); }catch(e){ /* best effort */ }
 }
 
-async function saveMyRole(r){
-  try{ localStorage.setItem(MY_ROLE_KEY, r); }catch(e){ /* best effort */ }
+function forgetSession(){
+  token = null;
+  role = null;
+  state = defaultState();
+  try{ localStorage.removeItem(TOKEN_KEY); }catch(e){ /* best effort */ }
+  try{ localStorage.removeItem("mbc-cargo-my-role"); }catch(e){}
 }
 
-async function clearMyRole(){
-  try{ localStorage.removeItem(MY_ROLE_KEY); }catch(e){ /* best effort */ }
+// Charge les données de l'équipe (seulement si connecté)
+async function fetchTeamState(){
+  if(!token) return false;
+  try{
+    const data = await api("load", {token});
+    if(data && data.ok){
+      state = Object.assign(defaultState(), data.value);
+      role = data.role;
+      saveError = false;
+      return true;
+    }
+    if(data && data.error === "unauthorized") forgetSession();
+  }catch(e){
+    console.error("Erreur de chargement:", e);
+  }
+  return false;
 }
 
 let state = defaultState();
@@ -353,40 +384,34 @@ function fmtDate(iso){
 }
 
 async function loadState(){
+  try{ token = localStorage.getItem(TOKEN_KEY) || null; }catch(e){ token = null; }
   try{
-    const res = await fetch(APPS_SCRIPT_URL, {method:"GET"});
-    const data = await res.json();
-    if(data && data.value){
-      const parsed = JSON.parse(data.value);
-      state = Object.assign(defaultState(), parsed);
-    }
+    const st = await api("status");
+    configured = !!(st && st.configured);
   }catch(e){
-    // Pas encore de données, ou backend injoignable — on part d'un état vide
-    state = defaultState();
-    console.error("Erreur de chargement:", e);
+    console.error("Serveur injoignable:", e);
   }
-  await loadMyRole();
-  checkUrlForCompletionCode();
+  await fetchTeamState();
+  await checkUrlForCompletionCode();
   ready = true;
   render();
 }
 
 async function refreshState(){
+  if(!token) return;
   const versionBefore = localChangeVersion;
   try{
-    const res = await fetch(APPS_SCRIPT_URL, {method:"GET"});
-    const data = await res.json();
+    const data = await api("load", {token});
     // Si un changement local a eu lieu pendant qu'on attendait la réponse
-    // (ou qu'une sauvegarde est en cours), on n'écrase surtout pas l'écran :
-    // on ignore simplement cette actualisation, la prochaine s'en chargera.
-    if(localChangeVersion !== versionBefore || pendingSaveCount > 0){
-      return;
+    // (ou qu'une sauvegarde est en cours), on n'écrase surtout pas l'écran.
+    if(localChangeVersion !== versionBefore || pendingSaveCount > 0) return;
+    if(data && data.ok){
+      state = Object.assign(defaultState(), data.value);
+      role = data.role;
+      saveError = false;
+    } else if(data && data.error === "unauthorized"){
+      forgetSession();
     }
-    if(data && data.value){
-      const parsed = JSON.parse(data.value);
-      state = Object.assign(defaultState(), parsed);
-    }
-    saveError = false;
   }catch(e){
     saveError = true;
     console.error("Erreur d'actualisation:", e);
@@ -394,17 +419,21 @@ async function refreshState(){
   render();
 }
 
-function checkUrlForCompletionCode(){
+async function checkUrlForCompletionCode(){
   const params = new URLSearchParams(window.location.search);
   const code = params.get("complete");
   if(code){
-    const p = state.pendingRequests.find(p => p.code === code.toUpperCase() && !p.completed);
-    publicPendingMatch = p || "notfound";
+    try{
+      const d = await api("findPending", {code});
+      publicPendingMatch = (d && d.found) ? d.pending : "notfound";
+    }catch(e){ publicPendingMatch = "notfound"; }
   }
   const trackingNumber = params.get("track");
   if(trackingNumber){
-    const s = state.shipments.find(s => s.trackingNumber.toLowerCase() === trackingNumber.toLowerCase());
-    publicTrackResult = s || "notfound";
+    try{
+      const d = await api("track", {num: trackingNumber});
+      publicTrackResult = (d && d.found) ? d : "notfound";
+    }catch(e){ publicTrackResult = "notfound"; }
   }
 }
 
@@ -433,10 +462,11 @@ async function doSave(){
     const res = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
       headers: {"Content-Type": "text/plain;charset=utf-8"},
-      body: JSON.stringify({ action: "set", value: JSON.stringify(state) })
+      body: JSON.stringify({ action: "save", token, value: JSON.stringify(state) })
     });
     const data = await res.json();
     saveError = !(data && data.ok);
+    if(data && data.error === "unauthorized") forgetSession();
   }catch(e){
     saveError = true;
     console.error("Erreur de sauvegarde:", e);
@@ -765,9 +795,8 @@ function publicHtml(){
 
 function renderTrackResult(){
   if(publicTrackResult === "notfound") return "";
-  const s = publicTrackResult;
-  const client = getClient(s.clientId);
-  const firstName = client ? client.name.trim().split(/\s+/)[0] : "";
+  const s = publicTrackResult.shipment;
+  const firstName = publicTrackResult.firstName || "";
   const statuses = statusesFor(s.freightType);
   const currentLabel = statuses[s.statusIndex];
   const isDelivered = s.statusIndex === statuses.length - 1;
@@ -803,7 +832,7 @@ function renderPendingMatch(){
 /* ================= TEAM VIEW ================= */
 
 function teamHtml(){
-  const noPasswordsYet = !state.auth.adminHash && !state.auth.assistantHash;
+  const noPasswordsYet = !configured;
 
   if(!role && noPasswordsYet){
     return `
@@ -811,7 +840,7 @@ function teamHtml(){
       <div class="card">
         <h3>PREMIÈRE CONFIGURATION</h3>
         <h2>Créer les accès de l'équipe</h2>
-        <div class="warn-box">Aucun mot de passe n'est encore configuré. Crée un mot de passe pour toi (Admin) et un pour l'assistante. Note : c'est une protection simple côté navigateur, pas un système de sécurité de niveau entreprise — suffisant pour un usage interne, mais à garder confidentiel.</div>
+        <div class="warn-box">Aucun mot de passe n'est encore configuré. Crée un mot de passe pour toi (Admin) et un pour l'assistante (6 caractères minimum, différents l'un de l'autre). Ils sont vérifiés sur le serveur et ne sont jamais visibles sur le site.</div>
         <div class="field"><label>Mot de passe Admin (Nourou)</label><input type="password" id="setup-admin-pwd"></div>
         <div class="field"><label>Mot de passe Assistante</label><input type="password" id="setup-assist-pwd"></div>
         ${authError ? `<div class="msg err">${authError}</div>` : ""}
@@ -828,8 +857,8 @@ function teamHtml(){
         <h2>Connexion</h2>
         <div class="field"><label>Profil</label>
           <select id="login-role">
-            <option value="admin">Nourou (Admin)</option>
-            <option value="assistant">Assistante (Suivi &amp; remise)</option>
+            <option value="admin" ${loginRoleChoice==="admin"?"selected":""}>Nourou (Admin)</option>
+            <option value="assistant" ${loginRoleChoice==="assistant"?"selected":""}>Assistante (Suivi &amp; remise)</option>
           </select>
         </div>
         <div class="field"><label>Mot de passe</label><input type="password" id="login-pwd"></div>
@@ -1289,20 +1318,38 @@ function handleClick(action, el){
   switch(action){
     case "go-team": view = "team"; authError=""; render(); break;
     case "go-public": view = "public"; render(); break;
-    case "logout": role = null; clearMyRole(); render(); break;
+    case "logout": {
+      const t = token;
+      forgetSession();
+      if(t) api("logout", {token: t}).catch(() => {});
+      render();
+      break;
+    }
 
     case "setup-passwords": {
       const adminPwd = document.getElementById("setup-admin-pwd").value;
       const assistPwd = document.getElementById("setup-assist-pwd").value;
       if(!adminPwd || !assistPwd){ authError = "Merci de remplir les deux mots de passe."; render(); return; }
       (async () => {
-        state.auth.adminHash = await sha256(adminPwd);
-        state.auth.assistantHash = await sha256(assistPwd);
-        await saveState();
-        role = "admin";
-        authError = "";
-        await saveMyRole("admin");
-        activeTab = "dashboard";
+        try{
+          const d = await api("setup", {admin: adminPwd, assistant: assistPwd});
+          if(d && d.ok){
+            rememberSession(d.token);
+            configured = true;
+            authError = "";
+            await fetchTeamState();
+            activeTab = "dashboard";
+          } else if(d && d.error === "too_short"){
+            authError = "Chaque mot de passe doit avoir au moins 6 caractères.";
+          } else if(d && d.error === "same_password"){
+            authError = "Les deux mots de passe doivent être différents.";
+          } else if(d && d.error === "already_configured"){
+            configured = true;
+            authError = "Les accès sont déjà configurés. Connecte-toi.";
+          } else {
+            authError = "Erreur du serveur. Réessaie.";
+          }
+        }catch(e){ authError = "Serveur injoignable. Vérifie ta connexion."; }
         render();
       })();
       break;
@@ -1310,18 +1357,22 @@ function handleClick(action, el){
 
     case "do-login": {
       const chosenRole = document.getElementById("login-role").value;
+      loginRoleChoice = chosenRole;
       const pwd = document.getElementById("login-pwd").value;
       (async () => {
-        const hash = await sha256(pwd);
-        const expected = chosenRole === "admin" ? state.auth.adminHash : state.auth.assistantHash;
-        if(hash === expected){
-          role = chosenRole;
-          authError = "";
-          await saveMyRole(chosenRole);
-          activeTab = chosenRole === "admin" ? "dashboard" : "suivi";
-        } else {
-          authError = "Mot de passe incorrect.";
-        }
+        try{
+          const d = await api("login", {role: chosenRole, password: pwd});
+          if(d && d.ok){
+            rememberSession(d.token);
+            authError = "";
+            await fetchTeamState();
+            activeTab = d.role === "admin" ? "dashboard" : "suivi";
+          } else if(d && d.error === "locked"){
+            authError = "Trop d'essais. Réessaie dans 15 minutes.";
+          } else {
+            authError = "Mot de passe incorrect.";
+          }
+        }catch(e){ authError = "Serveur injoignable. Vérifie ta connexion."; }
         render();
       })();
       break;
@@ -1330,21 +1381,22 @@ function handleClick(action, el){
     case "update-passwords": {
       const newAdmin = document.getElementById("new-admin-pwd").value;
       const newAssist = document.getElementById("new-assist-pwd").value;
+      if(!newAdmin && !newAssist) return;
       (async () => {
-        if(newAdmin) state.auth.adminHash = await sha256(newAdmin);
-        if(newAssist) state.auth.assistantHash = await sha256(newAssist);
-        authError = "";
-        await saveState();
-        alert("Mots de passe mis à jour.");
+        try{
+          const d = await api("changePasswords", {token, admin: newAdmin, assistant: newAssist});
+          if(d && d.ok){ authError = ""; alert("Mots de passe mis à jour. Les autres appareils devront se reconnecter."); }
+          else if(d && d.error === "too_short"){ authError = "Au moins 6 caractères par mot de passe."; }
+          else { authError = "Impossible de changer les mots de passe."; }
+        }catch(e){ authError = "Serveur injoignable."; }
+        render();
       })();
       break;
     }
 
     case "reset-data": {
       if(confirm("Es-tu sûr de vouloir effacer tous les clients, colis, factures et demandes ? Cette action est irréversible.")){
-        const authKeep = state.auth;
         state = defaultState();
-        state.auth = authKeep;
         saveState();
       }
       break;
@@ -1353,16 +1405,26 @@ function handleClick(action, el){
 
     case "do-track": {
       const val = document.getElementById("track-input").value.trim();
-      const s = state.shipments.find(s => s.trackingNumber.toLowerCase() === val.toLowerCase());
-      publicTrackResult = s || "notfound";
-      render();
+      if(!val) return;
+      (async () => {
+        try{
+          const d = await api("track", {num: val});
+          publicTrackResult = (d && d.found) ? d : "notfound";
+        }catch(e){ publicTrackResult = "notfound"; }
+        render();
+      })();
       break;
     }
     case "lookup-phone": {
       const val = document.getElementById("phone-lookup").value.trim();
-      const p = state.pendingRequests.find(p => !p.completed && phoneDigits(p.phone) === phoneDigits(val));
-      publicPendingMatch = p || "notfound";
-      render();
+      if(!val) return;
+      (async () => {
+        try{
+          const d = await api("findPending", {phone: val});
+          publicPendingMatch = (d && d.found) ? d.pending : "notfound";
+        }catch(e){ publicPendingMatch = "notfound"; }
+        render();
+      })();
       break;
     }
     case "submit-client-form": {
@@ -1370,15 +1432,23 @@ function handleClick(action, el){
       const city = document.getElementById("cf-city").value.trim();
       const content = document.getElementById("cf-content").value.trim();
       const weight = document.getElementById("cf-weight").value.trim();
-      const shipment = completeClientForm(id, {city, content, weight});
-      publicPendingMatch = null;
-      publicTrackResult = shipment || "notfound";
-      if(shipment){
-        alert("Merci ! Votre colis est enregistré sous le numéro : " + shipment.trackingNumber);
-      } else {
-        alert("Merci ! Vos informations ont été enregistrées.");
-      }
-      render();
+      el.disabled = true;
+      (async () => {
+        try{
+          const d = await api("completeForm", {pendingId: id, city, content, weight});
+          publicPendingMatch = null;
+          if(d && d.ok && d.trackingNumber){
+            alert("Merci ! Votre colis est enregistré sous le numéro : " + d.trackingNumber);
+            const t = await api("track", {num: d.trackingNumber});
+            publicTrackResult = (t && t.found) ? t : null;
+          } else if(d && d.ok){
+            alert("Merci ! Vos informations ont été enregistrées.");
+          } else {
+            alert("Ce dossier a déjà été complété ou n'existe plus.");
+          }
+        }catch(e){ alert("Connexion impossible. Réessayez."); }
+        render();
+      })();
       break;
     }
 
@@ -1464,7 +1534,7 @@ loadState();
 setInterval(() => {
   const activeTag = document.activeElement ? document.activeElement.tagName : "";
   const isTyping = ["INPUT", "TEXTAREA", "SELECT"].includes(activeTag);
-  if(ready && view === "team" && pendingSaveCount === 0 && !isTyping){
+  if(ready && view === "team" && token && pendingSaveCount === 0 && !isTyping){
     refreshState();
   }
 }, 20000);
