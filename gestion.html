@@ -342,6 +342,7 @@ let activeTab = "dashboard";
 let selectedClientId = null;
 let selectedInvoiceId = null;
 let publicTrackResult = null;
+let publicTrackQuery = "";
 let suiviSearchQuery = "";
 let publicLookupPhone = "";
 let publicPendingMatch = null;
@@ -430,6 +431,7 @@ async function checkUrlForCompletionCode(){
   }
   const trackingNumber = params.get("track");
   if(trackingNumber){
+    publicTrackQuery = trackingNumber.trim().toUpperCase();
     try{
       const d = await api("track", {num: trackingNumber});
       publicTrackResult = (d && d.found) ? d : "notfound";
@@ -774,7 +776,7 @@ function publicHtml(){
 
     <div class="card">
       <h3>NUMÉRO DE SUIVI</h3>
-      <div class="field"><input id="track-input" placeholder="MBC-2609-0001" value="${publicLookupPhone==='' ? '' : ''}"></div>
+      <div class="field"><input id="track-input" placeholder="MBC-2609-0001" value="${String(publicTrackQuery).replace(/[<>"'&]/g, "")}"></div>
       <button class="btn" data-action="do-track">Suivre</button>
       ${publicTrackResult !== undefined && publicTrackResult !== null ? renderTrackResult() : ""}
       ${publicTrackResult === "notfound" ? `<div class="msg err">Aucun colis trouvé avec ce numéro.</div>` : ""}
@@ -1406,6 +1408,7 @@ function handleClick(action, el){
     case "do-track": {
       const val = document.getElementById("track-input").value.trim();
       if(!val) return;
+      publicTrackQuery = val.toUpperCase();
       (async () => {
         try{
           const d = await api("track", {num: val});
@@ -1439,6 +1442,7 @@ function handleClick(action, el){
           publicPendingMatch = null;
           if(d && d.ok && d.trackingNumber){
             alert("Merci ! Votre colis est enregistré sous le numéro : " + d.trackingNumber);
+            publicTrackQuery = d.trackingNumber;
             const t = await api("track", {num: d.trackingNumber});
             publicTrackResult = (t && t.found) ? t : null;
           } else if(d && d.ok){
