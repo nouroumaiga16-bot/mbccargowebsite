@@ -120,12 +120,12 @@
 </div>
 
 <script>
-const APP_URL = "https://app.mbccargo.com";
+const APP_URL = "/gestion.html";
 
 function chercherColis(numero) {
   var n = (numero || "").trim().toUpperCase();
   if (!n) return;
-  window.location.href = APP_URL + "/suivi/" + encodeURIComponent(n);
+  window.location.href = APP_URL + "?track=" + encodeURIComponent(n);
 }
 
 document.getElementById("form-suivi").addEventListener("submit", function (e) {
