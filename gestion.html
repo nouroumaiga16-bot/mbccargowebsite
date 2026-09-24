@@ -298,7 +298,8 @@ function statusMessage(label, name){
 function statusesFor(type){ return type === "aerien" ? AERIEN_STATUSES : MARITIME_STATUSES; }
 
 function defaultState(){
-  return { clients: [], shipments: [], invoices: [], pendingRequests: [] };
+  return { clients: [], shipments: [], invoices: [], pendingRequests: [],
+    settings: { shopArea: "Larlé", mapsLink: "", helpPhone: "" } };
 }
 
 async function sha256(text){
@@ -648,6 +649,53 @@ function phoneDigits(phone){
   return (phone || "").replace(/[^\d]/g, "");
 }
 
+/* ---------------- MESSAGE D'ARRIVÉE À OUAGADOUGOU ---------------- */
+
+function shopSettings(){
+  return Object.assign({ shopArea: "Larlé", mapsLink: "", helpPhone: "" }, state.settings || {});
+}
+
+// Le bouton apparaît dès « Arrivé à Ouagadougou » et tant que le colis n'est pas remis
+function isArrivedNotDelivered(s){
+  const statuses = statusesFor(s.freightType);
+  const arrivalIdx = statuses.indexOf("Arrivé à Ouagadougou");
+  return arrivalIdx >= 0 && s.statusIndex >= arrivalIdx && s.statusIndex < statuses.length - 1;
+}
+
+function arrivalMessage(s){
+  const client = getClient(s.clientId);
+  const firstName = client ? client.name.trim().split(/\s+/)[0] : "";
+  const cfg = shopSettings();
+  return `Bonjour ${firstName} 👋\n\n`
+    + `Merci d'avoir fait confiance à MBC Cargo ! 🙏\n\n`
+    + `Bonne nouvelle : votre colis ${s.trackingNumber} est arrivé et vous attend actuellement à notre boutique de ${cfg.shopArea}, à Ouagadougou. 📦\n\n`
+    + (cfg.mapsLink ? `📍 Localisation : ${cfg.mapsLink}\n\n` : "")
+    + (cfg.helpPhone ? `Si vous rencontrez un problème pour nous trouver, appelez le ${cfg.helpPhone}, on vous guidera.\n\n` : "")
+    + `À très bientôt !\nL'équipe MBC Cargo`;
+}
+
+function sendArrivalMessage(shipmentId){
+  const s = state.shipments.find(x => x.id === shipmentId);
+  if(!s) return;
+  const cfg = shopSettings();
+  if(!cfg.mapsLink || !cfg.helpPhone){
+    alert(role === "admin"
+      ? "Remplis d'abord le lien Google Maps et le numéro d'aide dans Paramètres → Message d'arrivée."
+      : "Les informations de la boutique (localisation et numéro) ne sont pas encore configurées. Demande à Nourou de les remplir dans Paramètres.");
+    return;
+  }
+  const client = getClient(s.clientId);
+  const digits = phoneDigits(client ? client.phone : "");
+  const text = arrivalMessage(s);
+  if(digits.length < 8){
+    prompt("Numéro du client invalide pour WhatsApp. Copie le message ci-dessous et envoie-le manuellement :", text);
+  } else {
+    window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, "_blank");
+  }
+  s.arrivalMsgSentAt = new Date().toISOString();
+  saveState();
+}
+
 function whatsappSendUrl(p){
   const digits = phoneDigits(p.phone);
   return `https://wa.me/${digits}?text=${encodeURIComponent(pendingWhatsAppText(p))}`;
@@ -922,8 +970,19 @@ function renderTab(){
 }
 
 function parametresHtml(){
+  const cfg = shopSettings();
+  const clean = v => String(v || "").replace(/"/g, "&quot;");
   return `
   <h1>Paramètres</h1>
+  <div class="card" style="max-width:420px;">
+    <h3>MESSAGE D'ARRIVÉE</h3>
+    <h2>Boutique à Ouagadougou</h2>
+    <p style="color:var(--cream-dim);font-size:.85rem;margin-top:-6px;">Ces informations sont ajoutées au message WhatsApp envoyé quand un colis arrive à Ouagadougou.</p>
+    <div class="field"><label>Quartier de la boutique</label><input id="set-shop-area" value="${clean(cfg.shopArea)}" placeholder="Larlé"></div>
+    <div class="field"><label>Lien Google Maps de la boutique</label><input id="set-maps-link" value="${clean(cfg.mapsLink)}" placeholder="https://maps.app.goo.gl/..."></div>
+    <div class="field"><label>Numéro à appeler en cas de problème</label><input id="set-help-phone" value="${clean(cfg.helpPhone)}" placeholder="+226 70 00 00 00"></div>
+    <button class="btn" data-action="save-shop-settings">Enregistrer</button>
+  </div>
   <div class="card" style="max-width:420px;">
     <h3>SÉCURITÉ</h3>
     <h2>Changer les mots de passe</h2>
@@ -1102,7 +1161,13 @@ function suiviRowsHtml(shipments){
     <tr>
       <td><strong>${s.trackingNumber}</strong><br><span style="color:var(--muted);font-size:.78rem;">${client ? client.name : "—"}</span></td>
       <td><span class="badge ${s.freightType==='aerien'?'aerien':'maritime'}">${s.freightType==='aerien'?'Aérien':'Maritime/Véhicule'}</span></td>
-      <td><select data-action="change-status" data-id="${s.id}">${options}</select></td>
+      <td><select data-action="change-status" data-id="${s.id}">${options}</select>
+        ${isArrivedNotDelivered(s) ? `
+        <div style="margin-top:8px;">
+          <button class="btn small" data-action="send-arrival" data-id="${s.id}" style="background:#25D366;color:#0c0c0d;border-color:#25D366;">📲 Message d'arrivée</button>
+          ${s.arrivalMsgSentAt ? `<div style="color:var(--muted);font-size:.72rem;margin-top:4px;">✓ Envoyé le ${fmtDate(s.arrivalMsgSentAt)}</div>` : ""}
+        </div>` : ""}
+      </td>
       <td>
         <div class="notes-list">${(s.notes||[]).slice(-2).map(n => `<div class="note-line">${n.text}</div>`).join("") || `<span class="empty">Aucune note</span>`}</div>
         <div style="display:flex;gap:6px;margin-top:6px;">
@@ -1335,6 +1400,17 @@ function handleClick(action, el){
     case "go-team": view = "team"; authError=""; render(); break;
     case "go-public": view = "public"; render(); break;
     case "retry-load": ready = false; loadState(); break;
+    case "send-arrival": sendArrivalMessage(el.dataset.id); break;
+    case "save-shop-settings": {
+      state.settings = {
+        shopArea: document.getElementById("set-shop-area").value.trim() || "Larlé",
+        mapsLink: document.getElementById("set-maps-link").value.trim(),
+        helpPhone: document.getElementById("set-help-phone").value.trim()
+      };
+      saveState();
+      alert("Informations de la boutique enregistrées.");
+      break;
+    }
     case "logout": {
       const t = token;
       forgetSession();
@@ -1413,7 +1489,9 @@ function handleClick(action, el){
 
     case "reset-data": {
       if(confirm("Es-tu sûr de vouloir effacer tous les clients, colis, factures et demandes ? Cette action est irréversible.")){
+        const keepSettings = state.settings;
         state = defaultState();
+        if(keepSettings) state.settings = keepSettings;
         saveState();
       }
       break;
