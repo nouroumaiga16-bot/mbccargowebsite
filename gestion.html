@@ -260,6 +260,10 @@ async function api(action, payload){
 
 let serverDown = false;
 
+// Adresse publique du site : les liens envoyés aux clients pointent toujours ici,
+// peu importe d'où l'app de gestion est ouverte.
+const SITE_URL = "https://mbccargo.com";
+
 const STORAGE_KEY = "mbc-cargo-app-state";
 
 const AERIEN_STATUSES = [
@@ -685,7 +689,7 @@ function pendingLink(p){
 }
 
 function trackLink(trackingNumber){
-  return window.location.origin + "/suivi.html?track=" + encodeURIComponent(trackingNumber);
+  return SITE_URL + "/suivi.html?track=" + encodeURIComponent(trackingNumber);
 }
 
 function pendingWhatsAppText(p){
@@ -772,7 +776,7 @@ function nextContractNumber(){
 }
 
 function contractLink(c){
-  return window.location.origin + "/contrat.html?c=" + c.code;
+  return SITE_URL + "/contrat.html?c=" + c.code;
 }
 
 function readContractPrices(shipmentId){
