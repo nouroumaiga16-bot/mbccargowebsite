@@ -358,7 +358,7 @@ function statusMessage(label, name, type){
 function statusesFor(type){ return freightInfo(type).statuses; }
 
 function defaultState(){
-  return { clients: [], shipments: [], invoices: [], pendingRequests: [],
+  return { clients: [], shipments: [], invoices: [], pendingRequests: [], contracts: [],
     settings: { shopArea: "Larlé", mapsLink: "", helpPhone: "" } };
 }
 
@@ -748,6 +748,109 @@ function arrivalMessage(s){
     + (cfg.helpPhone ? `Besoin d'aide pour nous trouver ou envie de vous faire livrer ? Appelez le ${cfg.helpPhone}.\n\n` : "")
     + `💡 Nous faisons aussi les envois par conteneur. N'hésitez pas à nous contacter !\n\n`
     + `Merci de nous avoir fait confiance 🙏\nL'équipe MBC`;
+}
+
+/* ---------------- CONTRATS EN LIGNE ---------------- */
+
+let openContractFor = null; // envoi dont le panneau « Contrat » est ouvert
+
+function contractFor(shipmentId){
+  return (state.contracts || []).find(c => c.shipmentId === shipmentId) || null;
+}
+
+function contractCode(){
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for(let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function nextContractNumber(){
+  const year = new Date().getFullYear();
+  const n = (state.contracts || []).length + 1;
+  return `MBC-${String(n).padStart(4, "0")}-${year}`;
+}
+
+function contractLink(c){
+  return window.location.origin + "/contrat.html?c=" + c.code;
+}
+
+function readContractPrices(shipmentId){
+  const v = id => { const el = document.getElementById(id + "-" + shipmentId); return el ? el.value.trim() : ""; };
+  return { tarif: v("ct-tarif"), depot: v("ct-depot"), solde: v("ct-solde"), mode: v("ct-mode"), reference: v("ct-ref") };
+}
+
+function ensureContract(shipmentId){
+  state.contracts = state.contracts || [];
+  let c = contractFor(shipmentId);
+  const s = state.shipments.find(x => x.id === shipmentId);
+  if(!c){
+    c = { id: uid("ctr"), code: contractCode(), number: nextContractNumber(), shipmentId,
+          clientId: s ? s.clientId : null, serviceType: s ? s.freightType : "", status: "sent",
+          createdAt: new Date().toISOString(), prices: {} };
+    state.contracts.push(c);
+  }
+  if(c.status !== "signed") c.prices = readContractPrices(shipmentId);
+  return c;
+}
+
+function sendContract(shipmentId){
+  const c = ensureContract(shipmentId);
+  const client = getClient(c.clientId);
+  const firstName = client ? client.name.trim().split(/\s+/)[0] : "";
+  const text = `Bonjour ${firstName} 👋\n\n`
+    + `Voici votre contrat MBC Cargo n° ${c.number}. Merci de le remplir, de le lire et de le signer directement sur votre téléphone (2 minutes) :\n\n`
+    + `${contractLink(c)}\n\n`
+    + `Pour toute question, répondez simplement à ce message.\nL'équipe MBC`;
+  const digits = phoneDigits(client ? client.phone : "");
+  if(digits.length < 8){
+    prompt("Numéro du client invalide pour WhatsApp. Copie ce message et envoie-le manuellement :", text);
+  } else {
+    window.open(`https://wa.me/${digits}?text=${encodeURIComponent(text)}`, "_blank");
+  }
+  c.sentAt = new Date().toISOString();
+  saveState();
+  render();
+}
+
+function contractBadge(s){
+  const c = contractFor(s.id);
+  if(!c) return "";
+  return c.status === "signed"
+    ? `<div style="color:var(--green);font-size:.72rem;margin-top:4px;">✓ Contrat signé le ${fmtDate(c.signedAt)}</div>`
+    : `<div style="color:var(--muted);font-size:.72rem;margin-top:4px;">📝 Contrat envoyé — en attente de signature</div>`;
+}
+
+function contractPanelHtml(s){
+  const c = contractFor(s.id);
+  const p = (c && c.prices) || {};
+  const val = x => String(x || "").replace(/"/g, "&quot;");
+  const signed = c && c.status === "signed";
+  const inp = (id, label, value, ph) => `
+    <div class="field" style="margin:0;"><label>${label}</label>
+      <input id="${id}-${s.id}" value="${val(value)}" placeholder="${ph}" ${signed ? "disabled" : ""}></div>`;
+  return `
+  <tr class="contract-panel"><td colspan="5" style="background:var(--panel-2);">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+      <strong>📝 Contrat ${c ? c.number : "(nouveau)"} — ${s.trackingNumber}</strong>
+      <button class="link-btn" data-action="toggle-contract" data-id="${s.id}">Fermer ✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
+      ${inp("ct-tarif", "Tarif convenu ($ CAD)", p.tarif, "3800")}
+      ${inp("ct-depot", "Dépôt à la commande ($)", p.depot, "1900")}
+      ${inp("ct-solde", "Solde avant expédition ($)", p.solde, "1900")}
+      ${inp("ct-mode", "Mode de paiement", p.mode, "Interac")}
+      ${inp("ct-ref", "Référence du paiement", p.reference, "Optionnel")}
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center;">
+      ${signed
+        ? `<span style="color:var(--green);">✓ Signé le ${fmtDate(c.signedAt)}</span>
+           <a class="btn small" href="${contractLink(c)}" target="_blank" rel="noopener">Voir / imprimer le contrat</a>`
+        : `<button class="btn small" data-action="send-contract" data-id="${s.id}" style="background:#25D366;color:#0c0c0d;border-color:#25D366;">📲 ${c ? "Renvoyer" : "Envoyer"} le contrat par WhatsApp</button>
+           ${c ? `<a class="link-btn" href="${contractLink(c)}" target="_blank" rel="noopener">Aperçu du lien client</a>` : ""}
+           <span style="color:var(--muted);font-size:.75rem;">Le client remplit ses infos, lit et signe avec le doigt.</span>`}
+    </div>
+  </td></tr>`;
 }
 
 function sendArrivalMessage(shipmentId){
@@ -1260,6 +1363,10 @@ function suiviRowsHtml(shipments){
           <button class="btn small" data-action="send-arrival" data-id="${s.id}" style="background:#25D366;color:#0c0c0d;border-color:#25D366;">${arrivalButtonLabel(s)}</button>
           ${s.arrivalMsgSentAt ? `<div style="color:var(--muted);font-size:.72rem;margin-top:4px;">✓ Envoyé le ${fmtDate(s.arrivalMsgSentAt)}</div>` : ""}
         </div>` : ""}
+        <div style="margin-top:8px;">
+          <button class="btn small secondary" data-action="toggle-contract" data-id="${s.id}">📝 Contrat</button>
+          ${contractBadge(s)}
+        </div>
       </td>
       <td>
         <div class="notes-list">${(s.notes||[]).slice(-2).map(n => `<div class="note-line">${n.text}</div>`).join("") || `<span class="empty">Aucune note</span>`}</div>
@@ -1272,7 +1379,7 @@ function suiviRowsHtml(shipments){
         ${s.deliveredPhoto ? `<img class="thumb" src="${s.deliveredPhoto}">` :
           `<input type="file" accept="image/*" data-action="upload-photo" data-id="${s.id}" style="font-size:.72rem;max-width:120px;">`}
       </td>
-    </tr>`;
+    </tr>${openContractFor === s.id ? contractPanelHtml(s) : ""}`;
   }).join("");
   return rows || `<tr><td colspan="5" class="empty">${q ? "Aucun colis ne correspond à cette recherche." : "Aucun colis enregistré pour le moment."}</td></tr>`;
 }
@@ -1498,6 +1605,8 @@ function handleClick(action, el){
     case "go-public": view = "public"; render(); break;
     case "retry-load": ready = false; loadState(); break;
     case "send-arrival": sendArrivalMessage(el.dataset.id); break;
+    case "toggle-contract": openContractFor = openContractFor === el.dataset.id ? null : el.dataset.id; render(); break;
+    case "send-contract": sendContract(el.dataset.id); break;
     case "save-shop-settings": {
       state.settings = {
         shopArea: document.getElementById("set-shop-area").value.trim() || "Larlé",
