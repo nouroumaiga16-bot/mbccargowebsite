@@ -268,11 +268,53 @@ const AERIEN_STATUSES = [
   "Prêt pour remise","Remis au client"
 ];
 const MARITIME_STATUSES = [
-  "Devis confirmé","Reçu au dépôt Canada","Chargé en conteneur/navire",
-  "Parti du port (Canada)","En mer","Arrivé au port de destination",
-  "Dédouanement en cours","Dédouané — en transit vers Ouagadougou",
-  "Arrivé à Ouagadougou","Prêt pour remise","Remis au client"
+  "Devis confirmé","Reçu au dépôt Canada","Emballé / Préparé","Chargé en conteneur",
+  "Parti du port de Montréal","En mer","Arrivé au port de Lomé","Formalités douanières à Lomé",
+  "En route vers Ouagadougou","Arrivé à Ouagadougou","Dédouanement à Ouagadougou",
+  "Prêt pour remise","Remis au client"
 ];
+const VEHICULE_STATUSES = [
+  "Devis confirmé","Documents reçus","Véhicule réceptionné à Montréal","Inspection et photos",
+  "Chargé en conteneur","Parti du port de Montréal","En mer","Arrivé au port de Lomé",
+  "Formalités douanières à Lomé","En route vers Ouagadougou","Arrivé à Ouagadougou",
+  "Dédouanement à Ouagadougou","Prêt pour remise","Remis au client"
+];
+const RETOUR_STATUSES = [
+  "Devis confirmé","Reçu à la boutique de Larlé","Emballé / Préparé",
+  "Formalités douanières à Ouagadougou","En vol","Arrivé à Montréal",
+  "Dédouanement au Canada","En route vers notre local","Prêt pour remise","Remis au client"
+];
+
+// Les 4 types d'envoi
+const FREIGHT_TYPES = {
+  aerien:   { label: "Aérien",          long: "Aérien (Canada → Ouaga)",           statuses: AERIEN_STATUSES },
+  maritime: { label: "Maritime",        long: "Maritime (Canada → Ouaga)",         statuses: MARITIME_STATUSES },
+  vehicule: { label: "Véhicule",        long: "Véhicule (Canada → Ouaga)",         statuses: VEHICULE_STATUSES },
+  retour:   { label: "Retour aérien",   long: "Aérien retour (Ouaga → Montréal)",  statuses: RETOUR_STATUSES }
+};
+function freightInfo(type){ return FREIGHT_TYPES[type] || FREIGHT_TYPES.maritime; }
+function typeLabel(type){ return freightInfo(type).label; }
+function typeBadge(type){
+  const cls = type === "aerien" || type === "retour" ? "aerien" : "maritime";
+  return `<span class="badge ${cls}">${typeLabel(type)}</span>`;
+}
+function typeOptions(){
+  return Object.keys(FREIGHT_TYPES).map(k => `<option value="${k}">${FREIGHT_TYPES[k].long}</option>`).join("");
+}
+
+// Ancienne liste maritime (11 étapes) → nouvelle liste (13 étapes)
+const OLD_MARITIME_MAP = [0, 1, 3, 4, 5, 6, 7, 8, 9, 11, 12];
+function migrateSteps(){
+  if((state.stepsVersion || 1) >= 2) return false;
+  state.shipments.forEach(s => {
+    if(s.freightType === "maritime"){
+      const i = Number(s.statusIndex) || 0;
+      s.statusIndex = OLD_MARITIME_MAP[Math.min(i, OLD_MARITIME_MAP.length - 1)];
+    }
+  });
+  state.stepsVersion = 2;
+  return true;
+}
 
 const STATUS_MESSAGES = {
   "Devis confirmé": "Votre commande est confirmée, {name}. On prépare tout dès réception de votre colis.",
@@ -287,15 +329,33 @@ const STATUS_MESSAGES = {
   "Dédouané — en transit vers Ouagadougou": "Dédouanement terminé ! Direction Ouagadougou.",
   "Arrivé à Ouagadougou": "Votre colis est arrivé à Ouagadougou, {name} !",
   "Prêt pour remise": "Votre colis vous attend, {name}, prêt à être récupéré.",
-  "Remis au client": "Merci {name} pour votre confiance ! Votre colis a été remis avec succès."
+  "Remis au client": "Merci {name} pour votre confiance ! Votre colis a été remis avec succès.",
+  "Emballé / Préparé": "Votre colis est emballé avec soin et prêt à partir, {name}.",
+  "Chargé en conteneur": "Votre colis est chargé dans le conteneur, prêt pour la traversée, {name}.",
+  "Parti du port de Montréal": "Le navire a quitté le port de Montréal avec votre colis à bord.",
+  "Arrivé au port de Lomé": "Votre colis est arrivé au port de Lomé, {name} !",
+  "Formalités douanières à Lomé": "Les formalités douanières sont en cours au port de Lomé.",
+  "En route vers Ouagadougou": "Votre colis est en route vers Ouagadougou, {name}.",
+  "Dédouanement à Ouagadougou": "Votre colis est en cours de dédouanement à Ouagadougou — encore un peu de patience, {name}.",
+  "Documents reçus": "Nous avons bien reçu les documents de votre véhicule, {name}.",
+  "Véhicule réceptionné à Montréal": "Votre véhicule est bien arrivé chez nous à Montréal, {name}.",
+  "Inspection et photos": "Votre véhicule a été inspecté et photographié avant l'expédition.",
+  "Reçu à la boutique de Larlé": "Votre colis a bien été déposé à notre boutique de Larlé, {name}.",
+  "Formalités douanières à Ouagadougou": "Les formalités d'exportation sont en cours à Ouagadougou.",
+  "Arrivé à Montréal": "Votre colis est arrivé à Montréal, {name} !",
+  "Dédouanement au Canada": "Votre colis passe la douane canadienne — encore un peu de patience, {name}.",
+  "En route vers notre local": "Votre colis est en route vers notre local, {name}."
 };
 
-function statusMessage(label, name){
-  const template = STATUS_MESSAGES[label] || "Votre colis progresse bien, {name}.";
-  return template.replace("{name}", name || "cher client");
+function statusMessage(label, name, type){
+  let template = STATUS_MESSAGES[label] || "Votre colis progresse bien, {name}.";
+  if(type === "retour" && label === "En vol") template = "Votre colis est en plein vol vers le Canada, {name}.";
+  let msg = template.replace("{name}", name || "cher client");
+  if(type === "vehicule") msg = msg.replace(/Votre colis/g, "Votre véhicule").replace(/votre colis/g, "votre véhicule");
+  return msg;
 }
 
-function statusesFor(type){ return type === "aerien" ? AERIEN_STATUSES : MARITIME_STATUSES; }
+function statusesFor(type){ return freightInfo(type).statuses; }
 
 function defaultState(){
   return { clients: [], shipments: [], invoices: [], pendingRequests: [],
@@ -335,6 +395,7 @@ async function fetchTeamState(){
       state = Object.assign(defaultState(), data.value);
       role = data.role;
       saveError = false;
+      if(migrateSteps()) saveState();
       return true;
     }
     if(data && data.error === "unauthorized") forgetSession();
@@ -624,8 +685,7 @@ function pendingLink(p){
 }
 
 function trackLink(trackingNumber){
-  const base = window.location.origin + window.location.pathname;
-  return base + "?track=" + encodeURIComponent(trackingNumber);
+  return window.location.origin + "/suivi.html?track=" + encodeURIComponent(trackingNumber);
 }
 
 function pendingWhatsAppText(p){
@@ -655,30 +715,46 @@ function shopSettings(){
   return Object.assign({ shopArea: "Larlé", mapsLink: "", helpPhone: "" }, state.settings || {});
 }
 
-// Le bouton apparaît dès « Arrivé à Ouagadougou » et tant que le colis n'est pas remis
+// Aller (Canada → Ouaga) : bouton dès « Arrivé à Ouagadougou »
+// Retour (Ouaga → Montréal) : bouton dès « Prêt pour remise »
+// Dans les deux cas, il disparaît quand le colis est remis.
 function isArrivedNotDelivered(s){
   const statuses = statusesFor(s.freightType);
-  const arrivalIdx = statuses.indexOf("Arrivé à Ouagadougou");
-  return arrivalIdx >= 0 && s.statusIndex >= arrivalIdx && s.statusIndex < statuses.length - 1;
+  const trigger = s.freightType === "retour" ? "Prêt pour remise" : "Arrivé à Ouagadougou";
+  const idx = statuses.indexOf(trigger);
+  return idx >= 0 && s.statusIndex >= idx && s.statusIndex < statuses.length - 1;
+}
+
+function arrivalButtonLabel(s){
+  return s.freightType === "retour" ? "📲 Message de réception" : "📲 Message d'arrivée";
 }
 
 function arrivalMessage(s){
   const client = getClient(s.clientId);
   const firstName = client ? client.name.trim().split(/\s+/)[0] : "";
+  const quoi = s.freightType === "vehicule" ? "votre véhicule" : "votre colis";
+
+  if(s.freightType === "retour"){
+    return `Bonjour ${firstName} 👋\n\n`
+      + `Bonne nouvelle : votre colis ${s.trackingNumber} en provenance de Ouagadougou est arrivé à notre local et est prêt à être récupéré. 📦\n\n`
+      + `Pour vos prochains envois, sachez que nous faisons également les expéditions par conteneur. Si vous en avez besoin, n'hésitez pas à nous contacter !\n\n`
+      + `Merci de nous avoir fait confiance 🙏\nL'équipe MBC`;
+  }
+
   const cfg = shopSettings();
   return `Bonjour ${firstName} 👋\n\n`
-    + `Bonne nouvelle : votre colis ${s.trackingNumber} est arrivé et vous attend actuellement à notre boutique de ${cfg.shopArea}, à Ouagadougou. 📦\n\n`
-    + `Merci d'avoir fait confiance à MBC Cargo ! 🙏\n\n`
+    + `Bonne nouvelle : ${quoi} ${s.trackingNumber} est arrivé et vous attend à notre boutique de ${cfg.shopArea}, à Ouagadougou. 📦\n\n`
     + (cfg.mapsLink ? `📍 Localisation : ${cfg.mapsLink}\n\n` : "")
-    + (cfg.helpPhone ? `Si vous rencontrez un problème pour nous trouver ou si vous souhaitez vous faire livrer, appelez le ${cfg.helpPhone}, on vous guidera.\n\n` : "")
-    + `À très bientôt !\nL'équipe MBC Cargo`;
+    + (cfg.helpPhone ? `Besoin d'aide pour nous trouver ou envie de vous faire livrer ? Appelez le ${cfg.helpPhone}.\n\n` : "")
+    + `💡 Nous faisons aussi les envois par conteneur. N'hésitez pas à nous contacter !\n\n`
+    + `Merci de nous avoir fait confiance 🙏\nL'équipe MBC`;
 }
 
 function sendArrivalMessage(shipmentId){
   const s = state.shipments.find(x => x.id === shipmentId);
   if(!s) return;
   const cfg = shopSettings();
-  if(!cfg.mapsLink || !cfg.helpPhone){
+  if(s.freightType !== "retour" && (!cfg.mapsLink || !cfg.helpPhone)){
     alert(role === "admin"
       ? "Remplis d'abord le lien Google Maps et le numéro d'aide dans Paramètres → Message d'arrivée."
       : "Les informations de la boutique (localisation et numéro) ne sont pas encore configurées. Demande à Nourou de les remplir dans Paramètres.");
@@ -722,6 +798,21 @@ function completeClientForm(pendingId, {city, content, weight}){
 }
 
 /* ---------------- ACTIONS: SUIVI ---------------- */
+
+// Changer le type d'un envoi (ex. un ancien « Maritime » qui est en fait un véhicule)
+// On garde l'étape équivalente si elle existe dans la nouvelle liste.
+function changeFreightType(shipmentId, newType){
+  const s = state.shipments.find(x => x.id === shipmentId);
+  if(!s || !FREIGHT_TYPES[newType] || s.freightType === newType) return;
+  const oldLabel = statusesFor(s.freightType)[s.statusIndex];
+  const newList = statusesFor(newType);
+  let idx = newList.indexOf(oldLabel);
+  if(idx < 0) idx = Math.min(s.statusIndex, newList.length - 1);
+  s.freightType = newType;
+  s.statusIndex = idx;
+  saveState();
+  render();
+}
 
 function advanceStatus(shipmentId, newIndex){
   const s = state.shipments.find(s => s.id === shipmentId);
@@ -864,7 +955,7 @@ function renderTrackResult(){
   const statuses = statusesFor(s.freightType);
   const currentLabel = statuses[s.statusIndex];
   const isDelivered = s.statusIndex === statuses.length - 1;
-  const message = statusMessage(currentLabel, firstName);
+  const message = statusMessage(currentLabel, firstName, s.freightType);
   const rows = statuses.map((label, i) => {
     let cls = "todo";
     if(i < s.statusIndex) cls = "done";
@@ -1014,8 +1105,8 @@ function dashboardHtml(){
     const label = statusesFor(s.freightType)[s.statusIndex] || "";
     return label.toLowerCase().includes("dédouanement");
   }).length;
-  const aerienCount = state.shipments.filter(s => s.freightType === "aerien").length;
-  const maritimeCount = state.shipments.filter(s => s.freightType === "maritime").length;
+  const aerienCount = state.shipments.filter(s => s.freightType === "aerien" || s.freightType === "retour").length;
+  const maritimeCount = state.shipments.filter(s => s.freightType === "maritime" || s.freightType === "vehicule").length;
   const pretsPourRemise = state.shipments.filter(s => {
     const st = statusesFor(s.freightType);
     return st[s.statusIndex] === "Prêt pour remise";
@@ -1034,7 +1125,7 @@ function dashboardHtml(){
 
   <div class="section-title">RÉPARTITION PAR TYPE DE FRET</div>
   <div class="stats-grid">
-    <div class="stat"><div class="num">${aerienCount}</div><div class="label">Envois aériens</div></div>
+    <div class="stat"><div class="num">${aerienCount}</div><div class="label">Envois aériens (aller + retour)</div></div>
     <div class="stat"><div class="num">${maritimeCount}</div><div class="label">Maritime / véhicules</div></div>
   </div>
 
@@ -1054,7 +1145,7 @@ function envoiHtml(){
     return `
     <tr>
       <td>${p.clientName}<br><span style="color:var(--muted);font-size:.78rem;">${p.phone}</span></td>
-      <td><span class="badge ${p.freightType==='aerien'?'aerien':'maritime'}">${p.freightType==='aerien'?'Aérien':'Maritime/Véhicule'}</span></td>
+      <td>${typeBadge(p.freightType)}</td>
       <td>${shipment ? shipment.trackingNumber : "—"}</td>
       <td>${p.linkSent ? '<span class="badge remis">Message envoyé</span>' : '<span class="badge attente">À envoyer</span>'}</td>
       <td>
@@ -1073,7 +1164,7 @@ function envoiHtml(){
     <div class="field"><label>Téléphone (WhatsApp)</label><input id="ns-phone" placeholder="+226 70 00 00 00"></div>
     <div class="row2">
       <div class="field"><label>Type de fret</label>
-        <select id="ns-type"><option value="aerien">Aérien</option><option value="maritime">Maritime / Véhicule</option></select>
+        <select id="ns-type">${typeOptions()}</select>
       </div>
       <div class="field"><label>Poids (kg, optionnel)</label><input id="ns-weight" type="number" step="0.1"></div>
     </div>
@@ -1095,7 +1186,7 @@ function devisHtml(){
     return `
     <tr>
       <td>${p.clientName}<br><span style="color:var(--muted);font-size:.78rem;">${p.phone}</span></td>
-      <td><span class="badge ${p.freightType==='aerien'?'aerien':'maritime'}">${p.freightType==='aerien'?'Aérien':'Maritime/Véhicule'}</span></td>
+      <td>${typeBadge(p.freightType)}</td>
       <td>${inv ? fmtMoney(inv.amount) : "—"}</td>
       <td>${p.completed ? '<span class="badge remis">Dossier complété</span>' : (p.linkSent ? '<span class="badge attente">Lien envoyé</span>' : '<span class="badge attente">Lien à envoyer</span>')}</td>
       <td>
@@ -1114,7 +1205,7 @@ function devisHtml(){
     <div class="field"><label>Téléphone (WhatsApp)</label><input id="np-phone" placeholder="+226 70 00 00 00"></div>
     <div class="row2">
       <div class="field"><label>Type de fret</label>
-        <select id="np-type"><option value="aerien">Aérien</option><option value="maritime">Maritime / Véhicule</option></select>
+        <select id="np-type">${typeOptions()}</select>
       </div>
       <div class="field"><label>Poids (kg, optionnel)</label><input id="np-weight" type="number" step="0.1" oninput="calcNpAmount()"></div>
     </div>
@@ -1160,11 +1251,13 @@ function suiviRowsHtml(shipments){
     return `
     <tr>
       <td><strong>${s.trackingNumber}</strong><br><span style="color:var(--muted);font-size:.78rem;">${client ? client.name : "—"}</span></td>
-      <td><span class="badge ${s.freightType==='aerien'?'aerien':'maritime'}">${s.freightType==='aerien'?'Aérien':'Maritime/Véhicule'}</span></td>
+      <td><select data-action="change-type" data-id="${s.id}" title="Type d'envoi" style="max-width:130px;">
+        ${Object.keys(FREIGHT_TYPES).map(k => `<option value="${k}" ${k===s.freightType?"selected":""}>${FREIGHT_TYPES[k].label}</option>`).join("")}
+      </select></td>
       <td><select data-action="change-status" data-id="${s.id}">${options}</select>
         ${isArrivedNotDelivered(s) ? `
         <div style="margin-top:8px;">
-          <button class="btn small" data-action="send-arrival" data-id="${s.id}" style="background:#25D366;color:#0c0c0d;border-color:#25D366;">📲 Message d'arrivée</button>
+          <button class="btn small" data-action="send-arrival" data-id="${s.id}" style="background:#25D366;color:#0c0c0d;border-color:#25D366;">${arrivalButtonLabel(s)}</button>
           ${s.arrivalMsgSentAt ? `<div style="color:var(--muted);font-size:.72rem;margin-top:4px;">✓ Envoyé le ${fmtDate(s.arrivalMsgSentAt)}</div>` : ""}
         </div>` : ""}
       </td>
@@ -1316,7 +1409,7 @@ function invoicePrintHtml(id){
     <div class="kv"><div class="k">Client</div><div>${client ? client.name : "—"}</div></div>
     <div class="kv"><div class="k">Téléphone</div><div>${client ? client.phone : "—"}</div></div>
     ${shipment ? `<div class="kv"><div class="k">N° de suivi</div><div>${shipment.trackingNumber}</div></div>
-    <div class="kv"><div class="k">Type de fret</div><div>${shipment.freightType==='aerien'?'Aérien':'Maritime / Véhicule'}</div></div>
+    <div class="kv"><div class="k">Type de fret</div><div>${freightInfo(shipment.freightType).long}</div></div>
     <div class="kv"><div class="k">Description</div><div>${shipment.description || "—"}</div></div>` : ""}
     ${inv.notes ? `<div class="kv"><div class="k">Notes</div><div>${inv.notes}</div></div>` : ""}
     <table style="width:100%;margin-top:16px;">
@@ -1346,6 +1439,10 @@ function bindActionsIn(root){
 
     if(el.tagName === "SELECT" && action === "change-status"){
       el.addEventListener("change", () => advanceStatus(el.dataset.id, Number(el.value)));
+      return;
+    }
+    if(el.tagName === "SELECT" && action === "change-type"){
+      el.addEventListener("change", () => changeFreightType(el.dataset.id, el.value));
       return;
     }
     if(el.tagName === "SELECT" && action === "change-client-status"){
