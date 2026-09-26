@@ -113,6 +113,7 @@
   .cities span:last-child{text-align:right;}
   .cities b{color:var(--paper); font-weight:500;}
   .cities i{font-style:normal;}
+  .cities .milieu{color:var(--marigold); font-size:0.8rem; align-self:center;}
   @media (max-width:520px){ .cities .pays{display:none;} }
 
   /* étapes */
@@ -174,9 +175,9 @@
   <section class="hero">
     <div class="wrap">
       <div class="inner">
-        <div class="kicker">Suivi en direct · Canada → Afrique de l'Ouest</div>
+        <div class="kicker">Suivi en direct · Canada ⇄ Afrique de l'Ouest</div>
         <h1>Où est votre <em>colis</em> ?</h1>
-        <p class="lede">Entrez le numéro de suivi reçu par WhatsApp. La position de votre envoi s'affiche tout de suite.</p>
+        <p class="lede">Colis, conteneur ou véhicule : entrez le numéro de suivi reçu par WhatsApp. La position de votre envoi s'affiche tout de suite.</p>
 
         <form class="search" id="form-suivi" autocomplete="off">
           <input type="text" id="input-suivi" placeholder="Ex. MBC-2609-0001" autocapitalize="characters" spellcheck="false" aria-label="Numéro de suivi">
@@ -194,7 +195,7 @@
 
           <div class="corridor">
             <div class="track"><div class="fill" id="fill"></div><div class="plane" id="plane">✈</div></div>
-            <div class="cities"><span><b>Montréal</b><i class="pays"> · Canada</i></span><span><b>Ouagadougou</b><i class="pays"> · Burkina Faso</i></span></div>
+            <div class="cities"><span id="ville-depart"><b>Montréal</b><i class="pays"> · Canada</i></span><span id="ville-milieu" class="milieu"></span><span id="ville-arrivee"><b>Ouagadougou</b><i class="pays"> · Burkina Faso</i></span></div>
           </div>
 
           <ul class="steps" id="etapes"></ul>
@@ -228,11 +229,31 @@ const AERIEN = [
   "Prêt pour remise","Remis au client"
 ];
 const MARITIME = [
-  "Devis confirmé","Reçu au dépôt Canada","Chargé en conteneur/navire",
-  "Parti du port (Canada)","En mer","Arrivé au port de destination",
-  "Dédouanement en cours","Dédouané — en transit vers Ouagadougou",
-  "Arrivé à Ouagadougou","Prêt pour remise","Remis au client"
+  "Devis confirmé","Reçu au dépôt Canada","Emballé / Préparé","Chargé en conteneur",
+  "Parti du port de Montréal","En mer","Arrivé au port de Lomé","Formalités douanières à Lomé",
+  "En route vers Ouagadougou","Arrivé à Ouagadougou","Dédouanement à Ouagadougou",
+  "Prêt pour remise","Remis au client"
 ];
+const VEHICULE = [
+  "Devis confirmé","Documents reçus","Véhicule réceptionné à Montréal","Inspection et photos",
+  "Chargé en conteneur","Parti du port de Montréal","En mer","Arrivé au port de Lomé",
+  "Formalités douanières à Lomé","En route vers Ouagadougou","Arrivé à Ouagadougou",
+  "Dédouanement à Ouagadougou","Prêt pour remise","Remis au client"
+];
+const RETOUR = [
+  "Devis confirmé","Reçu à la boutique de Larlé","Emballé / Préparé",
+  "Formalités douanières à Ouagadougou","En vol","Arrivé à Montréal",
+  "Dédouanement au Canada","En route vers notre local","Prêt pour remise","Remis au client"
+];
+
+// Pour chaque type : étapes, étiquette, icône et trajet affiché
+const TYPES = {
+  aerien:   { etapes: AERIEN,   tag: "Fret aérien",         icone: "✈", depart: ["Montréal","Canada"],        milieu: null,   arrivee: ["Ouagadougou","Burkina Faso"] },
+  maritime: { etapes: MARITIME, tag: "Fret maritime",       icone: "🚢", depart: ["Montréal","Canada"],       milieu: "Lomé", arrivee: ["Ouagadougou","Burkina Faso"] },
+  vehicule: { etapes: VEHICULE, tag: "Véhicule",            icone: "🚗", depart: ["Montréal","Canada"],       milieu: "Lomé", arrivee: ["Ouagadougou","Burkina Faso"] },
+  retour:   { etapes: RETOUR,   tag: "Aérien · Ouaga → Canada", icone: "✈", depart: ["Ouagadougou","Burkina Faso"], milieu: null, arrivee: ["Montréal","Canada"] }
+};
+
 const MESSAGES = {
   "Devis confirmé": "Votre commande est confirmée, {name}. On prépare tout dès réception de votre colis.",
   "Reçu au dépôt Canada": "Bonne nouvelle {name}, votre colis est arrivé à notre dépôt au Canada.",
@@ -246,7 +267,22 @@ const MESSAGES = {
   "Dédouané — en transit vers Ouagadougou": "Dédouanement terminé ! Direction Ouagadougou.",
   "Arrivé à Ouagadougou": "Votre colis est arrivé à Ouagadougou, {name} !",
   "Prêt pour remise": "Votre colis vous attend, {name}, prêt à être récupéré.",
-  "Remis au client": "Merci {name} pour votre confiance ! Votre colis a été remis avec succès. 🎉"
+  "Remis au client": "Merci {name} pour votre confiance ! Votre colis a été remis avec succès. 🎉",
+  "Emballé / Préparé": "Votre colis est emballé avec soin et prêt à partir, {name}.",
+  "Chargé en conteneur": "Votre colis est chargé dans le conteneur, prêt pour la traversée, {name}.",
+  "Parti du port de Montréal": "Le navire a quitté le port de Montréal avec votre colis à bord.",
+  "Arrivé au port de Lomé": "Votre colis est arrivé au port de Lomé, {name} !",
+  "Formalités douanières à Lomé": "Les formalités douanières sont en cours au port de Lomé.",
+  "En route vers Ouagadougou": "Votre colis est en route vers Ouagadougou, {name}.",
+  "Dédouanement à Ouagadougou": "Votre colis est en cours de dédouanement à Ouagadougou — encore un peu de patience, {name}.",
+  "Documents reçus": "Nous avons bien reçu les documents de votre véhicule, {name}.",
+  "Véhicule réceptionné à Montréal": "Votre véhicule est bien arrivé chez nous à Montréal, {name}.",
+  "Inspection et photos": "Votre véhicule a été inspecté et photographié avant l'expédition.",
+  "Reçu à la boutique de Larlé": "Votre colis a bien été déposé à notre boutique de Larlé, {name}.",
+  "Formalités douanières à Ouagadougou": "Les formalités d'exportation sont en cours à Ouagadougou.",
+  "Arrivé à Montréal": "Votre colis est arrivé à Montréal, {name} !",
+  "Dédouanement au Canada": "Votre colis passe la douane canadienne — encore un peu de patience, {name}.",
+  "En route vers notre local": "Votre colis est en route vers notre local, {name}."
 };
 
 const form = document.getElementById("form-suivi");
@@ -263,7 +299,8 @@ function afficherMessage(html, erreur){
 
 function afficherResultat(data){
   const s = data.shipment;
-  const etapes = s.freightType === "aerien" ? AERIEN : MARITIME;
+  const type = TYPES[s.freightType] || TYPES.maritime;
+  const etapes = type.etapes;
   const i = Math.max(0, Math.min(Number(s.statusIndex) || 0, etapes.length - 1));
   const livre = i === etapes.length - 1;
   const prenom = texte(data.firstName) || "cher client";
@@ -271,10 +308,20 @@ function afficherResultat(data){
 
   document.getElementById("res-num").textContent = s.trackingNumber;
   const tag = document.getElementById("res-tag");
-  tag.textContent = livre ? "Livré ✓" : (s.freightType === "aerien" ? "Fret aérien" : "Fret maritime / véhicule");
+  tag.textContent = livre ? "Livré ✓" : type.tag;
   tag.classList.toggle("done", livre);
-  document.getElementById("res-msg").textContent =
-    (MESSAGES[label] || "Votre colis progresse bien, {name}.").replace("{name}", prenom);
+  let texteStatut = MESSAGES[label] || "Votre colis progresse bien, {name}.";
+  if(s.freightType === "retour" && label === "En vol") texteStatut = "Votre colis est en plein vol vers le Canada, {name}.";
+  texteStatut = texteStatut.replace("{name}", prenom);
+  if(s.freightType === "vehicule") texteStatut = texteStatut.replace(/Votre colis/g, "Votre véhicule").replace(/votre colis/g, "votre véhicule");
+  document.getElementById("res-msg").textContent = texteStatut;
+
+  // Trajet et icône selon le type d'envoi
+  document.getElementById("plane").textContent = type.icone;
+  document.getElementById("ville-depart").innerHTML = `<b>${type.depart[0]}</b><i class="pays"> · ${type.depart[1]}</i>`;
+  document.getElementById("ville-arrivee").innerHTML = `<b>${type.arrivee[0]}</b><i class="pays"> · ${type.arrivee[1]}</i>`;
+  const milieu = document.getElementById("ville-milieu");
+  milieu.textContent = type.milieu ? "via " + type.milieu : "";
 
   document.getElementById("etapes").innerHTML = etapes.map((e, k) => {
     const fait = k < i || (k === i && livre);
