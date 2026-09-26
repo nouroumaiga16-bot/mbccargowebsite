@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Contrat MBC Cargo</title>
+<meta name="theme-color" content="#0F1B2D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F1B2D; --ink-2:#16263C; --ink-3:#1E3049; --paper:#F3EFE4;
+    --marigold:#E8A33D; --clay:#C9603C; --green:#5FB58A; --ink-soft:#8394AA;
+    --line:rgba(243,239,228,0.14);
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-body:'Inter', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{background:var(--ink); color:var(--paper); font-family:var(--font-body); line-height:1.55; -webkit-font-smoothing:antialiased; padding-bottom:env(safe-area-inset-bottom,0px);}
+  a{color:var(--marigold);}
+  h1,h2,h3{font-family:var(--font-display); margin:0; font-weight:600; letter-spacing:-0.01em;}
+  p{margin:0 0 10px;}
+
+  header.nav{position:sticky; top:0; z-index:40; background:rgba(15,27,45,0.9); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); padding-top:env(safe-area-inset-top,0px);}
+  .nav-inner{max-width:860px; margin:0 auto; padding:0 20px; height:64px; display:flex; align-items:center; justify-content:space-between;}
+  .brand{font-family:var(--font-display); font-weight:700; font-size:1.15rem; color:var(--paper); text-decoration:none;}
+  .brand span{color:var(--marigold);}
+  .nav-inner .small{font-size:.85rem; color:var(--ink-soft);}
+
+  .wrap{max-width:860px; margin:0 auto; padding:28px 20px 60px;}
+  .doc-head{text-align:center; margin-bottom:26px;}
+  .doc-head .kicker{color:var(--marigold); font-family:var(--font-display); font-weight:600; font-size:.9rem; margin-bottom:10px;}
+  .doc-head h1{font-size:clamp(1.5rem,4.5vw,2.2rem); line-height:1.15;}
+  .doc-head .sub{color:var(--ink-soft); font-style:italic; margin-top:6px;}
+  .meta{display:flex; justify-content:center; gap:22px; flex-wrap:wrap; margin-top:16px; font-size:.92rem;}
+  .meta b{color:var(--marigold); font-family:var(--font-display);}
+
+  .card{background:var(--ink-2); border:1px solid var(--line); border-radius:6px; padding:22px; margin-bottom:18px;}
+  @media (max-width:520px){ .card{padding:18px 15px;} }
+  .card h2{font-size:1.1rem; color:var(--marigold); margin-bottom:14px;}
+  .card h3{font-size:.98rem; margin:18px 0 8px; color:var(--paper);}
+  .muted{color:var(--ink-soft); font-size:.9rem;}
+
+  .kv{display:grid; grid-template-columns:190px 1fr; gap:8px 16px; font-size:.95rem;}
+  .kv .k{color:var(--ink-soft);}
+  @media (max-width:560px){ .kv{grid-template-columns:1fr; gap:2px;} .kv .k{margin-top:8px;} }
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:640px){ .grid{grid-template-columns:1fr;} }
+  .field label{display:block; font-size:.82rem; color:var(--ink-soft); margin-bottom:5px;}
+  .field label .req{color:var(--marigold);}
+  .field input, .field select{
+    width:100%; background:var(--ink); border:1px solid var(--line); color:var(--paper);
+    padding:13px 12px; border-radius:4px; font-size:16px; font-family:var(--font-body);
+  }
+  .field input:focus, .field select:focus{outline:none; border-color:var(--marigold);}
+  .field.wide{grid-column:1 / -1;}
+  .val{padding:2px 0; font-weight:500;}
+
+  .services{display:grid; gap:10px;}
+  .svc{display:flex; gap:12px; align-items:flex-start; padding:13px 14px; border:1px solid var(--line); border-radius:4px; cursor:pointer;}
+  .svc input{margin-top:3px; accent-color:var(--marigold); width:18px; height:18px; flex:none;}
+  .svc small{display:block; color:var(--ink-soft);}
+  .svc.on{border-color:var(--marigold); background:rgba(232,163,61,.07);}
+
+  .articles{font-size:.93rem; color:#DCD6C6;}
+  .articles h3{color:var(--marigold); font-size:.92rem; margin:20px 0 6px; letter-spacing:.02em;}
+  .articles ol{padding-left:20px; margin:6px 0 10px;}
+  .articles li{margin-bottom:4px;}
+  details.read{border:1px solid var(--line); border-radius:4px; padding:0 16px;}
+  details.read summary{cursor:pointer; padding:14px 0; font-weight:600; color:var(--marigold); list-style:none;}
+  details.read summary::-webkit-details-marker{display:none;}
+  details.read[open] summary{border-bottom:1px solid var(--line); margin-bottom:6px;}
+
+  .sigbox{background:#FBF9F3; border-radius:4px; position:relative; touch-action:none;}
+  .sigbox canvas{display:block; width:100%; height:190px; border-radius:4px;}
+  .sigbox .hint{position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); text-align:center; color:#9C9480; pointer-events:none; font-size:.95rem;}
+  .sig-actions{display:flex; justify-content:space-between; margin-top:8px; font-size:.85rem;}
+  .link{background:none; border:none; color:var(--ink-soft); text-decoration:underline; cursor:pointer; font-size:.85rem; padding:0;}
+
+  .accept{display:flex; gap:12px; align-items:flex-start; margin-top:18px; font-size:.93rem; cursor:pointer;}
+  .accept input{width:20px; height:20px; margin-top:2px; accent-color:var(--marigold); flex:none;}
+
+  .btn{display:block; width:100%; margin-top:20px; background:var(--marigold); color:var(--ink); border:none; border-radius:4px; padding:16px; font-size:1.05rem; font-weight:600; cursor:pointer; font-family:var(--font-body);}
+  .btn:disabled{opacity:.6; cursor:wait;}
+  .btn.alt{background:transparent; color:var(--paper); border:1px solid var(--line);}
+  .err{margin-top:14px; padding:12px 14px; border:1px solid rgba(201,96,60,.5); border-radius:4px; color:#F0B8A4; font-size:.92rem; display:none;}
+  .ok-banner{background:rgba(95,181,138,.12); border:1px solid rgba(95,181,138,.5); color:#BFE5D1; border-radius:6px; padding:16px 18px; margin-bottom:18px;}
+  .sign-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  @media (max-width:560px){ .sign-grid{grid-template-columns:1fr;} }
+  .sign-grid img{max-width:100%; background:#FBF9F3; border-radius:4px; display:block; margin-top:6px;}
+  .center{text-align:center; padding:70px 10px; color:var(--ink-soft);}
+
+  /* ---------- impression / PDF ---------- */
+  @media print{
+    @page{margin:16mm 14mm;}
+    body{background:#fff; color:#111; font-size:10.5pt;}
+    header.nav, .no-print{display:none !important;}
+    .wrap{padding:0; max-width:none;}
+    .card{background:#fff; border:1px solid #cfd8d2; break-inside:avoid-page; padding:12px 14px;}
+    .card h2, .articles h3, .doc-head .kicker, .meta b{color:#1F6B4C;}
+    .articles{color:#222;}
+    .kv .k, .muted, .doc-head .sub{color:#555;}
+    .sign-grid img{background:#fff; border:1px solid #ddd;}
+    .ok-banner{display:none;}
+    a{color:#111; text-decoration:none;}
+  }
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/">MBC <span>Cargo</span></a>
+    <span class="small">Contrat sécurisé</span>
+  </div>
+</header>
+
+<main class="wrap" id="app">
+  <div class="center">Chargement du contrat…</div>
+</main>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9L5c9zw3Icw1nfEO8_ExV_27mB-YpNMj6A0ODfVI6Cdx8KdxwIpsK8jkKhCvTEt9DAA/exec";
+const app = document.getElementById("app");
+const code = (new URLSearchParams(location.search).get("c") || "").trim().toUpperCase();
+let contrat = null;
+
+async function api(action, payload){
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: {"Content-Type": "text/plain;charset=utf-8"},
+    body: JSON.stringify(Object.assign({action}, payload || {}))
+  });
+  return res.json();
+}
+
+function esc(t){ return String(t == null ? "" : t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function dateFr(iso){ const d = iso ? new Date(iso) : new Date(); return d.toLocaleDateString("fr-CA", {day:"2-digit", month:"long", year:"numeric"}); }
+function money(v){ return v ? esc(v) + " $ CAD" : "—"; }
+
+const SERVICES = {
+  aerien:   { label: "Fret aérien — colis / cartons", delai: "Délai indicatif : 5 à 8 jours" },
+  maritime: { label: "Fret maritime — colis / volumes", delai: "Délai indicatif : 35 à 60 jours" },
+  vehicule: { label: "Expédition de véhicule (voiture, moto, utilitaire) en conteneur", delai: "Délai indicatif : 45 à 60 jours" }
+};
+function serviceKey(t){ return t === "retour" ? "aerien" : (SERVICES[t] ? t : "maritime"); }
+
+/* ---------- texte du contrat (articles) ---------- */
+const PRESTATAIRE = `
+  <div class="kv">
+    <div class="k">Raison sociale</div><div>MBC CARGO</div>
+    <div class="k">Représentant</div><div>Nourou MAIGA</div>
+    <div class="k">Siège / bureau</div><div>Région de Montréal, Québec, Canada</div>
+    <div class="k">Téléphone / WhatsApp</div><div>+1 (418) 812-9289</div>
+    <div class="k">Courriel</div><div>mbccargo.service@gmail.com</div>
+  </div>`;
+
+const ARTICLE_1 = `
+  <h3>ARTICLE 1 — OBJET DU CONTRAT</h3>
+  <p>Le présent contrat a pour objet l'achat, par le Client, des services d'expédition internationale offerts par MBC CARGO, consistant à prendre en charge, transporter, acheminer et livrer les biens décrits à l'article 2, depuis le Canada vers la destination convenue en Afrique de l'Ouest, selon le mode choisi (fret aérien, fret maritime ou expédition de véhicule).</p>
+  <p>MBC CARGO agit en qualité de prestataire de services logistiques et d'intermédiaire d'expédition. Elle n'est pas le transporteur maritime ou aérien final, sauf mention contraire écrite. Les compagnies de transport, transitaires et agents locaux interviennent comme sous-traitants.</p>`;
+
+const ARTICLE_3_TEXTE = `
+  <p>Le prix couvre uniquement les prestations expressément décrites. Sont exclus, sauf mention écrite contraire : droits de douane et taxes à l'importation au pays de destination, frais de stockage au-delà du délai gratuit, amendes, stationnement, dépotage extraordinaire, réparation, assurance cargo facultative, et tout frais imprévu dû à une déclaration inexacte du Client.</p>
+  <p>Aucun départ n'est confirmé tant que le dépôt convenu n'est pas reçu. Le solde est exigible selon l'échéancier ci-dessus. Tout retard de paiement de plus de sept (7) jours peut entraîner la suspension du service, des frais de stockage et, le cas échéant, la résolution du contrat aux frais du Client.</p>`;
+
+const ARTICLES_4_16 = `
+  <h3>ARTICLE 4 — OBLIGATIONS DE MBC CARGO</h3>
+  <p>MBC CARGO s'engage à :</p>
+  <ol>
+    <li>Prendre en charge les biens aux lieu et date convenus, sous réserve de la réception des documents et du paiement exigibles ;</li>
+    <li>Organiser l'acheminement selon le mode choisi, avec la diligence d'un prestataire raisonnable ;</li>
+    <li>Assurer un suivi par WhatsApp ou SMS aux étapes principales (prise en charge, départ, arrivée au port/aéroport, mise à disposition) ;</li>
+    <li>Coordonner, dans la mesure du possible, l'assistance aux formalités douanières au pays de destination par l'intermédiaire de partenaires locaux ;</li>
+    <li>Informer le Client de tout événement majeur connu d'elle qui retarde ou compromet l'expédition.</li>
+  </ol>
+  <p>Les délais indiqués sont indicatifs. Ils peuvent varier en raison des compagnies aériennes ou maritimes, des contrôles douaniers, des grèves, des conditions climatiques, de l'encombrement portuaire ou de toute cause indépendante de la volonté de MBC CARGO.</p>
+
+  <h3>ARTICLE 5 — OBLIGATIONS DU CLIENT</h3>
+  <p>Le Client s'engage à :</p>
+  <ol>
+    <li>Déclarer de façon exacte et complète la nature, le poids, les dimensions, la valeur et le contenu des biens ;</li>
+    <li>Ne pas remettre de marchandises interdites, réglementées sans autorisation, dangereuses non déclarées, contrefaites, ou illicites selon les lois du Canada, du pays de transit ou du pays de destination ;</li>
+    <li>Fournir tous les documents requis : pièce d'identité, facture, liste de colisage, procuration le cas échéant et, pour un véhicule, une preuve d'appartenance (certificat d'immatriculation SAAQ ou preuve d'achat) ainsi que la pièce d'identité de la personne qui expédie ;</li>
+    <li>Préparer les colis de façon solide et adaptée au transport international ;</li>
+    <li>Payer le prix aux échéances convenues et régler les droits et taxes dus à destination, sauf si le devis les inclut expressément ;</li>
+    <li>S'assurer que le destinataire est joignable et en mesure de réceptionner dans les délais ;</li>
+    <li>Signaler immédiatement toute erreur sur le destinataire, l'adresse ou les documents.</li>
+  </ol>
+  <p>Toute fausse déclaration, omission ou bien interdit engage exclusivement la responsabilité du Client, qui indemnise MBC CARGO de tout préjudice, amende, saisie ou frais qui en résultent.</p>
+
+  <h3>ARTICLE 6 — PRISE EN CHARGE, RISQUES ET ASSURANCE</h3>
+  <p>La prise en charge est constatée par un reçu, un bordereau ou un message de confirmation. À compter de cette prise en charge et jusqu'à la remise au destinataire ou à l'agent local désigné, MBC CARGO exerce une obligation de moyens.</p>
+  <p>MBC CARGO n'est pas responsable des dommages résultant d'un vice propre de la marchandise, d'un emballage insuffisant, d'un cas de force majeure, d'un acte de l'autorité publique, d'un vol après livraison, ou d'une faute du Client ou du destinataire.</p>
+  <p>Une assurance cargo n'est pas automatiquement incluse. Le Client peut en demander une par écrit avant le départ. À défaut, il assume le risque de perte ou d'avarie au-delà des limites légales applicables au transporteur sous-jacent.</p>
+  <p>Pour les véhicules, les dispositions particulières des articles 6 bis et 6 ter s'appliquent en plus du présent article.</p>
+
+  <h3>ARTICLE 6 BIS — DISPOSITIONS PARTICULIÈRES AUX VÉHICULES</h3>
+  <p><b>Chargement.</b> Le chargement des véhicules se fait à l'entrepôt de MBC CARGO situé au 939, rue Upton, Montréal (Québec), à la date convenue avec le Client.</p>
+  <p><b>Conteneur partagé.</b> Le véhicule est placé dans un conteneur partagé pouvant contenir jusqu'à quatre (4) véhicules. Le Client reconnaît que ce mode de transport peut entraîner des égratignures, petites bosses et traces de manutention mineures, qui sont considérées comme normales et ne donnent droit à aucune indemnisation.</p>
+  <p><b>Photos et vidéos obligatoires.</b> Avant la remise du véhicule, le Client doit prendre des photos et des vidéos datées de l'ensemble du véhicule (extérieur et intérieur). Sans ces preuves photo et vidéo, aucune réclamation pour dommage ne sera recevable.</p>
+  <p><b>Option de protection complète.</b> Le Client qui souhaite qu'aucun dommage ne soit toléré et bénéficier d'une couverture totale peut souscrire, avant le départ, une option de protection complète moyennant un montant supplémentaire de 500 $ à 1 000 $ CAD selon l'année et le modèle du véhicule. Le montant exact est confirmé par écrit par MBC CARGO. Sans cette option, seules les règles du présent contrat s'appliquent.</p>
+  <p><b>Récupération.</b> À l'arrivée, seul le Client ou la personne qu'il a désignée à l'avance au présent contrat (destinataire), sur présentation d'une pièce d'identité valide, peut récupérer le véhicule.</p>
+  <p><b>Dédouanement.</b> Les frais et formalités de dédouanement à l'arrivée à Ouagadougou sont à la charge du Client. MBC CARGO s'occupe de l'acheminement du véhicule jusqu'à destination.</p>
+
+  <h3>ARTICLE 6 TER — BIENS PERSONNELS PLACÉS DANS LE VÉHICULE</h3>
+  <p>Seul le véhicule fait l'objet du service d'expédition. MBC CARGO n'assume aucune responsabilité pour les biens, effets personnels ou marchandises que le Client choisit de laisser ou de placer à l'intérieur du véhicule (perte, vol, bris, dommage, saisie ou retard).</p>
+  <p>Il est strictement interdit de placer dans le véhicule notamment : armes, munitions et explosifs ; produits inflammables ou dangereux (essence, bonbonnes de gaz, peintures, solvants, produits chimiques) ; drogues et substances illicites ; batteries au lithium non installées ; denrées périssables ; argent liquide, bijoux et objets de grande valeur ; documents officiels ; produits contrefaits ; animaux ou végétaux ; et, de façon générale, tout article interdit ou réglementé par les lois du Canada, des pays de transit ou du pays de destination. Tout frais, amende ou saisie résultant de ces biens est à la charge exclusive du Client.</p>
+
+  <h3>ARTICLE 7 — DOUANES ET RÉGLEMENTATION</h3>
+  <p>Le Client est l'importateur réel au pays de destination, sauf convention contraire. Il demeure responsable des droits de douane, TVA, accises et formalités locales.</p>
+  <p>MBC CARGO et ses partenaires peuvent assister le dédouanement, mais ne garantissent ni le montant des droits, ni l'absence de contrôle, ni un délai douanier précis. Toute marchandise saisie ou refusée en raison d'une déclaration inexacte ou d'une interdiction demeure à la charge exclusive du Client.</p>
+
+  <h3>ARTICLE 8 — LIVRAISON ET RÉCEPTION</h3>
+  <p>La livraison est réputée effectuée lorsque les biens sont remis au destinataire désigné, ou mis à sa disposition à l'entrepôt / point de retrait convenu, avec notification au Client. La remise se fait uniquement au Client ou au destinataire désigné, sur présentation d'une pièce d'identité valide.</p>
+  <p>Si le destinataire est injoignable, ne récupère pas les biens ou le véhicule, ou refuse la marchandise, des frais d'entreposage s'appliquent automatiquement après un délai de grâce de cinq (5) jours. Passé trente (30) jours sans instruction et sans paiement des frais, MBC CARGO pourra, après mise en demeure, disposer des biens conformément à la loi afin de recouvrer ses créances.</p>
+
+  <h3>ARTICLE 9 — RÉCLAMATIONS</h3>
+  <p>Toute réclamation (manquant, avarie, retard anormal) doit être notifiée par écrit (courriel ou WhatsApp confirmé) dans les cinq (5) jours suivant la réception ou la mise à disposition, avec photos, vidéos et description. Pour un véhicule, la réclamation doit être accompagnée des photos et vidéos prises avant le départ (article 6 bis). Passé ce délai, ou sans ces preuves, aucune réclamation n'est recevable et la livraison est présumée conforme, sous réserve des dispositions impératives applicables.</p>
+
+  <h3>ARTICLE 10 — RESPONSABILITÉ ET LIMITATION</h3>
+  <p>La responsabilité de MBC CARGO, toutes causes confondues, est limitée au montant du prix du service payé au titre du présent contrat, sauf faute lourde ou intentionnelle. Elle ne couvre pas les dommages indirects (perte d'exploitation, préjudice moral, manque à gagner).</p>
+  <p>Cette limitation s'applique dans la mesure permise par le droit québécois et, le cas échéant, par les conventions internationales de transport applicables au transporteur effectif.</p>
+
+  <h3>ARTICLE 11 — ANNULATION ET RÉSOLUTION</h3>
+  <p>Le Client peut annuler par écrit avant la prise en charge. Les frais déjà engagés (ramassage, documentation, réservation d'espace) restent dus. Si le Client annule après avoir déposé son véhicule à l'entrepôt, des frais de 150 $ à 200 $ CAD sont retenus pour couvrir le dépôt et le stationnement. Après prise en charge ou après départ, aucun remboursement n'est dû, sauf si l'annulation résulte d'une faute exclusive de MBC CARGO.</p>
+  <p>MBC CARGO peut résoudre le contrat de plein droit, après mise en demeure restée sans effet de quarante-huit (48) heures, en cas de non-paiement, de déclaration inexacte, de marchandise interdite ou de manquement grave du Client.</p>
+
+  <h3>ARTICLE 12 — PROTECTION DES RENSEIGNEMENTS PERSONNELS</h3>
+  <p>Les renseignements personnels collectés servent exclusivement à l'exécution du contrat, au suivi, à la facturation et aux obligations légales (douane, transport). Ils ne sont communiqués qu'aux partenaires nécessaires à l'acheminement. Le Client peut exercer ses droits d'accès et de rectification en s'adressant à MBC CARGO.</p>
+
+  <h3>ARTICLE 13 — FORCE MAJEURE</h3>
+  <p>Aucune Partie n'est responsable d'un manquement dû à un événement de force majeure : guerre, émeute, catastrophe naturelle, pandémie, fermeture de frontière ou de port, grève générale, décision gouvernementale, panne majeure des réseaux de transport. Les délais sont alors suspendus. Si l'événement dure plus de soixante (60) jours, chaque Partie peut résilier sans dommages, les sommes correspondant aux prestations déjà rendues demeurant acquises.</p>
+
+  <h3>ARTICLE 14 — DROIT APPLICABLE ET LITIGES</h3>
+  <p>Le présent contrat est régi par les lois de la province de Québec et les lois fédérales du Canada qui s'y appliquent.</p>
+  <p>Les Parties s'efforcent de régler tout différend à l'amiable. À défaut d'accord dans les quinze (15) jours d'une mise en demeure écrite, les tribunaux compétents du district judiciaire de Montréal, Québec, sont seuls compétents, sous réserve des règles impératives de protection du consommateur le cas échéant.</p>
+
+  <h3>ARTICLE 15 — DISPOSITIONS GÉNÉRALES</h3>
+  <p>Le présent contrat, ses annexes (devis, liste de colisage, photos, copies de pièces) constituent l'intégralité de l'entente. Toute modification doit être constatée par écrit (y compris message WhatsApp expressément accepté par les deux Parties).</p>
+  <p>Si une clause est déclarée nulle, les autres demeurent en vigueur. Le fait de ne pas se prévaloir d'un manquement ne vaut pas renonciation.</p>
+  <p>Le contrat peut être signé en deux exemplaires originaux ou par signature manuscrite scannée / photographiée, ou par signature électronique, chaque exemplaire ayant la même valeur.</p>
+
+  <h3>ARTICLE 16 — DÉCLARATION DU CLIENT</h3>
+  <p>Le Client déclare avoir lu le présent contrat, en avoir compris la portée, avoir eu la possibilité de poser des questions, et signer en toute connaissance de cause, sans pression. Il confirme que les biens décrits lui appartiennent ou qu'il est dûment autorisé à les faire expédier.</p>`;
+
+const ANNEXES = `
+  <h3>ANNEXES</h3>
+  <ul class="muted">
+    <li>Annexe A — Devis accepté / grille tarifaire</li>
+    <li>Annexe B — Liste de colisage et photos des biens</li>
+    <li>Annexe C — Copie de la pièce d'identité du Client</li>
+    <li>Annexe D — Documents du véhicule (le cas échéant)</li>
+    <li>Annexe E — Coordonnées du destinataire et instructions de livraison</li>
+  </ul>`;
+
+/* ---------- champs ---------- */
+const CLIENT_FIELDS = [
+  ["name", "Nom et prénom / raison sociale", true, "text"],
+  ["birthDate", "Date de naissance", false, "date"],
+  ["address", "Adresse complète", true, "text"],
+  ["city", "Ville, province / pays, code postal", true, "text"],
+  ["phone", "Téléphone / WhatsApp", true, "tel"],
+  ["email", "Courriel", false, "email"],
+  ["idDoc", "Pièce d'identité (type et n°)", true, "text"]
+];
+const GOODS_FIELDS = [
+  ["goods", "Nature des biens", true, "text", ""],
+  ["units", "Nombre de colis / unités", false, "text", ""],
+  ["weight", "Poids total estimé (kg)", false, "text", ""],
+  ["dimensions", "Dimensions / volume", false, "text", ""],
+  ["declaredValue", "Valeur déclarée (CAD)", false, "text", ""],
+  ["vehicle", "Marque / modèle / année (véhicule)", false, "text", "vehicule"],
+  ["vin", "N° VIN / plaque (véhicule)", false, "text", "vehicule"],
+  ["pickupPlace", "Lieu de prise en charge", false, "text", ""],
+  ["recipientName", "Destinataire (nom complet)", true, "text", ""],
+  ["recipientPhone", "Téléphone du destinataire", true, "tel", ""],
+  ["deliveryAddress", "Adresse de livraison", false, "text", ""],
+  ["destinationCity", "Ville et pays de destination", true, "text", ""]
+];
+
+function inputHtml([key, label, req, type, only], value){
+  const hide = only === "vehicule" ? ' data-only="vehicule"' : "";
+  return `<div class="field"${hide}><label for="f-${key}">${label}${req ? ' <span class="req">*</span>' : ""}</label>
+    <input id="f-${key}" type="${type}" value="${esc(value || "")}" ${req ? "required" : ""} autocomplete="off"></div>`;
+}
+function valueHtml([key, label], data){
+  return `<div class="k">${label}</div><div class="val">${esc(data[key] || "—")}</div>`;
+}
+
+function prixHtml(p){
+  return `<div class="kv">
+    <div class="k">Tarif convenu (taxes en sus si applicables)</div><div class="val">${money(p.tarif)}</div>
+    <div class="k">Dépôt à la commande (minimum 50 %)</div><div class="val">${money(p.depot)}</div>
+    <div class="k">Solde avant expédition / avant livraison</div><div class="val">${money(p.solde)}</div>
+    <div class="k">Mode de paiement</div><div class="val">${esc(p.mode || "—")}</div>
+    <div class="k">Référence du paiement</div><div class="val">${esc(p.reference || "—")}</div>
+  </div>`;
+}
+
+function enTete(c){
+  return `<div class="doc-head">
+    <div class="kicker">MBC CARGO · Montréal → Afrique de l'Ouest</div>
+    <h1>Contrat d'achat de services d'expédition</h1>
+    <div class="sub">Colis et véhicules — Canada vers l'Afrique de l'Ouest</div>
+    <div class="meta"><span>N° de contrat : <b>${esc(c.number)}</b></span>
+      <span>Date : <b>${dateFr(c.signedAt)}</b></span>
+      ${c.prefill.trackingNumber ? `<span>Suivi : <b>${esc(c.prefill.trackingNumber)}</b></span>` : ""}</div>
+  </div>`;
+}
+
+/* ---------- mode 1 : à remplir et signer ---------- */
+function afficherFormulaire(c){
+  const svc = serviceKey(c.serviceType);
+  const pre = { name: c.prefill.name, phone: c.prefill.phone, destinationCity: "Ouagadougou, Burkina Faso" };
+  app.innerHTML = `
+    ${enTete(c)}
+    <p class="muted no-print" style="text-align:center;margin-bottom:22px;">Remplissez vos informations, lisez le contrat puis signez avec votre doigt en bas de la page. Les champs marqués <span style="color:var(--marigold)">*</span> sont obligatoires.</p>
+
+    <div class="card"><h2>Le prestataire (le « Vendeur »)</h2>${PRESTATAIRE}</div>
+
+    <div class="card"><h2>Le client (l'« Acheteur »)</h2>
+      <div class="grid">${CLIENT_FIELDS.map(f => inputHtml(f, pre[f[0]])).join("")}</div>
+    </div>
+
+    <div class="card articles">${ARTICLE_1}</div>
+
+    <div class="card"><h2>Article 2 — Description des biens et du service</h2>
+      <div class="services" id="services">
+        ${Object.keys(SERVICES).map(k => `
+          <label class="svc ${k===svc?"on":""}"><input type="radio" name="service" value="${k}" ${k===svc?"checked":""}>
+            <span>${SERVICES[k].label}${SERVICES[k].delai ? `<small>${SERVICES[k].delai}</small>` : ""}</span></label>`).join("")}
+      </div>
+      <div class="grid" style="margin-top:16px;">${GOODS_FIELDS.map(f => inputHtml(f, pre[f[0]])).join("")}</div>
+      <label class="accept" data-only="vehicule" style="margin-top:16px;"><input type="checkbox" id="f-protection">
+        <span>Je souhaite l'<b>option de protection complète</b> (500 $ à 1 000 $ CAD selon l'année et le modèle, montant confirmé par MBC Cargo — voir article 6 bis).</span></label>
+      <p class="muted" style="margin-top:14px;">Une liste de colisage, des photos et, le cas échéant, une copie du certificat d'immatriculation du véhicule sont annexées au présent contrat et en font partie intégrante.</p>
+    </div>
+
+    <div class="card"><h2>Article 3 — Prix et modalités de paiement</h2>
+      ${prixHtml(c.prices || {})}
+      <div class="articles" style="margin-top:14px;">${ARTICLE_3_TEXTE}</div>
+    </div>
+
+    <div class="card">
+      <details class="read" id="lecture"><summary>📖 Lire les articles 4 à 16 (obligations, assurance, douanes, réclamations…)</summary>
+        <div class="articles">${ARTICLES_4_16}</div>
+      </details>
+      <div class="articles">${ANNEXES}</div>
+    </div>
+
+    <div class="card" data-only="vehicule" style="border-color:rgba(232,163,61,.5);">
+      <h2>📸 Important pour votre véhicule</h2>
+      <p>Avant de nous remettre le véhicule, prenez des <b>photos et vidéos de tout le véhicule</b> (extérieur et intérieur) et gardez-les. Sans ces preuves, aucune réclamation ne pourra être acceptée (article 6 bis).</p>
+      <p style="margin:0;">Ne laissez <b>aucun objet de valeur ni article interdit</b> dans le véhicule (article 6 ter).</p>
+    </div>
+
+    <div class="card"><h2>Signature du client</h2>
+      <div class="field" style="margin-bottom:14px;"><label for="f-signedPlace">Fait à (ville) <span class="req">*</span></label>
+        <input id="f-signedPlace" type="text" placeholder="Ex. Montréal" required></div>
+      <div class="sigbox" id="sigbox"><canvas id="sig"></canvas><div class="hint" id="sig-hint">✍️ Signez ici avec votre doigt</div></div>
+      <div class="sig-actions"><span class="muted">Le ${dateFr()}</span><button type="button" class="link" id="sig-clear">Effacer la signature</button></div>
+
+      <label class="accept"><input type="checkbox" id="accept">
+        <span>Je déclare avoir lu le présent contrat, en avoir compris la portée et l'accepter. Lu et approuvé, bon pour accord.</span></label>
+
+      <button class="btn" id="btn-sign">Signer et envoyer le contrat</button>
+      <div class="err" id="err"></div>
+    </div>`;
+
+  // service choisi → champs véhicule
+  const majService = () => {
+    const v = (document.querySelector('input[name="service"]:checked') || {}).value;
+    document.querySelectorAll(".svc").forEach(l => l.classList.toggle("on", l.querySelector("input").checked));
+    document.querySelectorAll('[data-only="vehicule"]').forEach(el => el.style.display = v === "vehicule" ? "" : "none");
+  };
+  document.querySelectorAll('input[name="service"]').forEach(r => r.addEventListener("change", majService));
+  majService();
+
+  const pad = signaturePad(document.getElementById("sig"), document.getElementById("sig-hint"));
+  document.getElementById("sig-clear").addEventListener("click", pad.clear);
+  document.getElementById("btn-sign").addEventListener("click", () => envoyer(pad));
+}
+
+function signaturePad(canvas, hint){
+  const ctx = canvas.getContext("2d");
+  let drawing = false, empty = true, last = null;
+  function size(){
+    const r = canvas.getBoundingClientRect();
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = r.width * ratio; canvas.height = r.height * ratio;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.lineWidth = 2.4; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#0F1B2D";
+    empty = true; hint.style.display = "";
+  }
+  function pos(e){ const r = canvas.getBoundingClientRect(); return {x: e.clientX - r.left, y: e.clientY - r.top}; }
+  canvas.addEventListener("pointerdown", e => { drawing = true; last = pos(e); canvas.setPointerCapture(e.pointerId); e.preventDefault(); });
+  canvas.addEventListener("pointermove", e => {
+    if(!drawing) return;
+    const p = pos(e);
+    ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    last = p;
+    if(empty){ empty = false; hint.style.display = "none"; }
+    e.preventDefault();
+  });
+  ["pointerup","pointercancel","pointerleave"].forEach(ev => canvas.addEventListener(ev, () => drawing = false));
+  size();
+  let w = window.innerWidth;
+  window.addEventListener("resize", () => { if(window.innerWidth !== w){ w = window.innerWidth; size(); } });
+  return {
+    clear: size,
+    isEmpty: () => empty,
+    data: () => {
+      // on réduit l'image pour un envoi rapide
+      const out = document.createElement("canvas");
+      const r = canvas.getBoundingClientRect();
+      out.width = Math.min(600, Math.round(r.width)); out.height = Math.round(out.width * r.height / r.width);
+      const o = out.getContext("2d");
+      o.fillStyle = "#ffffff"; o.fillRect(0, 0, out.width, out.height);
+      o.drawImage(canvas, 0, 0, out.width, out.height);
+      return out.toDataURL("image/png");
+    }
+  };
+}
+
+function erreur(msg){
+  const e = document.getElementById("err");
+  e.textContent = msg; e.style.display = msg ? "block" : "none";
+  if(msg) e.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+async function envoyer(pad){
+  erreur("");
+  const data = {};
+  const manquants = [];
+  const svc = (document.querySelector('input[name="service"]:checked') || {}).value || "";
+  [...CLIENT_FIELDS, ...GOODS_FIELDS, ["signedPlace","Fait à",true]].forEach(f => {
+    const el = document.getElementById("f-" + f[0]);
+    if(!el) return;
+    data[f[0]] = el.value.trim();
+    const visible = !(f[4] === "vehicule" && svc !== "vehicule");
+    if(f[2] && visible && !data[f[0]]) manquants.push(f[1]);
+  });
+  data.service = svc;
+  const prot = document.getElementById("f-protection");
+  data.protection = (svc === "vehicule" && prot && prot.checked) ? "Oui" : "Non";
+  if(manquants.length) return erreur("Merci de remplir : " + manquants.join(", ") + ".");
+  if(pad.isEmpty()) return erreur("Merci de signer avec votre doigt dans le cadre prévu.");
+  if(!document.getElementById("accept").checked) return erreur("Merci de cocher la case « Je déclare avoir lu le présent contrat… ».");
+
+  const btn = document.getElementById("btn-sign");
+  btn.disabled = true; btn.textContent = "Envoi en cours…";
+  try{
+    const r = await api("signContract", {code, data, accepted: true, signature: pad.data()});
+    if(r && r.ok){ contrat = r.contract; afficherSigne(contrat, true); window.scrollTo(0, 0); return; }
+    if(r && r.error === "already_signed") return charger();
+    erreur(r && r.error === "missing_fields" ? "Certaines informations obligatoires manquent." : "L'envoi n'a pas fonctionné. Réessayez.");
+  }catch(e){
+    erreur("Connexion impossible. Vérifiez votre internet et réessayez.");
+  }
+  btn.disabled = false; btn.textContent = "Signer et envoyer le contrat";
+}
+
+/* ---------- mode 2 : contrat signé (lecture / impression) ---------- */
+function afficherSigne(c, vientDeSigner){
+  const d = c.data || {};
+  const svc = SERVICES[d.service] || SERVICES[serviceKey(c.serviceType)];
+  const goods = GOODS_FIELDS.filter(f => !(f[4] === "vehicule" && d.service !== "vehicule"));
+  app.innerHTML = `
+    ${vientDeSigner ? `<div class="ok-banner">✅ Merci ! Votre contrat est signé et a bien été transmis à MBC Cargo. Vous pouvez le garder en PDF avec le bouton ci-dessous.</div>` : ""}
+    <div class="no-print" style="margin-bottom:18px;"><button class="btn" style="margin-top:0;" onclick="window.print()">🖨️ Imprimer / Enregistrer en PDF</button></div>
+    ${enTete(c)}
+    <div class="card"><h2>Le prestataire (le « Vendeur »)</h2>${PRESTATAIRE}</div>
+    <div class="card"><h2>Le client (l'« Acheteur »)</h2><div class="kv">${CLIENT_FIELDS.map(f => valueHtml(f, d)).join("")}</div></div>
+    <div class="card articles">${ARTICLE_1}</div>
+    <div class="card"><h2>Article 2 — Description des biens et du service</h2>
+      <p><b>Service acheté :</b> ${esc(svc.label)}${svc.delai ? ` <span class="muted">(${esc(svc.delai)})</span>` : ""}</p>
+      <div class="kv">${goods.map(f => valueHtml(f, d)).join("")}
+        ${d.service === "vehicule" ? `<div class="k">Option de protection complète</div><div class="val">${esc(d.protection || "Non")}</div>` : ""}</div>
+    </div>
+    <div class="card"><h2>Article 3 — Prix et modalités de paiement</h2>${prixHtml(c.prices || {})}<div class="articles" style="margin-top:14px;">${ARTICLE_3_TEXTE}</div></div>
+    <div class="card articles">${ARTICLES_4_16}${ANNEXES}</div>
+    <div class="card"><h2>Signatures</h2>
+      <p>Fait à <b>${esc(d.signedPlace || "—")}</b>, le <b>${dateFr(c.signedAt)}</b>.</p>
+      <div class="sign-grid">
+        <div><div class="muted">LE CLIENT — L'ACHETEUR</div><div class="val">${esc(d.name)}</div>
+          ${c.signature ? `<img src="${c.signature}" alt="Signature du client">` : ""}
+          <div class="muted" style="margin-top:6px;">Lu et approuvé. Bon pour accord. Signé électroniquement le ${new Date(c.signedAt).toLocaleString("fr-CA")}.</div></div>
+        <div><div class="muted">MBC CARGO — LE VENDEUR</div><div class="val">Nourou MAIGA</div>
+          <div class="muted" style="margin-top:6px;">Pour MBC CARGO</div></div>
+      </div>
+    </div>`;
+}
+
+async function charger(){
+  if(!code){ app.innerHTML = `<div class="center">Lien de contrat incomplet. Vérifiez le lien reçu par WhatsApp.</div>`; return; }
+  try{
+    const r = await api("getContract", {code});
+    if(!r || !r.found){ app.innerHTML = `<div class="center">Ce contrat est introuvable. Vérifiez le lien reçu par WhatsApp ou <a href="https://wa.me/14188129289">écrivez-nous</a>.</div>`; return; }
+    contrat = r.contract;
+    if(contrat.status === "signed") afficherSigne(contrat, false);
+    else afficherFormulaire(contrat);
+  }catch(e){
+    app.innerHTML = `<div class="center">Connexion impossible pour le moment.<br><br><button class="btn alt" style="max-width:240px;margin:0 auto;" onclick="charger()">Réessayer</button></div>`;
+  }
+}
+charger();
+</script>
+</body>
+</html>
