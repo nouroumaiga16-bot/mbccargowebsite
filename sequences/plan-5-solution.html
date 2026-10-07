@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan 5 - Solution MBC Cargo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #E8F4F8 0%, #F0FFFF 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            position: relative;
+            width: 1920px;
+            height: 1080px;
+            background: linear-gradient(to right, #E8F4F8, #F5F5F5, #FFF8DC);
+            overflow: hidden;
+        }
+        
+        /* Carte du voyage */
+        .map-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 100px;
+        }
+        
+        /* Montréal */
+        .city {
+            position: relative;
+            text-align: center;
+            animation: slideIn 1s ease-in-out;
+        }
+        
+        .city-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563EB;
+            font-family: 'Montserrat', sans-serif;
+            margin-top: 20px;
+        }
+        
+        .city-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #2563EB, #4169E1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto;
+        }
+        
+        /* Boîte */
+        .box {
+            position: absolute;
+            width: 120px;
+            height: 100px;
+            background: #D2691E;
+            border: 2px solid #8B4513;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            left: 150px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: boxTravel 14s linear 0.5s forwards;
+            box-shadow: 0 10px 30px rgba(210, 105, 30, 0.4);
+        }
+        
+        .box::before {
+            content: 'MBC';
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        /* Avion/Conteneur en mouvement */
+        .plane {
+            position: absolute;
+            font-size: 48px;
+            top: 30%;
+            animation: planeFly 14s linear 0.5s forwards;
+        }
+        
+        /* Notifications WhatsApp */
+        .notification {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+            color: #333;
+            border-left: 4px solid #25D366;
+            max-width: 300px;
+            animation: popNotif 1s ease-in-out forwards;
+        }
+        
+        .notif-1 {
+            top: 150px;
+            right: 200px;
+            animation-delay: 2s;
+        }
+        
+        .notif-2 {
+            top: 300px;
+            right: 300px;
+            animation-delay: 6s;
+        }
+        
+        .notif-3 {
+            bottom: 150px;
+            right: 250px;
+            animation-delay: 10s;
+        }
+        
+        /* Ouagadougou */
+        .city-ouaga {
+            animation-delay: 0.2s;
+        }
+        
+        /* Femme réceptive */
+        .woman {
+            position: absolute;
+            right: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 120px;
+            height: 160px;
+            animation: slideInWoman 1.5s ease-in-out 13s both;
+        }
+        
+        .woman-head {
+            width: 40px;
+            height: 40px;
+            background: #D4A574;
+            border-radius: 50%;
+            margin: 0 auto;
+        }
+        
+        .woman-body {
+            width: 50px;
+            height: 70px;
+            background: #FF6B9D;
+            margin: 8px auto 0;
+            border-radius: 8px;
+        }
+        
+        .woman-legs {
+            width: 18px;
+            height: 50px;
+            background: #8B6F47;
+            margin: 0 auto;
+        }
+        
+        .woman-smile {
+            position: absolute;
+            font-size: 48px;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: smile 0.5s ease-in-out 13s both;
+        }
+        
+        /* Flèche de progression */
+        .arrow {
+            position: absolute;
+            font-size: 32px;
+            color: #EA580C;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 50%;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInWoman {
+            from {
+                opacity: 0;
+                transform: translateY(-50%) translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(-50%) translateX(0);
+            }
+        }
+        
+        @keyframes boxTravel {
+            from {
+                left: 150px;
+                opacity: 1;
+            }
+            to {
+                right: 100px;
+                opacity: 1;
+            }
+        }
+        
+        @keyframes planeFly {
+            from {
+                left: 150px;
+                opacity: 1;
+            }
+            to {
+                right: 100px;
+                opacity: 1;
+            }
+        }
+        
+        @keyframes popNotif {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes smile {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(-50%) translateX(0);
+            }
+            50% {
+                transform: translateY(-50%) translateX(10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="map-container">
+            <!-- Montréal -->
+            <div class="city">
+                <div class="city-icon">🇨🇦</div>
+                <div class="city-name">Montréal</div>
+            </div>
+            
+            <!-- Boîte en voyage -->
+            <div class="box"></div>
+            
+            <!-- Avion/Conteneur -->
+            <div class="plane">✈️</div>
+            
+            <!-- Flèche -->
+            <div class="arrow">→</div>
+            
+            <!-- Notifications WhatsApp -->
+            <div class="notification notif-1">
+                ✓ Votre colis est expédié
+            </div>
+            <div class="notification notif-2">
+                ✓ En transit vers Ouaga
+            </div>
+            <div class="notification notif-3">
+                ✓ Prêt pour la livraison
+            </div>
+            
+            <!-- Ouagadougou -->
+            <div class="city city-ouaga">
+                <div class="city-icon">🇧🇫</div>
+                <div class="city-name">Ouagadougou</div>
+            </div>
+            
+            <!-- Femme réceptive -->
+            <div class="woman">
+                <div class="woman-smile">😊</div>
+                <div class="woman-head"></div>
+                <div class="woman-body"></div>
+                <div class="woman-legs"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
