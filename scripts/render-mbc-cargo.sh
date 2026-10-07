@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# MBC Cargo — rendu HyperFrames de la publicité explicative (45 s, sans voix off)
+# MBC Cargo — rendu HyperFrames de la publicité explicative (45 s, voix off incluse)
 # Usage : bash scripts/render-mbc-cargo.sh [16x9|9x16|all]   (depuis la racine du dépôt)
 #   16x9 -> output/mbc-cargo-pub-16x9.mp4   1920x1080 (YouTube, site, Facebook)
 #   9x16 -> output/mbc-cargo-pub-9x16.mp4   1080x1920 (Reels, TikTok, Stories)

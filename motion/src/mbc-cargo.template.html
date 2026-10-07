@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  MBC Cargo — publicité explicative en motion design, 45 s, sans voix off
+  MBC Cargo — publicité explicative en motion design, 45 s, avec voix off
   (HyperFrames + GSAP). Gabarit unique : scripts/build-motion.mjs en tire
     motion/build/16x9/index.html  (1920x1080)
     motion/build/9x16/index.html  (1080x1920)
@@ -297,6 +297,9 @@ em { font-style: normal; color: var(--mari); }
 </head>
 <body>
 <div id="root" class="{{FMT}}" data-composition-id="mbc-cargo" data-start="0" data-duration="45" data-width="{{W}}" data-height="{{H}}">
+
+  <!-- Voix off (Kokoro, voix française) : motion/voix-off/generer.py, répliques calées sur les plans -->
+  <audio id="voix-off" src="assets/voix-off.m4a" data-start="0" data-duration="45" data-volume="1"></audio>
 
   <!-- 1. Accroche -->
   <section id="s1-accroche" class="clip s1" data-start="0" data-duration="3.8" data-track-index="1">

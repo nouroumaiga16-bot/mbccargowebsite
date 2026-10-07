@@ -1,0 +1,77 @@
+[
+ {
+  "id": "v01",
+  "start": 0.25,
+  "slot": 3.0,
+  "text": "Votre colis part d'ici… votre famille le reçoit là-bas."
+ },
+ {
+  "id": "v02",
+  "start": 3.9,
+  "slot": 2.2,
+  "text": "MBC Cargo. Depuis plus de huit ans."
+ },
+ {
+  "id": "v03",
+  "start": 6.6,
+  "slot": 6.2,
+  "text": "Par avion, en cinq à huit jours. Par bateau, pour les grands volumes. Et même votre voiture, dédouanement inclus."
+ },
+ {
+  "id": "v04",
+  "start": 13.5,
+  "slot": 1.7,
+  "text": "Comment ça marche ?"
+ },
+ {
+  "id": "v05",
+  "start": 15.3,
+  "slot": 3.2,
+  "text": "Écrivez-nous sur WhatsApp : devis gratuit en moins de deux heures.",
+  "speed": 1.12
+ },
+ {
+  "id": "v06",
+  "start": 18.85,
+  "slot": 3.2,
+  "text": "Déposez votre colis, recevez votre numéro de suivi."
+ },
+ {
+  "id": "v07",
+  "start": 22.45,
+  "slot": 3.3,
+  "text": "Suivez-le en direct, étape par étape, jusqu'à Ouagadougou."
+ },
+ {
+  "id": "v08",
+  "start": 26.1,
+  "slot": 2.7,
+  "text": "Et dès la livraison, vous êtes prévenu."
+ },
+ {
+  "id": "v09",
+  "start": 29.6,
+  "slot": 4.2,
+  "text": "Ouagadougou, Dakar, Abidjan, Bamako… douze villes, un seul contact."
+ },
+ {
+  "id": "v10",
+  "start": 34.6,
+  "slot": 4.2,
+  "text": "Des prix clairs, sans surprise. Dès dix-huit dollars le kilo."
+ },
+ {
+  "id": "v11",
+  "start": 39.4,
+  "slot": 2.3,
+  "text": "Plus de deux mille quatre cents clients nous font confiance.",
+  "speed": 1.08
+ },
+ {
+  "id": "v12",
+  "start": 42.2,
+  "slot": 2.8,
+  "text": "Prêt à expédier ? Écrivez-nous sur WhatsApp.",
+  "speed": 1.05
+ }
+]
