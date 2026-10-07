@@ -15,6 +15,13 @@ render() {
   local fmt="$1" out="$2"
   $HF lint "motion/build/$fmt"
   $HF render "motion/build/$fmt" -o "$out" --fps 30 --quality delivery --quiet
+  # Voix normalisée à -14 LUFS (niveau des réseaux sociaux), image copiée telle quelle
+  local m; m=$(ffmpeg -v info -i "$out" -vn -af loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json -f null - 2>&1 | sed -n '/^{/,/^}/p')
+  g() { echo "$m" | grep "\"$1\"" | grep -oE '[-0-9.]+' | head -1; }
+  ffmpeg -y -v error -i "$out" -map 0:v -map 0:a -c:v copy -t 45 -movflags +faststart -c:a aac -b:a 192k -ac 2 \
+    -af "loudnorm=I=-14:TP=-1.5:LRA=11:measured_I=$(g input_i):measured_TP=$(g input_tp):measured_LRA=$(g input_lra):measured_thresh=$(g input_thresh):offset=$(g target_offset):linear=true,aresample=48000" \
+    "${out%.mp4}.tmp.mp4"
+  mv "${out%.mp4}.tmp.mp4" "$out"
   printf '%s : %ss\n' "$out" "$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$out")"
 }
 
