@@ -1,25 +1,25 @@
 <!doctype html>
 <!--
-  MBC Cargo — motion design 45 s (HyperFrames + GSAP)
-  Gabarit unique : scripts/build-motion.mjs en tire deux projets HyperFrames
+  MBC Cargo — publicité explicative en motion design, 45 s, sans voix off
+  (HyperFrames + GSAP). Gabarit unique : scripts/build-motion.mjs en tire
     motion/build/16x9/index.html  (1920x1080)
     motion/build/9x16/index.html  (1080x1920)
   {{W}} {{H}} {{FMT}} sont remplacés au build. Ne pas éditer les fichiers générés.
 
-  Plans (calés sur la voix audio/mbc-cargo-voix-v1.mp3) :
-    1 Ouaga, la mère ............ 0 → 2 s
-    2 Montréal, la boîte ........ 2 → 10 s
-    3 L'angoisse ................ 10 → 15,6 s  (la question « Combien ça va coûter… » finit à 15,7 s)
-    4 MBC Cargo ................. 15,6 → 19 s  (« Avec MBC Cargo » à 16,1 s)
-    5 Le voyage + WhatsApp ...... 19 → 32 s
-    6 Ils nous font confiance ... 32 → 40 s
-    7 Appel à l'action .......... 40 → 45 s    (« Expédiez maintenant » à 41 s)
+  Contenus repris du site (index.html, suivi.html, formulaire.html) :
+    1 Accroche ............... 0 → 3,4 s    « Votre colis part d'ici, votre famille le reçoit là-bas. »
+    2 Logo ................... 3,3 → 6 s
+    3 Services ............... 6 → 13 s     aérien 5–8 j · maritime 35–60 j · véhicules
+    4 Comment ça marche ...... 13 → 29 s    4 étapes sur un téléphone (WhatsApp, enregistrement, suivi, livraison)
+    5 Destinations ........... 29 → 34 s    12 villes d'Afrique de l'Ouest
+    6 Tarifs ................. 34 → 39 s    18 $/kg · 400 $/CBM · dès 3 500 $
+    7 Confiance + CTA ........ 39 → 45 s
 -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width={{W}}, height={{H}}">
-<title>MBC Cargo — Votre mère vous attend</title>
+<title>MBC Cargo — Comment ça marche</title>
 <script src="assets/gsap.min.js"></script>
 <script src="assets/MotionPathPlugin.min.js"></script>
 <style>
@@ -31,375 +31,405 @@
 @font-face { font-family: "Inter"; font-weight: 600; src: url(assets/fonts/inter-latin-600-normal.woff2) format("woff2"); }
 
 :root {
-  --ink: #0F1B2D; --ink2: #16263C; --ink3: #1E3049; --night: #0A1220;
-  --paper: #F3EFE4; --paper2: #EAE3D2; --sand: #B9AF95; --soft: #8394AA;
-  --mari: #E8A33D; --clay: #C9603C; --wa: #25D366; --wa-dark: #075E54;
+  --ink: #0F1B2D; --ink2: #16263C; --ink3: #1E3049; --paper: #F3EFE4; --paper2: #EAE3D2;
+  --mari: #E8A33D; --clay: #C9603C; --soft: #8394AA; --wa: #25D366; --wa-dark: #075E54;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--ink); }
-#root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--ink);
-  font-family: "Inter", sans-serif; color: var(--ink); }
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--ink); font-family: "Inter", sans-serif; color: var(--paper); }
 .clip { position: absolute; inset: 0; overflow: hidden; }
-.abs { position: absolute; }
 .fill { position: absolute; inset: 0; }
 svg { display: block; overflow: visible; }
-.display { font-family: "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
 
-/* ---------- Chips de lieu ---------- */
-.place { position: absolute; display: flex; align-items: center; gap: 14px; padding: 14px 24px 14px 18px;
-  border-radius: 999px; font: 600 26px/1 "Inter", sans-serif; letter-spacing: .02em; white-space: nowrap; }
-.place i { display: block; width: 28px; height: 28px; }
-.place.dark { background: rgba(15,27,45,.72); color: var(--paper); }
-.place.light { background: var(--ink); color: var(--paper); }
+/* Typo */
+.kicker { font: 600 26px/1 "Inter", sans-serif; letter-spacing: .22em; text-transform: uppercase; color: var(--mari); }
+.port .kicker { font-size: 28px; }
+.h { font-family: "Space Grotesk", sans-serif; font-weight: 700; letter-spacing: -0.035em; line-height: .98; }
+.ln { display: block; overflow: hidden; padding: 0 .04em .1em; margin-bottom: -.1em; }
+.ln > span { display: block; }
+em { font-style: normal; color: var(--mari); }
+.on-paper { color: var(--ink); }
+.on-paper em { color: var(--clay); }
+.dots { background-image: radial-gradient(rgba(243,239,228,.09) 2px, transparent 2.5px); background-size: 46px 46px; }
+.dots-ink { background-image: radial-gradient(rgba(15,27,45,.08) 2px, transparent 2.5px); background-size: 46px 46px; }
+.pill { display: flex; align-items: center; gap: 14px; padding: 16px 28px 16px 18px; border-radius: 999px; background: var(--ink); color: var(--paper); font: 600 28px/1 "Inter", sans-serif; white-space: nowrap; }
+.pill .ck { width: 36px; height: 36px; border-radius: 50%; background: var(--mari); display: flex; align-items: center; justify-content: center; }
+.pill .ck svg { width: 20px; height: 20px; }
+.odo { display: inline-flex; }
+.odo .col { height: 1em; overflow: hidden; }
+.odo .strip { display: flex; flex-direction: column; }
+.odo .strip span { display: block; height: 1em; line-height: 1em; }
+.odo .gap { width: .22em; }
 
-/* ---------- Sous-titres cinétiques ---------- */
-.caps { z-index: 50; pointer-events: none; }
-.cap { position: absolute; font-family: "Space Grotesk", sans-serif; font-weight: 600; letter-spacing: -0.025em;
-  line-height: 1.04; }
-.cap .w { display: inline-block; }
-.cap.on-dark { color: var(--paper); text-shadow: 0 6px 30px rgba(10,18,32,.45); }
-.cap.on-dark em { color: var(--mari); font-style: normal; }
-.cap.on-light { color: var(--ink); }
-.cap.on-light em { color: var(--clay); font-style: normal; }
-.cap .x { position: relative; display: inline-block; }
-.cap .xline { position: absolute; left: -2%; width: 104%; top: 54%; height: .09em; background: var(--clay);
-  border-radius: 99px; transform-origin: 0 50%; }
-.land .cap { left: 110px; bottom: 112px; width: 1120px; font-size: 78px; }
-.port .cap { left: 80px; right: 80px; top: 240px; font-size: 86px; }
-.land .cap.center { left: 0; right: 0; width: auto; text-align: center; bottom: 120px; }
-.port .cap.center { text-align: center; }
-.port .cap.c1 { color: var(--ink); text-shadow: none; }
-.port .cap.c1 em { color: #8E3B27; }
-.cap .sub { display: block; margin-top: 18px; font-size: .62em; font-weight: 500; letter-spacing: -0.01em; }
+/* ===== 1. Accroche ===== */
+.hook { position: absolute; left: 0; right: 0; text-align: center; }
+.land .hook { top: 280px; font-size: 120px; }
+.port .hook { top: 620px; font-size: 120px; padding: 0 60px; }
+.city-lbl { position: absolute; font: 600 24px/1 "Inter", sans-serif; letter-spacing: .2em; color: var(--soft); }
 
-/* ---------- Plan 1 : Ouagadougou ---------- */
-.s1-sky { background: linear-gradient(180deg, #F7CF7E 0%, #EFA94A 34%, #D8743F 66%, #9B4329 100%); }
-.sun { position: absolute; border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, #FFF1C9 0%, #FFD98A 45%, #F6B654 70%, rgba(246,182,84,0) 71%);
-  box-shadow: 0 0 160px 60px rgba(255,214,140,.55); }
-.land .s1 .sun { width: 380px; height: 380px; left: 1180px; top: 150px; }
-.port .s1 .sun { width: 420px; height: 420px; left: 330px; top: 470px; }
-.skyline { position: absolute; left: 0; right: 0; bottom: 0; }
-.land .skyline { height: 520px; }
-.port .skyline { height: 760px; }
-.home { position: absolute; }
-.land .s1 .home { width: 980px; right: 40px; bottom: -30px; }
-.port .s1 .home { width: 1180px; left: -40px; bottom: -40px; }
-.land .s1 .place { left: 110px; top: 100px; }
-.port .s1 .place { left: 80px; top: 120px; }
+/* ===== 2. Logo ===== */
+.iris { position: absolute; width: 2600px; height: 2600px; border-radius: 50%; left: 50%; top: 50%; margin: -1300px 0 0 -1300px; }
+.iris.m { background: var(--mari); } .iris.i { background: var(--ink); }
+.brand-lock { position: absolute; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; }
+.land .brand-lock { top: 170px; } .port .brand-lock { top: 560px; }
+.ring-logo { position: relative; width: 420px; height: 420px; display: flex; align-items: center; justify-content: center; }
+.ring-logo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ring-logo .mbc { display: flex; font: 700 168px/1 "Space Grotesk", sans-serif; letter-spacing: -0.04em; color: #fff; }
+.ring-logo .mbc span, .wordmark span { display: block; }
+.wordmark { display: flex; margin-top: 34px; font: 600 54px/1 "Space Grotesk", sans-serif; letter-spacing: .48em; text-indent: .48em; color: var(--mari); }
+.tagline { margin-top: 36px; padding: 0 40px; font: 500 36px/1.3 "Inter", sans-serif; color: var(--paper); text-align: center; }
+.tagline b { color: var(--mari); font-weight: 600; }
 
-/* ---------- Plan 2 : Montréal ---------- */
-.s2-bg { background: var(--paper); }
-.s2-wall { background: linear-gradient(180deg, #F3EFE4 0%, #EDE6D5 100%); }
-.s2-table { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #CDB896 0, #C4AD88 14px, #B79E77 100%); }
-.s2-table::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 14px; background: #DCC9A7; }
-.land .s2-table { height: 250px; }
-.port .s2-table { height: 380px; }
-.window { position: absolute; border-radius: 18px; overflow: hidden; border: 16px solid #FBF8F1;
-  box-shadow: 0 30px 60px rgba(15,27,45,.12), inset 0 0 0 2px rgba(15,27,45,.06); }
-.land .window { left: 110px; top: 110px; width: 600px; height: 430px; }
-.port .window { left: 80px; top: 610px; width: 520px; height: 400px; }
-.frame { position: absolute; border-radius: 10px; border: 14px solid #6B3A22; overflow: hidden;
-  box-shadow: 0 24px 40px rgba(15,27,45,.16); background: #F6C46A; }
-.land .frame { left: 790px; top: 150px; width: 210px; height: 260px; }
-.port .frame { left: 680px; top: 650px; width: 230px; height: 290px; }
-.box-wrap { position: absolute; }
-.land .s2 .box-wrap { left: 1160px; top: 300px; width: 600px; height: 560px; }
-.port .s2 .box-wrap { left: 210px; top: 1110px; width: 660px; height: 616px; }
-.box-wrap > * { position: absolute; inset: 0; width: 100%; height: 100%; }
-.item { position: absolute; }
-.tag { position: absolute; display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 999px;
-  background: var(--ink); color: var(--paper); font: 600 30px/1 "Inter", sans-serif; white-space: nowrap; }
-.tag i { width: 14px; height: 14px; border-radius: 50%; background: var(--mari); display: block; }
-.land .s2 .place { left: 110px; top: 588px; }
-.port .s2 .place { left: 80px; top: 1046px; }
+/* ===== Titres de section ===== */
+.sec-head { position: absolute; }
+.land .sec-head { left: 140px; top: 110px; }
+.port .sec-head { left: 80px; right: 80px; top: 170px; }
+.sec-head .h { margin-top: 22px; font-size: 92px; }
+.port .sec-head .h { font-size: 96px; }
 
-/* ---------- Plan 3 : l'angoisse ---------- */
-.s3-bg { background: radial-gradient(ellipse at 62% 48%, #1E3049 0%, #111C2E 46%, #070D18 100%); }
-.port .s3-bg { background: radial-gradient(ellipse at 50% 62%, #1E3049 0%, #111C2E 46%, #070D18 100%); }
-.land .s3 .box-wrap { left: 1030px; top: 300px; width: 460px; height: 430px; }
-.port .s3 .box-wrap { left: 270px; top: 1000px; width: 540px; height: 504px; }
-.qm { position: absolute; font: 700 120px/1 "Space Grotesk", sans-serif; color: var(--mari); }
-.ptag { position: absolute; }
-.land .ptag { left: 1500px; top: 170px; width: 230px; }
-.port .ptag { left: 700px; top: 760px; width: 250px; }
-.cal { position: absolute; width: 190px; border-radius: 22px; overflow: hidden; background: var(--paper);
-  box-shadow: 0 30px 60px rgba(0,0,0,.35); text-align: center; }
-.cal b { display: block; background: var(--clay); color: var(--paper); font: 700 24px/52px "Inter", sans-serif; letter-spacing: .12em; }
-.cal span { display: block; font: 700 92px/130px "Space Grotesk", sans-serif; color: var(--ink); }
-.land .cal { left: 640px; top: 150px; }
-.port .cal { left: 90px; top: 1560px; }
+/* ===== 3. Services ===== */
+.s3-bg { background: var(--paper); }
+.cards { position: absolute; display: flex; gap: 36px; }
+.land .cards { left: 140px; right: 140px; top: 400px; height: 520px; }
+.port .cards { left: 80px; right: 80px; top: 600px; flex-direction: column; gap: 32px; }
+.card { position: relative; flex: 1; border-radius: 36px; background: #fff; overflow: hidden; color: var(--ink);
+  box-shadow: 0 30px 60px rgba(15,27,45,.10); padding: 44px 44px 40px; display: flex; flex-direction: column; }
+.port .card { flex: none; height: 300px; padding: 34px 40px; flex-direction: row; flex-wrap: wrap; align-content: center; align-items: center; column-gap: 36px; }
+.card .ico { width: 132px; height: 132px; border-radius: 50%; background: var(--ink); display: flex; align-items: center; justify-content: center; flex: none; overflow: hidden; }
+.card .ico svg { width: 76px; height: 76px; }
+.card h3 { margin: 34px 0 12px; font: 700 50px/1.05 "Space Grotesk", sans-serif; letter-spacing: -0.03em; }
+.port .card h3 { margin: 0 0 8px; font-size: 52px; }
+.card .fact { font: 700 64px/1 "Space Grotesk", sans-serif; color: var(--clay); letter-spacing: -0.03em; margin-top: auto; }
+.port .card .fact { flex-basis: 100%; margin-top: 18px; padding-left: 168px; font-size: 54px; }
+.card p { margin: 10px 0 0; font: 500 26px/1.35 "Inter", sans-serif; color: #5B6878; }
+.port .card p { font-size: 28px; margin: 0; }
+.card .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 10px; background: var(--mari); transform-origin: 0 50%; }
+.extras { position: absolute; display: flex; gap: 18px; }
+.land .extras { left: 140px; top: 960px; }
+.port .extras { left: 80px; right: 80px; top: 1640px; flex-wrap: wrap; }
 
-/* ---------- Plan 4 : MBC Cargo ---------- */
-.s4-ink { background: var(--ink); }
-.iris { position: absolute; border-radius: 50%; }
-.land .iris { width: 2400px; height: 2400px; left: -240px; top: -660px; }
-.port .iris { width: 2400px; height: 2400px; left: -660px; top: -240px; }
-.iris.mari { background: var(--mari); }
-.iris.ink { background: var(--ink); }
-.logo { position: absolute; display: flex; align-items: center; justify-content: center; }
-.land .s4 .logo { width: 380px; height: 380px; left: 770px; top: 170px; }
-.port .s4 .logo { width: 460px; height: 460px; left: 310px; top: 560px; }
-.logo .ring { position: absolute; inset: 0; border-radius: 50%; border: 18px solid var(--mari); }
-.port .logo .ring { border-width: 22px; }
-.logo .mbc { position: relative; display: flex; font: 700 150px/1 "Space Grotesk", sans-serif; color: #fff; letter-spacing: -0.03em; }
-.port .logo .mbc { font-size: 182px; }
-.logo .mbc span { display: block; }
-.cargo { position: absolute; left: 0; right: 0; text-align: center; font: 600 46px/1 "Space Grotesk", sans-serif;
-  letter-spacing: .5em; text-indent: .5em; color: var(--mari); }
-.cargo span { display: inline-block; }
-.land .s4 .cargo { top: 590px; }
-.port .s4 .cargo { top: 1070px; font-size: 54px; }
-.chips { position: absolute; display: flex; gap: 22px; }
-.land .s4 .chips { left: 0; right: 0; top: 690px; justify-content: center; }
-.port .s4 .chips { left: 0; right: 0; top: 1190px; flex-direction: column; align-items: center; }
-.chip { display: flex; align-items: center; gap: 14px; padding: 18px 30px 18px 22px; border-radius: 999px;
-  background: rgba(243,239,228,.08); border: 2px solid rgba(243,239,228,.16);
-  color: var(--paper); font: 600 32px/1 "Inter", sans-serif; white-space: nowrap; }
-.chip .ck { width: 38px; height: 38px; border-radius: 50%; background: var(--mari); display: flex; align-items: center; justify-content: center; }
-.chip .ck svg { width: 22px; height: 22px; }
-.port .s4 .cap { top: 240px; text-align: center; }
+/* ===== 4. Comment ça marche ===== */
+.s4-bg { background: var(--ink); }
+.big-title { position: absolute; left: 0; right: 0; text-align: center; }
+.land .big-title { top: 290px; font-size: 150px; }
+.port .big-title { top: 640px; font-size: 140px; padding: 0 40px; }
+.big-title .kicker { display: block; margin-bottom: 40px; }
+.rail { position: absolute; }
+.land .rail { left: 140px; top: 96px; width: 820px; height: 100px; }
+.port .rail { left: 100px; right: 100px; top: 120px; height: 100px; }
+.rail .kicker { position: absolute; left: 0; top: 0; }
+.rail-track, .rail-fill { position: absolute; left: 0; right: 0; top: 74px; height: 6px; border-radius: 9px; transform-origin: 0 50%; }
+.rail-track { background: rgba(243,239,228,.14); }
+.rail-fill { background: var(--mari); }
+.rail-dot { position: absolute; top: 56px; width: 42px; height: 42px; margin-left: -21px; border-radius: 50%; background: var(--ink); border: 5px solid rgba(243,239,228,.25);
+  font: 700 18px/32px "Space Grotesk", sans-serif; text-align: center; color: var(--soft); }
+.rail-dot b { position: absolute; inset: -5px; border-radius: 50%; background: var(--mari); color: var(--ink); line-height: 42px; }
+.steptxt { position: absolute; }
+.land .steptxt { left: 140px; top: 290px; width: 960px; }
+.port .steptxt { left: 80px; right: 80px; top: 270px; }
+.step-n { font: 700 230px/.8 "Space Grotesk", sans-serif; letter-spacing: -0.05em; color: var(--mari); }
+.port .step-n { font-size: 160px; }
+.step-t { margin-top: 40px; font-size: 100px; }
+.port .step-t { margin-top: 26px; font-size: 90px; }
+.step-d { margin-top: 30px; font: 500 38px/1.4 "Inter", sans-serif; color: #B8C2CF; max-width: 860px; }
+.port .step-d { font-size: 36px; margin-top: 22px; }
+.phone { position: absolute; border-radius: 70px; background: #0A1220; box-shadow: 0 60px 120px rgba(0,0,0,.45), 0 0 0 2px rgba(243,239,228,.1); }
+.land .phone { left: 1220px; top: 70px; width: 500px; height: 950px; }
+.port .phone { left: 240px; top: 850px; width: 600px; height: 1020px; }
+.screen { position: absolute; inset: 18px; border-radius: 54px; overflow: hidden; background: #ECE5DD; }
+.notch { position: absolute; left: 50%; top: 26px; width: 120px; height: 34px; margin-left: -60px; border-radius: 99px; background: #0A1220; z-index: 5; }
+.scr { position: absolute; inset: 0; color: #111B21; }
+/* écran 1 : WhatsApp */
+.wa-head { position: absolute; left: 0; right: 0; top: 0; height: 170px; background: var(--wa-dark); display: flex; align-items: flex-end; gap: 18px; padding: 0 28px 26px; color: #fff; }
+.wa-av { width: 68px; height: 68px; flex: none; }
+.wa-av svg { width: 68px; height: 68px; }
+.wa-name { font: 600 32px/1.1 "Inter", sans-serif; }
+.wa-name small { display: block; font: 400 23px/1.4 "Inter", sans-serif; opacity: .8; }
+.wa-body { position: absolute; left: 22px; right: 22px; top: 200px; display: flex; flex-direction: column; gap: 18px; }
+.bub { max-width: 88%; padding: 18px 22px 12px; border-radius: 26px; font: 500 29px/1.35 "Inter", sans-serif; box-shadow: 0 2px 2px rgba(0,0,0,.08); }
+.port .bub { font-size: 32px; }
+.bub.out { align-self: flex-end; background: #D9FDD3; border-top-right-radius: 6px; }
+.bub.in { align-self: flex-start; background: #fff; border-top-left-radius: 6px; }
+.bub time { display: block; text-align: right; font: 400 20px/1 "Inter", sans-serif; color: #667781; margin-top: 6px; }
+.bub time b { color: #53BDEB; }
+.typing { align-self: flex-start; height: 58px; background: #fff; border-radius: 26px; border-top-left-radius: 6px; padding: 22px 26px; display: flex; gap: 10px; }
+.typing i { display: block; width: 14px; height: 14px; border-radius: 50%; background: #8A9AA5; }
+/* écrans 2-4 : pages du site */
+.page { position: absolute; inset: 0; background: var(--paper); }
+.page-top { height: 140px; background: var(--ink); display: flex; align-items: flex-end; padding: 0 30px 22px; gap: 14px; color: var(--paper); font: 700 30px/46px "Space Grotesk", sans-serif; }
+.page-top em { color: var(--mari); }
+.page-top .lg, .page-top .lg svg { width: 46px; height: 46px; }
+.page-in { padding: 28px 30px; }
+.p-kick { font: 600 20px/1 "Inter", sans-serif; letter-spacing: .16em; color: var(--clay); text-transform: uppercase; }
+.p-h { margin: 12px 0 20px; font: 700 46px/1.05 "Space Grotesk", sans-serif; letter-spacing: -0.03em; color: var(--ink); }
+.port .p-h { font-size: 52px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font: 600 20px/1 "Inter", sans-serif; color: #6C7A8C; margin-bottom: 8px; }
+.field .in { height: 62px; border-radius: 16px; background: #fff; border: 2px solid #E2DACA; display: flex; align-items: center; padding: 0 20px; font: 500 27px/1 "Inter", sans-serif; color: var(--ink); overflow: hidden; white-space: nowrap; }
+.port .field .in { height: 70px; font-size: 30px; }
+.field .in .tx { display: inline-block; white-space: nowrap; }
+.btn-p { margin-top: 18px; height: 70px; border-radius: 999px; background: var(--clay); color: #fff; display: flex; align-items: center; justify-content: center; font: 600 26px/1 "Inter", sans-serif; }
+.code-card { margin-top: 20px; padding: 24px; border-radius: 26px; background: #fff; border: 3px solid var(--mari); text-align: center; }
+.code-card small { display: block; font: 600 19px/1 "Inter", sans-serif; letter-spacing: .14em; color: #6C7A8C; text-transform: uppercase; }
+.code-card b { display: block; margin-top: 12px; font: 700 44px/1 "Space Grotesk", sans-serif; letter-spacing: .02em; color: var(--ink); }
+.port .code-card b { font-size: 50px; }
+.track-res { padding: 26px; border-radius: 26px; background: var(--ink); color: var(--paper); }
+.track-res .num { font: 700 30px/1 "Space Grotesk", sans-serif; letter-spacing: .02em; }
+.track-res .tag { display: inline-block; margin-left: 10px; padding: 6px 12px; border-radius: 99px; background: rgba(232,163,61,.2); color: var(--mari); font: 600 18px/1 "Inter", sans-serif; vertical-align: 4px; }
+.corr { position: relative; margin: 34px 6px 14px; height: 6px; border-radius: 9px; background: rgba(243,239,228,.18); }
+.corr .cf { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 9px; background: var(--mari); transform-origin: 0 50%; }
+.corr .cp { position: absolute; top: -21px; left: -23px; width: 46px; height: 46px; }
+.corr .cp svg { width: 46px; height: 46px; }
+.cities { display: flex; justify-content: space-between; font: 600 20px/1 "Inter", sans-serif; }
+.steps { margin: 18px 0 0; padding: 0; list-style: none; }
+.steps li { display: flex; align-items: center; gap: 16px; padding: 13px 0; border-bottom: 2px solid #E2DACA; font: 500 25px/1.2 "Inter", sans-serif; color: #9AA5B2; }
+.port .steps li { font-size: 28px; }
+.steps li i { position: relative; width: 34px; height: 34px; border-radius: 50%; border: 3px solid #CFC6B3; flex: none; }
+.steps li i .ok { position: absolute; inset: -3px; border-radius: 50%; background: var(--clay); display: flex; align-items: center; justify-content: center; }
+.steps li i svg { width: 18px; height: 18px; }
+.done-scr { position: absolute; inset: 0; background: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; color: var(--paper); }
+.big-ck { width: 220px; height: 220px; border-radius: 50%; background: var(--wa); display: flex; align-items: center; justify-content: center; }
+.big-ck svg { width: 120px; height: 120px; }
+.done-scr h4 { margin: 46px 0 16px; font: 700 54px/1.05 "Space Grotesk", sans-serif; letter-spacing: -0.03em; }
+.done-scr p { margin: 0; font: 500 28px/1.4 "Inter", sans-serif; color: #B8C2CF; }
+.confetti { position: absolute; left: 50%; top: 40%; }
+.confetti i { position: absolute; display: block; width: 18px; height: 30px; border-radius: 4px; }
 
-/* ---------- Plan 5 : le voyage ---------- */
-.s5-bg { background: var(--paper); }
-.s5-grid { opacity: .5; background-image: linear-gradient(rgba(15,27,45,.06) 2px, transparent 2px),
-  linear-gradient(90deg, rgba(15,27,45,.06) 2px, transparent 2px); background-size: 80px 80px; }
-.map { position: absolute; left: 0; top: 0; }
-.land .map { width: 1240px; height: 1080px; }
-.port .map { width: 1080px; height: 1920px; }
-.pin-lbl { position: absolute; display: flex; flex-direction: column; gap: 6px; }
-.pin-lbl b { font: 700 40px/1 "Space Grotesk", sans-serif; color: var(--ink); letter-spacing: -0.02em; }
-.pin-lbl span { font: 500 24px/1 "Inter", sans-serif; color: #6C7A8C; letter-spacing: .04em; }
-.stamp { position: absolute; padding: 14px 26px; border: 6px solid var(--clay); border-radius: 14px; color: var(--clay);
-  font: 700 46px/1 "Space Grotesk", sans-serif; letter-spacing: .08em; }
-.depot { position: absolute; }
-.phone { position: absolute; border-radius: 64px; background: #ECE5DD; border: 16px solid var(--ink);
-  box-shadow: 0 50px 90px rgba(15,27,45,.28); overflow: hidden; }
-.land .phone { left: 1300px; top: 90px; width: 470px; height: 900px; }
-.port .phone { left: 250px; top: 1125px; width: 580px; height: 770px; }
-.wa-head { position: absolute; left: 0; right: 0; top: 0; height: 150px; background: var(--wa-dark);
-  display: flex; align-items: flex-end; gap: 18px; padding: 0 26px 24px; color: #fff; }
-.wa-av { width: 64px; height: 64px; border-radius: 50%; background: var(--ink); border: 4px solid var(--mari);
-  display: flex; align-items: center; justify-content: center; font: 700 20px/1 "Space Grotesk", sans-serif; color: #fff; flex: none; }
-.wa-name { font: 600 30px/1.1 "Inter", sans-serif; }
-.wa-name small { display: block; font: 400 22px/1.4 "Inter", sans-serif; opacity: .8; }
-.wa-body { position: absolute; left: 0; right: 0; top: 150px; bottom: 0; overflow: hidden; }
-.wa-stack { position: absolute; left: 22px; right: 22px; top: 26px; display: flex; flex-direction: column; gap: 16px; }
-.msg { align-self: flex-start; max-width: 92%; background: #fff; border-radius: 6px 26px 26px 26px; padding: 18px 22px 12px;
-  box-shadow: 0 2px 2px rgba(0,0,0,.08); font: 500 27px/1.32 "Inter", sans-serif; color: #111B21; }
-.port .msg { font-size: 31px; }
-.msg time { display: block; text-align: right; margin-top: 4px; font: 400 19px/1 "Inter", sans-serif; color: #667781; }
-.msg time b { color: #53BDEB; font-weight: 600; }
-.msg.hl { background: #D9FDD3; }
+/* ===== 5. Destinations ===== */
+.s5-bg { background: radial-gradient(ellipse at 50% 55%, #1E3049 0%, #0F1B2D 62%); }
+.land .s5 .sec-head { left: 0; right: 0; top: 70px; text-align: center; }
+.land .s5 .sec-head .h { font-size: 78px; }
+.port .s5 .sec-head { top: 150px; text-align: center; }
+.hub { position: absolute; width: 230px; height: 230px; border-radius: 50%; background: var(--mari); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-shadow: 0 0 0 26px rgba(232,163,61,.16), 0 0 0 54px rgba(232,163,61,.07); }
+.hub b { font: 700 40px/1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
+.hub span { margin-top: 8px; font: 600 20px/1 "Inter", sans-serif; letter-spacing: .14em; }
+.spokes { position: absolute; left: 0; top: 0; }
+.dest-pt { position: absolute; width: 0; height: 0; }
+.dest { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 12px; padding: 14px 24px 14px 16px; border-radius: 999px; background: var(--paper); color: var(--ink); white-space: nowrap; box-shadow: 0 14px 30px rgba(0,0,0,.25); }
+.dest .fl { font-size: 34px; line-height: 1; }
+.dest b { font: 700 29px/1.1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
+.dest span { font: 500 20px/1 "Inter", sans-serif; color: #6C7A8C; }
 
-/* ---------- Plan 6 : preuve ---------- */
-.s6-bg { background: var(--ink); }
-.s6-glow { background: radial-gradient(ellipse at 50% 0%, rgba(232,163,61,.18) 0%, rgba(232,163,61,0) 60%); }
-.s6-title { position: absolute; left: 0; right: 0; text-align: center; color: var(--paper);
-  font: 600 80px/1 "Space Grotesk", sans-serif; letter-spacing: -0.03em; }
-.land .s6-title { top: 110px; }
-.port .s6-title { top: 200px; font-size: 92px; line-height: 1.05; padding: 0 60px; }
-.stats { position: absolute; display: flex; justify-content: center; }
-.land .stats { left: 0; right: 0; top: 250px; gap: 120px; }
-.port .stats { left: 0; right: 0; top: 470px; gap: 40px; }
-.stat { text-align: center; color: var(--paper); }
-.num { display: flex; justify-content: center; font: 700 150px/1 "Space Grotesk", sans-serif; color: var(--mari); letter-spacing: -0.03em; }
-.port .num { font-size: 112px; }
-.col { height: 1em; overflow: hidden; }
-.strip { display: flex; flex-direction: column; }
-.strip span { display: block; height: 1em; line-height: 1em; }
-.num .gap { width: .22em; }
-.stat p { margin: 14px 0 0; font: 500 30px/1.2 "Inter", sans-serif; color: var(--soft); }
-.port .stat p { font-size: 28px; }
-.quotes { position: absolute; display: flex; }
-.land .quotes { left: 110px; right: 110px; top: 560px; gap: 36px; }
-.port .quotes { left: 70px; right: 70px; top: 790px; flex-direction: column; gap: 30px; }
-.quote { flex: 1; background: var(--ink2); border: 2px solid rgba(243,239,228,.1); border-radius: 30px; padding: 38px 40px 34px; color: var(--paper); }
-.stars { display: flex; gap: 6px; margin-bottom: 18px; }
-.stars svg { width: 30px; height: 30px; }
-.quote p { margin: 0 0 26px; font: 500 30px/1.4 "Inter", sans-serif; }
-.port .quote p { font-size: 34px; }
-.who { display: flex; align-items: center; gap: 16px; }
-.avatar { width: 62px; height: 62px; border-radius: 50%; background: var(--mari); color: var(--ink); display: flex; align-items: center; justify-content: center; font: 700 24px/1 "Space Grotesk", sans-serif; flex: none; }
-.who b { display: block; font: 600 26px/1.2 "Inter", sans-serif; }
-.who span { font: 400 22px/1.3 "Inter", sans-serif; color: var(--soft); }
+/* ===== 6. Tarifs ===== */
+.s6-bg { background: var(--paper); }
+.prices { position: absolute; display: flex; gap: 36px; }
+.land .prices { left: 140px; right: 140px; top: 400px; }
+.port .prices { left: 80px; right: 80px; top: 600px; flex-direction: column; gap: 30px; }
+.price { flex: 1; position: relative; padding: 46px 44px; border-radius: 36px; background: #fff; color: var(--ink); box-shadow: 0 30px 60px rgba(15,27,45,.10); overflow: hidden; }
+.price.pop { background: var(--ink); color: var(--paper); }
+.price .lbl { font: 600 26px/1 "Inter", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--clay); }
+.price.pop .lbl { color: var(--mari); }
+.price .amt { margin-top: 24px; display: flex; align-items: baseline; gap: 12px; font: 700 100px/1 "Space Grotesk", sans-serif; letter-spacing: -0.05em; }
+.port .price .amt { font-size: 108px; margin-top: 18px; }
+.price .amt small, .price .amt .pre { font: 600 34px/1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; opacity: .7; }
+.price p { margin: 20px 0 0; font: 500 28px/1.35 "Inter", sans-serif; opacity: .72; }
+.port .price p { margin-top: 12px; }
+.badge-pop { position: absolute; right: 30px; top: 30px; padding: 10px 18px; border-radius: 99px; background: var(--mari); color: var(--ink); font: 700 20px/1 "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.foot-note { position: absolute; font: 500 28px/1.4 "Inter", sans-serif; color: #5B6878; }
+.land .foot-note { left: 140px; right: 140px; top: 900px; }
+.port .foot-note { left: 80px; right: 80px; top: 1650px; }
+.foot-note b { color: var(--ink); }
 
-/* ---------- Plan 7 : appel à l'action ---------- */
-.s7-sky { background: linear-gradient(180deg, #F7CF7E 0%, #EFA94A 40%, #D8743F 80%, #B4532F 100%); }
-.land .s7 .sun { width: 300px; height: 300px; left: 1500px; top: 90px; }
-.port .s7 .sun { width: 300px; height: 300px; left: 700px; top: 860px; }
-.land .s7 .home { width: 880px; right: 20px; bottom: -30px; }
-.port .s7 .home { width: 1100px; left: 10px; bottom: -40px; }
-.cta { position: absolute; color: var(--ink); }
-.land .cta { left: 110px; top: 200px; width: 880px; }
-.port .cta { left: 70px; right: 70px; top: 230px; text-align: center; }
-.cta-line { display: block; font: 700 104px/1 "Space Grotesk", sans-serif; letter-spacing: -0.035em; }
-.port .cta-line { font-size: 108px; }
-.cta-line.l2 { color: #fff; margin-top: 16px; text-shadow: 0 8px 30px rgba(155,67,41,.35); }
-.cta-line .w { display: inline-block; }
-.btn { display: inline-flex; align-items: center; gap: 20px; margin-top: 54px; padding: 30px 48px 30px 36px; border-radius: 999px;
-  background: var(--ink); color: #fff; font: 600 40px/1 "Inter", sans-serif; box-shadow: 0 24px 50px rgba(15,27,45,.3); }
-.btn .wa { width: 58px; height: 58px; border-radius: 50%; background: var(--wa); display: flex; align-items: center; justify-content: center; }
-.btn .wa svg { width: 36px; height: 36px; }
-.contact { margin-top: 34px; font: 600 34px/1.5 "Inter", sans-serif; color: var(--ink); }
-.contact span { display: block; font-weight: 500; font-size: 28px; opacity: .78; }
-.brand { position: absolute; display: flex; align-items: center; gap: 18px; font: 700 40px/1 "Space Grotesk", sans-serif; color: var(--ink); letter-spacing: -0.02em; }
-.brand em { font-style: normal; color: var(--clay); }
-.brand .mini { width: 72px; height: 72px; border-radius: 50%; background: var(--ink); display: flex; align-items: center; justify-content: center; }
-.brand .mini svg { width: 72px; height: 72px; }
-.land .s7 .brand { left: 110px; top: 80px; }
-.port .s7 .brand { left: 0; right: 0; justify-content: center; top: 96px; }
+/* ===== 7. Confiance + CTA ===== */
+.s7-bg { background: var(--ink); }
+.stats { position: absolute; left: 0; right: 0; display: flex; justify-content: center; }
+.land .stats { top: 250px; gap: 150px; }
+.port .stats { top: 470px; flex-direction: column; align-items: center; gap: 56px; }
+.stat { text-align: center; }
+.stat .v { font: 700 170px/1 "Space Grotesk", sans-serif; letter-spacing: -0.05em; color: var(--mari); display: flex; justify-content: center; }
+.port .stat .v { font-size: 180px; }
+.stat p { margin: 16px 0 0; font: 500 32px/1 "Inter", sans-serif; color: #B8C2CF; }
+.trust { position: absolute; left: 0; right: 0; display: flex; justify-content: center; gap: 22px; }
+.land .trust { top: 640px; }
+.port .trust { top: 1440px; flex-direction: column; align-items: center; gap: 18px; }
+.trust .pill { background: rgba(243,239,228,.08); border: 2px solid rgba(243,239,228,.14); }
+.cta-bg { background: var(--mari); }
+.cta-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.cta-wrap .h { color: var(--ink); }
+.land .cta-wrap .h { font-size: 118px; }
+.port .cta-wrap .h { font-size: 118px; padding: 0 50px; }
+.cta-sub { margin-top: 34px; font: 600 38px/1.3 "Inter", sans-serif; color: var(--ink); }
+.cta-btn { margin-top: 56px; display: flex; align-items: center; gap: 22px; padding: 30px 54px 30px 34px; border-radius: 999px; background: var(--ink); color: #fff; font: 600 44px/1 "Inter", sans-serif; box-shadow: 0 30px 60px rgba(15,27,45,.3); }
+.cta-btn .wa { width: 66px; height: 66px; border-radius: 50%; background: var(--wa); display: flex; align-items: center; justify-content: center; }
+.cta-btn .wa svg { width: 40px; height: 40px; }
+.cta-site { margin-top: 40px; display: flex; align-items: center; gap: 18px; font: 700 40px/1 "Space Grotesk", sans-serif; color: var(--ink); letter-spacing: -0.02em; }
+.cta-site .lg, .cta-site .lg svg { width: 64px; height: 64px; }
 
-/* ---------- Grain ---------- */
-.grain { z-index: 60; pointer-events: none; opacity: .07;
+.grain { z-index: 60; pointer-events: none; opacity: .06;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 </style>
 </head>
 <body>
 <div id="root" class="{{FMT}}" data-composition-id="mbc-cargo" data-start="0" data-duration="45" data-width="{{W}}" data-height="{{H}}">
 
-  <!-- Voix : coupée dans la pause de 30,4–30,8 s ; la dernière phrase démarre à 41 s sur l'appel à l'action -->
-  <audio id="vo-a" src="assets/mbc-cargo-voix-v1.mp3" data-start="0" data-media-start="0" data-duration="30.59" data-volume="1"></audio>
-  <audio id="vo-b" src="assets/mbc-cargo-voix-v1.mp3" data-start="40.79" data-media-start="30.59" data-duration="3.37" data-volume="1"></audio>
-
-  <!-- ========== PLAN 1 : Ouagadougou ========== -->
-  <section id="scene-1-ouaga" class="clip s1" data-start="0" data-duration="2.5" data-track-index="1">
-    <div class="fill s1-cam">
-      <div class="fill s1-sky"></div>
-      <div class="sun s1-sun"></div>
-      <div class="skyline" data-art="skyline"></div>
-      <div class="home s1-home" data-art="home"></div>
+  <!-- 1. Accroche -->
+  <section id="s1-accroche" class="clip s1" data-start="0" data-duration="3.8" data-track-index="1">
+    <div class="fill dots"></div>
+    <div class="fill" data-art="route"></div>
+    <div class="city-lbl lbl-a">MONTRÉAL</div>
+    <div class="city-lbl lbl-b">OUAGADOUGOU</div>
+    <div class="hook h">
+      <span class="ln"><span>Votre colis</span></span>
+      <span class="ln"><span>part d'ici,</span></span>
+      <span class="ln"><span>votre famille</span></span>
+      <span class="ln"><span>le reçoit <em>là-bas.</em></span></span>
     </div>
-    <div class="place dark s1-place"><i data-art="pin-chip"></i>Ouagadougou · Burkina Faso</div>
   </section>
 
-  <!-- ========== PLAN 2 : Montréal ========== -->
-  <section id="scene-2-montreal" class="clip s2" data-start="1.9" data-duration="8.5" data-track-index="2">
-    <div class="fill s2-in">
-      <div class="fill s2-wall"></div>
-      <div class="window" data-art="window"></div>
-      <div class="frame" data-art="portrait"></div>
-      <div class="s2-table"></div>
-      <div class="box-wrap s2-box">
-        <div data-art="box-back"></div>
-        <div class="items">
-          <div class="item it-shirt" data-art="shirt"></div>
-          <div class="item it-vit" data-art="vitamins"></div>
-          <div class="item it-cash" data-art="cash"></div>
-        </div>
-        <div data-art="box-front"></div>
+  <!-- 2. Logo -->
+  <section id="s2-logo" class="clip s2" data-start="3.3" data-duration="3.1" data-track-index="2">
+    <div class="iris m"></div>
+    <div class="iris i"></div>
+    <div class="brand-lock">
+      <div class="ring-logo">
+        <svg viewBox="0 0 420 420"><circle class="ring" cx="210" cy="210" r="190" fill="none" stroke="#E8A33D" stroke-width="22" transform="rotate(-90 210 210)"/></svg>
+        <div class="mbc"><span>M</span><span>B</span><span>C</span></div>
       </div>
-      <div class="tag tg-1"><i></i>Vêtements</div>
-      <div class="tag tg-2"><i></i>Vitamines</div>
-      <div class="tag tg-3"><i></i>Un peu d'argent</div>
-      <div class="place light s2-place"><i data-art="pin-chip"></i>Montréal · Canada</div>
+      <div class="wordmark"><span>C</span><span>A</span><span>R</span><span>G</span><span>O</span></div>
+      <div class="tagline">Canada <b>→</b> Afrique de l'Ouest · depuis plus de 8 ans</div>
     </div>
   </section>
 
-  <!-- ========== PLAN 3 : l'angoisse ========== -->
-  <section id="scene-3-angoisse" class="clip s3" data-start="9.6" data-duration="6.6" data-track-index="3">
+  <!-- 3. Services -->
+  <section id="s3-services" class="clip s3 on-paper" data-start="6.0" data-duration="7.4" data-track-index="3">
     <div class="fill s3-in">
       <div class="fill s3-bg"></div>
-      <div class="fill s3-cam">
-        <div class="cal"><b>LIVRAISON</b><span>?</span></div>
-        <div class="ptag" data-art="pricetag"></div>
-        <div class="box-wrap s3-box" data-art="box-closed"></div>
-        <div class="qms"></div>
+      <div class="fill dots-ink"></div>
+      <div class="sec-head">
+        <div class="kicker" style="color:var(--clay)">Ce qu'on transporte pour vous</div>
+        <div class="h"><span class="ln"><span>Du colis au <em>véhicule.</em></span></span></div>
+      </div>
+      <div class="cards">
+        <div class="card c-air"><div class="ico" data-art="plane-ico"></div><div><h3>Fret aérien</h3><p>Envois urgents, objets de valeur</p></div><div class="fact">5 à 8 jours</div><div class="bar"></div></div>
+        <div class="card c-sea"><div class="ico" data-art="ship-ico"></div><div><h3>Fret maritime</h3><p>La solution économique en volume</p></div><div class="fact">35 à 60 jours</div><div class="bar"></div></div>
+        <div class="card c-car"><div class="ico" data-art="car-ico"></div><div><h3>Véhicules</h3><p>Voiture, moto, utilitaire</p></div><div class="fact">Conteneur sécurisé</div><div class="bar"></div></div>
+      </div>
+      <div class="extras">
+        <div class="pill"><div class="ck" data-art="check"></div>Dédouanement géré</div>
+        <div class="pill"><div class="ck" data-art="check"></div>Service diaspora 7j/7</div>
       </div>
     </div>
   </section>
 
-  <!-- ========== PLAN 4 : MBC Cargo ========== -->
-  <section id="scene-4-mbc" class="clip s4" data-start="15.5" data-duration="3.7" data-track-index="4">
-    <div class="iris mari s4-iris1"></div>
-    <div class="iris ink s4-iris2"></div>
-    <div class="logo">
-      <div class="ring"></div>
-      <div class="mbc"><span>M</span><span>B</span><span>C</span></div>
-    </div>
-    <div class="cargo"><span>C</span><span>A</span><span>R</span><span>G</span><span>O</span></div>
-    <div class="chips">
-      <div class="chip"><div class="ck" data-art="check"></div>Dédouanement géré</div>
-      <div class="chip"><div class="ck" data-art="check"></div>Suivi WhatsApp</div>
-      <div class="chip"><div class="ck" data-art="check"></div>Prix clair</div>
+  <!-- 4. Comment ça marche -->
+  <section id="s4-etapes" class="clip s4" data-start="13.0" data-duration="16.5" data-track-index="4">
+    <div class="fill s4-in">
+      <div class="fill s4-bg"></div>
+      <div class="fill dots"></div>
+      <div class="big-title h"><span class="kicker">Comment ça marche</span><span class="ln"><span>4 étapes,</span></span><span class="ln"><span><em>zéro stress.</em></span></span></div>
+      <div class="rail">
+        <div class="kicker">Comment ça marche</div>
+        <div class="rail-track"></div><div class="rail-fill"></div>
+        <div class="rail-dot" style="left:0%">1<b>1</b></div><div class="rail-dot" style="left:33.33%">2<b>2</b></div>
+        <div class="rail-dot" style="left:66.66%">3<b>3</b></div><div class="rail-dot" style="left:100%">4<b>4</b></div>
+      </div>
+      <div class="steptxt st1"><div class="step-n"><span class="ln"><span>01</span></span></div><div class="step-t h"><span class="ln"><span>Contactez-nous</span></span></div><div class="step-d">WhatsApp, appel ou formulaire. Devis gratuit en moins de 2 heures.</div></div>
+      <div class="steptxt st2"><div class="step-n"><span class="ln"><span>02</span></span></div><div class="step-t h"><span class="ln"><span>Déposez</span></span><span class="ln"><span>votre colis</span></span></div><div class="step-d">Au bureau de Montréal ou enlèvement à domicile. Vous recevez votre numéro de suivi.</div></div>
+      <div class="steptxt st3"><div class="step-n"><span class="ln"><span>03</span></span></div><div class="step-t h"><span class="ln"><span>Suivez</span></span><span class="ln"><span>en direct</span></span></div><div class="step-d">Sur WhatsApp et sur mbccargo.com, à chaque étape du trajet.</div></div>
+      <div class="steptxt st4"><div class="step-n"><span class="ln"><span>04</span></span></div><div class="step-t h"><span class="ln"><span>Livraison</span></span><span class="ln"><span>confirmée</span></span></div><div class="step-d">Notification dès la remise : vous êtes rassuré en même temps que votre famille.</div></div>
+      <div class="phone">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="scr scr1">
+            <div class="wa-head"><div class="wa-av" data-art="logo"></div><div class="wa-name">MBC Cargo<small>répond en moins de 2 h</small></div></div>
+            <div class="wa-body">
+              <div class="bub out b1">Bonjour ! Je veux envoyer un colis de 10 kg à Ouagadougou 📦<time>09:41 <b>✓✓</b></time></div>
+              <div class="typing"><i></i><i></i><i></i></div>
+              <div class="bub in b2">Avec plaisir ! En fret aérien, livré en 5 à 8 jours. Voici votre devis gratuit ✅<time>09:58</time></div>
+            </div>
+          </div>
+          <div class="scr scr2"><div class="page">
+            <div class="page-top"><div class="lg" data-art="logo"></div>MBC <em>Cargo</em></div>
+            <div class="page-in">
+              <div class="p-kick">Montréal — Ouagadougou</div>
+              <div class="p-h">Enregistrer votre envoi</div>
+              <div class="field"><label>Ville de départ</label><div class="in"><span class="tx t1">Montréal</span></div></div>
+              <div class="field"><label>Ville d'arrivée</label><div class="in"><span class="tx t2">Ouagadougou</span></div></div>
+              <div class="field"><label>Description du colis</label><div class="in"><span class="tx t3">Vêtements, vitamines</span></div></div>
+              <div class="btn-p">Obtenir mon numéro de suivi</div>
+              <div class="code-card"><small>Votre numéro de suivi</small><b>MBC-2609-0001</b></div>
+            </div>
+          </div></div>
+          <div class="scr scr3"><div class="page">
+            <div class="page-top"><div class="lg" data-art="logo"></div>MBC <em>Cargo</em></div>
+            <div class="page-in">
+              <div class="p-kick">Suivi en direct</div>
+              <div class="p-h">Où est votre colis ?</div>
+              <div class="track-res">
+                <div><span class="num">MBC-2609-0001</span><span class="tag">Fret aérien</span></div>
+                <div class="corr"><div class="cf"></div><div class="cp" data-art="plane-mari"></div></div>
+                <div class="cities"><span>Montréal</span><span>Ouagadougou</span></div>
+              </div>
+              <ul class="steps">
+                <li><i><span class="ok" data-art="check-w"></span></i>Reçu au dépôt Canada</li>
+                <li><i><span class="ok" data-art="check-w"></span></i>Emballé, prêt à partir</li>
+                <li><i><span class="ok" data-art="check-w"></span></i>En vol</li>
+                <li><i><span class="ok" data-art="check-w"></span></i>Arrivé à Ouagadougou</li>
+                <li><i><span class="ok" data-art="check-w"></span></i>Dédouanement en cours</li>
+              </ul>
+            </div>
+          </div></div>
+          <div class="scr scr4"><div class="done-scr">
+            <div class="confetti"></div>
+            <div class="big-ck" data-art="check-big"></div>
+            <h4>Remis au client 🎉</h4>
+            <p>Merci pour votre confiance ! Votre colis a été remis avec succès.</p>
+          </div></div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- ========== PLAN 5 : le voyage ========== -->
-  <section id="scene-5-voyage" class="clip s5" data-start="18.6" data-duration="13.8" data-track-index="5">
+  <!-- 5. Destinations -->
+  <section id="s5-destinations" class="clip s5" data-start="29.0" data-duration="5.4" data-track-index="5">
     <div class="fill s5-in">
       <div class="fill s5-bg"></div>
-      <div class="fill s5-grid"></div>
-      <div class="map" data-art="map"></div>
-      <div class="pin-lbl lbl-mtl"><b>Montréal</b><span>DÉPÔT MBC</span></div>
-      <div class="pin-lbl lbl-oua"><b>Ouagadougou</b><span>LIVRAISON</span></div>
-      <div class="depot" data-art="box-small"></div>
-      <div class="stamp">DÉDOUANÉ</div>
-      <div class="phone">
-        <div class="wa-head"><div class="wa-av">MBC</div><div class="wa-name">MBC Cargo<small>en ligne</small></div></div>
-        <div class="wa-body"><div class="wa-stack">
-          <div class="msg">📦 Votre colis est bien arrivé au dépôt de Montréal.<time>09:02 <b>✓✓</b></time></div>
-          <div class="msg">✈️ Il est parti pour Ouagadougou.<time>10:15 <b>✓✓</b></time></div>
-          <div class="msg">📍 Livraison prévue jeudi chez votre mère.<time>10:16 <b>✓✓</b></time></div>
-          <div class="msg">💵 Prix confirmé, aucun frais caché.<time>10:16 <b>✓✓</b></time></div>
-          <div class="msg">🛃 Dédouanement terminé, on s'occupe de tout.<time>08:40 <b>✓✓</b></time></div>
-          <div class="msg hl">🏠 Livré à Ouagadougou ! Votre mère a reçu son colis.<time>14:05 <b>✓✓</b></time></div>
-        </div></div>
-      </div>
+      <div class="sec-head"><div class="kicker">L'Afrique de l'Ouest, notre terrain</div><div class="h"><span class="ln"><span>12 villes, <em>un seul contact.</em></span></span></div></div>
+      <svg class="spokes" data-art="spokes"></svg>
+      <div class="hub"><b>Montréal</b><span>CANADA</span></div>
+      <div class="dests"></div>
     </div>
   </section>
 
-  <!-- ========== PLAN 6 : ils nous font confiance ========== -->
-  <section id="scene-6-confiance" class="clip s6" data-start="31.8" data-duration="8.6" data-track-index="6">
+  <!-- 6. Tarifs -->
+  <section id="s6-tarifs" class="clip s6 on-paper" data-start="34.0" data-duration="5.4" data-track-index="6">
     <div class="fill s6-in">
       <div class="fill s6-bg"></div>
-      <div class="fill s6-glow"></div>
-      <div class="s6-title">Ils nous font confiance</div>
-      <div class="stats">
-        <div class="stat"><div class="num" data-odo="8+"></div><p>années d'expérience</p></div>
-        <div class="stat"><div class="num" data-odo="2 400+"></div><p>clients satisfaits</p></div>
-        <div class="stat"><div class="num" data-odo="12"></div><p>pays desservis</p></div>
+      <div class="fill dots-ink"></div>
+      <div class="sec-head"><div class="kicker" style="color:var(--clay)">Tarifs</div><div class="h"><span class="ln"><span>Prix clairs, <em>zéro surprise.</em></span></span></div></div>
+      <div class="prices">
+        <div class="price"><div class="lbl">Fret maritime</div><div class="amt"><span data-odo="400"></span><small>$ / CBM</small></div><p>35 à 60 jours · grands volumes</p></div>
+        <div class="price pop"><div class="badge-pop">Populaire</div><div class="lbl">Fret aérien</div><div class="amt"><span data-odo="18"></span><small>$ / kg</small></div><p>5 à 8 jours · assurance incluse</p></div>
+        <div class="price"><div class="lbl">Véhicule</div><div class="amt"><span class="pre">dès</span><span data-odo="3 500"></span><small>$</small></div><p>Burkina Faso · dédouanement inclus</p></div>
       </div>
-      <div class="quotes">
-        <div class="quote"><div class="stars" data-art="stars"></div><p>« J'envoie des colis à ma famille à Ouaga depuis 4 ans. Jamais de problème. »</p><div class="who"><div class="avatar">SK</div><div><b>Seydou Kaboré</b><span>Montréal, QC</span></div></div></div>
-        <div class="quote"><div class="stars" data-art="stars"></div><p>« Tout le dédouanement était géré. Zéro stress. »</p><div class="who"><div class="avatar">FD</div><div><b>Fatou Diallo</b><span>Laval, QC</span></div></div></div>
-        <div class="quote"><div class="stars" data-art="stars"></div><p>« Rapport qualité-prix imbattable. »</p><div class="who"><div class="avatar">MT</div><div><b>Moussa Traoré</b><span>Toronto, ON</span></div></div></div>
-      </div>
+      <div class="foot-note"><b>Inclus :</b> manutention, suivi WhatsApp et assistance douanière de base. Prix indicatifs, devis final confirmé par nos équipes.</div>
     </div>
   </section>
 
-  <!-- ========== PLAN 7 : appel à l'action ========== -->
-  <section id="scene-7-cta" class="clip s7" data-start="39.8" data-duration="5.2" data-track-index="7">
+  <!-- 7. Confiance + appel à l'action -->
+  <section id="s7-cta" class="clip s7" data-start="39.0" data-duration="6.0" data-track-index="7">
     <div class="fill s7-in">
-      <div class="fill s7-sky"></div>
-      <div class="sun s7-sun"></div>
-      <div class="skyline" data-art="skyline"></div>
-      <div class="home s7-home" data-art="home-box"></div>
-      <div class="brand"><div class="mini" data-art="logo-mini"></div>MBC <em>Cargo</em></div>
-      <div class="cta">
-        <span class="cta-line l1">Expédiez maintenant.</span>
-        <span class="cta-line l2">Votre mère vous attend.</span>
-        <div class="btn"><div class="wa" data-art="wa-icon"></div>Demander un devis</div>
-        <div class="contact">+1 (418) 812-9289<span>mbccargo.com · WhatsApp 7j/7</span></div>
+      <div class="fill s7-bg"></div>
+      <div class="fill dots"></div>
+      <div class="stats">
+        <div class="stat"><div class="v" data-odo="8+"></div><p>années d'expérience</p></div>
+        <div class="stat"><div class="v" data-odo="2 400+"></div><p>clients satisfaits</p></div>
+        <div class="stat"><div class="v" data-odo="12"></div><p>pays desservis</p></div>
+      </div>
+      <div class="trust">
+        <div class="pill"><div class="ck" data-art="check"></div>Envois assurés</div>
+        <div class="pill"><div class="ck" data-art="check"></div>Dédouanement certifié</div>
+        <div class="pill"><div class="ck" data-art="check"></div>Réponse sous 2 h</div>
+      </div>
+      <div class="fill cta-bg"></div>
+      <div class="cta-wrap">
+        <div class="h"><span class="ln"><span>Prêt à expédier</span></span><span class="ln"><span>vers l'Afrique ?</span></span></div>
+        <div class="cta-sub">Devis gratuit en moins de 2 heures</div>
+        <div class="cta-btn"><div class="wa" data-art="wa-icon"></div>+1 (418) 812-9289</div>
+        <div class="cta-site"><div class="lg" data-art="logo"></div>mbccargo.com</div>
       </div>
     </div>
   </section>
-
-  <!-- ========== Sous-titres cinétiques (calés sur la voix) ========== -->
-  <div id="sous-titres" class="clip caps" data-start="0" data-duration="45" data-track-index="8">
-    <div class="cap on-dark c1">Vous pensez à votre mère à <em>Ouaga.</em></div>
-    <div class="cap on-light c2">Vous remplissez une boîte&nbsp;:<span class="sub"><span data-at="4.39">des vêtements,</span> <span data-at="5.74">des vitamines,</span> <span data-at="6.78">un peu d'argent.</span></span></div>
-    <div class="cap on-light c3">Vous la fermez…</div>
-    <div class="cap on-dark c4">et vous vous demandez&nbsp;:</div>
-    <div class="cap on-dark c5">Va-t-elle <em>arriver&nbsp;?</em></div>
-    <div class="cap on-dark c6">Combien ça va <em>coûter</em> en&nbsp;réalité&nbsp;?</div>
-    <div class="cap on-dark center c8">C'est fini <span class="x">l'angoisse.<i class="xline"></i></span></div>
-    <div class="cap on-light c9">Vous déposez votre colis à <em>Montréal.</em></div>
-    <div class="cap on-light c10">Vous suivez chaque étape sur <em>WhatsApp.</em></div>
-    <div class="cap on-light c11">Vous savez exactement <em>quand</em> elle va le recevoir.</div>
-    <div class="cap on-light c12">Pas de surprise sur le <em>prix.</em></div>
-    <div class="cap on-light c13">Pas de panique <em>douanière.</em></div>
-  </div>
 
   <div id="grain" class="clip grain" data-start="0" data-duration="45" data-track-index="9"></div>
 </div>
@@ -409,441 +439,233 @@ svg { display: block; overflow: visible; }
   const root = document.getElementById("root");
   const PORT = root.classList.contains("port");
   const W = PORT ? 1080 : 1920, H = PORT ? 1920 : 1080;
-  const $ = (s, el = document) => el.querySelector(s);
+  const L = (land, port) => (PORT ? port : land);
+  const $ = (s, el = document) => (typeof s === "string" ? el.querySelector(s) : s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const px = (el, css) => Object.assign(el.style, Object.fromEntries(Object.entries(css).map(([k, v]) => [k, typeof v === "number" ? v + "px" : v])));
   gsap.registerPlugin(MotionPathPlugin);
+  const C = { ink: "#0F1B2D", paper: "#F3EFE4", mari: "#E8A33D", clay: "#C9603C" };
 
-  // PRNG déterministe (pas de Math.random : le rendu doit être reproductible)
-  let seed = 7;
-  const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-
-  /* =================== Illustrations (SVG) =================== */
-  const C = { ink: "#0F1B2D", ink3: "#1E3049", paper: "#F3EFE4", mari: "#E8A33D", clay: "#C9603C", skin: "#7A4A31" };
-
-  const ART = {};
-  ART["pin-chip"] = () => `<svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Z" fill="${C.mari}"/><circle cx="12" cy="9" r="2.6" fill="${C.ink}"/></svg>`;
-  ART.check = () => `<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="${C.ink}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  ART["wa-icon"] = () => `<svg viewBox="0 0 24 24"><path fill="#fff" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.1c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.79-4.17-4.94-4.37-.15-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.2 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.83 2 .9 2.14.07.15.11.32.02.52-.09.2-.14.32-.27.49-.14.17-.29.38-.41.5-.14.14-.28.29-.12.57.16.29.72 1.19 1.54 1.93 1.06.95 1.95 1.24 2.24 1.38.29.14.46.12.63-.07.17-.2.72-.84.91-1.12.2-.29.39-.24.66-.14.27.1 1.7.8 1.99.94.29.15.48.22.55.34.07.13.07.72-.17 1.4Z"/></svg>`;
-  ART["logo-mini"] = () => `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="${C.ink}"/><circle cx="50" cy="50" r="33" fill="none" stroke="${C.mari}" stroke-width="5"/><text x="50" y="61" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="31" fill="#fff">MBC</text></svg>`;
-  ART.stars = () => Array.from({ length: 5 }, () => `<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9Z" fill="${C.mari}"/></svg>`).join("");
-
-  // Silhouette de Ouagadougou : maisons en banco à toits plats, château d'eau, baobab, palmier
-  ART.skyline = () => {
-    const vb = PORT ? "0 0 1080 760" : "0 0 1920 520";
-    const back = PORT
-      ? `M0,430 h90 v-60 h120 v80 h70 v-120 h40 v-40 h50 v40 h30 v150 h110 v-70 h140 v60 h60 v-100 h90 v120 h80 v-50 h110 v80 h90 V760 H0Z`
-      : `M0,300 h140 v-50 h150 v70 h90 v-110 h40 v-40 h50 v40 h30 v140 h130 v-60 h170 v50 h70 v-90 h110 v110 h100 v-40 h120 v60 h140 v-80 h90 v70 h160 v-50 h110 v60 h80 V520 H0Z`;
-    const front = PORT
-      ? `M0,560 h160 v-50 h140 v60 h220 v-40 h180 v50 h150 v-30 h230 V760 H0Z`
-      : `M0,400 h260 v-40 h200 v50 h320 v-30 h260 v40 h240 v-50 h300 v40 h340 V520 H0Z`;
-    const tx = PORT ? 840 : 1640, ty = PORT ? 470 : 330;
-    const baobab = `<g transform="translate(${tx},${ty})" fill="#7E3420">
-      <path d="M-46,0 C-34,-50 -40,-100 -30,-140 L30,-140 C40,-100 34,-50 46,0Z"/>
-      <path d="M-26,-130 C-60,-160 -110,-162 -150,-176 M26,-130 C60,-164 112,-168 150,-184 M-10,-138 C-24,-170 -40,-190 -54,-206 M10,-138 C24,-172 44,-192 60,-210 M0,-140 L0,-196" stroke="#7E3420" stroke-width="14" stroke-linecap="round" fill="none"/>
-      <path d="M-196,-176 C-180,-212 -110,-226 -60,-214 C-30,-240 40,-244 70,-220 C120,-232 190,-214 200,-184 C150,-170 -150,-164 -196,-176Z"/></g>`;
-    return `<svg viewBox="${vb}" preserveAspectRatio="xMidYMax slice" width="100%" height="100%">
-      <path d="${back}" fill="#B65A35" opacity=".75"/>${baobab}
-      <path d="${front}" fill="#8E3B27"/></svg>`;
+  /* ---------- Icônes et illustrations ---------- */
+  const PLANE = "M44 0 L10 -5 L-8 -34 L-16 -34 L-6 -5 L-26 -4 L-34 -16 L-40 -16 L-36 0 L-40 16 L-34 16 L-26 4 L-6 5 L-16 34 L-8 34 L10 5Z";
+  const ART = {
+    check: () => `<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="${C.ink}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    "check-w": () => `<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    "check-big": () => `<svg viewBox="0 0 24 24"><path class="ckpath" d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    logo: () => `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="${C.ink}"/><circle cx="50" cy="50" r="34" fill="none" stroke="${C.mari}" stroke-width="5.5"/><text x="50" y="61" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="31" fill="#fff">MBC</text></svg>`,
+    "wa-icon": () => `<svg viewBox="0 0 24 24"><path fill="#fff" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.1c-.24.68-1.4 1.3-1.94 1.38-.5.08-1.13.11-1.82-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.79-4.17-4.94-4.37-.15-.2-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.27-.29.58-.36.78-.36.2 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.83 2 .9 2.14.07.15.11.32.02.52-.09.2-.14.32-.27.49-.14.17-.29.38-.41.5-.14.14-.28.29-.12.57.16.29.72 1.19 1.54 1.93 1.06.95 1.95 1.24 2.24 1.38.29.14.46.12.63-.07.17-.2.72-.84.91-1.12.2-.29.39-.24.66-.14.27.1 1.7.8 1.99.94.29.15.48.22.55.34.07.13.07.72-.17 1.4Z"/></svg>`,
+    "plane-mari": () => `<svg viewBox="-50 -50 100 100"><path d="${PLANE}" fill="${C.mari}"/></svg>`,
+    "plane-ico": () => `<svg viewBox="-50 -50 100 100"><g class="anim"><path d="${PLANE}" fill="${C.mari}" transform="rotate(-30)"/></g></svg>`,
+    "ship-ico": () => `<svg viewBox="0 0 100 100"><g class="anim"><rect x="30" y="22" width="16" height="16" rx="2" fill="${C.clay}"/><rect x="48" y="22" width="16" height="16" rx="2" fill="${C.mari}"/><rect x="39" y="6" width="16" height="16" rx="2" fill="${C.paper}"/>
+      <path d="M12 42 H88 L78 66 H22Z" fill="${C.mari}"/><rect x="62" y="28" width="12" height="14" fill="${C.paper}"/></g>
+      <path class="wave" d="M-20 76 q10 -8 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#8FB3D9" stroke-width="5" stroke-linecap="round"/></svg>`,
+    "car-ico": () => `<svg viewBox="0 0 100 100"><g class="anim"><path d="M14 58 L22 38 Q25 32 32 32 H64 Q71 32 75 38 L84 52 Q90 53 90 60 V66 H12 V62 Q12 58 14 58Z" fill="${C.mari}"/>
+      <path d="M30 38 H48 V52 H24Z M54 38 H66 L74 52 H54Z" fill="${C.paper}" opacity=".9"/>
+      <g class="wh"><circle cx="30" cy="68" r="10" fill="${C.paper}"/><circle cx="30" cy="62" r="3" fill="${C.ink}"/></g>
+      <g class="wh"><circle cx="72" cy="68" r="10" fill="${C.paper}"/><circle cx="72" cy="62" r="3" fill="${C.ink}"/></g></g>
+      <path class="road" d="M0 82 H100" stroke="#3A4E6E" stroke-width="4" stroke-dasharray="10 8"/></svg>`,
   };
 
-  // Maison en banco + banc + la mère (assise, téléphone en main). withBox : colis MBC posé sur le banc
-  const home = (withBox) => `
-    <svg viewBox="0 0 900 640">
-      <defs>
-        <pattern id="pagne${withBox ? "b" : "a"}" width="34" height="34" patternUnits="userSpaceOnUse">
-          <rect width="34" height="34" fill="${C.clay}"/><circle cx="9" cy="9" r="5" fill="${C.mari}"/><circle cx="26" cy="26" r="5" fill="${C.mari}"/>
-          <path d="M0 26 L9 17 L18 26" stroke="#F1C77D" stroke-width="2.5" fill="none"/></pattern>
-      </defs>
-      <ellipse cx="470" cy="628" rx="430" ry="22" fill="#5E2616" opacity=".35"/>
-      <rect x="40" y="96" width="700" height="544" fill="#D98552"/>
-      <rect x="28" y="78" width="724" height="30" rx="4" fill="#B5603A"/>
-      <path d="${Array.from({ length: 18 }, (_, i) => `M${52 + i * 39},108 l18,22 l18,-22`).join(" ")}" fill="none" stroke="${C.mari}" stroke-width="7" stroke-linejoin="round"/>
-      <rect x="40" y="590" width="700" height="50" fill="#C2703F"/>
-      <rect x="88" y="290" width="168" height="350" rx="8" fill="#8E3B27"/>
-      <rect x="104" y="306" width="136" height="334" rx="4" fill="${C.ink3}"/>
-      <path d="M104 420 h136 M104 520 h136" stroke="#2A4060" stroke-width="5"/>
-      <circle cx="220" cy="470" r="7" fill="${C.mari}"/>
-      <rect x="370" y="168" width="170" height="132" rx="8" fill="#8E3B27"/>
-      <rect x="384" y="182" width="142" height="104" fill="#F6C46A" opacity=".9"/>
-      <rect x="384" y="182" width="64" height="104" fill="#2E5C8A"/><rect x="462" y="182" width="64" height="104" fill="#2E5C8A"/>
-      <path d="M392 196 h48 M392 214 h48 M392 232 h48 M392 250 h48 M392 268 h48 M470 196 h48 M470 214 h48 M470 232 h48 M470 250 h48 M470 268 h48" stroke="#244B73" stroke-width="5"/>
-      <g>
-        <rect x="300" y="476" width="380" height="22" rx="6" fill="#6B3A22"/>
-        <rect x="322" y="498" width="16" height="122" fill="#56301C"/><rect x="642" y="498" width="16" height="122" fill="#56301C"/>
-      </g>
-      ${withBox ? `
-      <g class="bench-box">
-        <path d="M318,476 L318,396 L440,396 L440,476Z" fill="#D9A066"/>
-        <path d="M440,476 L440,396 L478,376 L478,456Z" fill="#B97C45"/>
-        <path d="M318,396 L356,376 L478,376 L440,396Z" fill="#E7B67E"/>
-        <path d="M368,396 L384,396 L422,376 L406,376Z" fill="#EFE2C4" opacity=".9"/>
-        <circle cx="379" cy="438" r="22" fill="${C.ink}"/><circle cx="379" cy="438" r="15" fill="none" stroke="${C.mari}" stroke-width="3"/>
-        <text x="379" y="443" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="13" fill="#fff">MBC</text>
-      </g>` : ""}
-      <g class="mother">
-        <path d="M512,478 Q500,420 512,392 L600,392 Q626,420 618,478Z" fill="url(#pagne${withBox ? "b" : "a"})"/>
-        <path d="M520,470 L640,470 Q668,472 668,500 L676,604 L630,604 L622,512 L528,512Z" fill="url(#pagne${withBox ? "b" : "a"})"/>
-        <ellipse cx="660" cy="610" rx="34" ry="10" fill="#4A2618"/>
-        <path d="M520,300 Q500,330 506,400 L604,400 Q616,342 596,300 Q560,284 520,300Z" fill="${C.paper}"/>
-        <path d="M534,298 Q558,320 584,298" stroke="${C.clay}" stroke-width="6" fill="none"/>
-        <rect x="546" y="270" width="24" height="30" rx="8" fill="${C.skin}"/>
-        <circle cx="560" cy="248" r="36" fill="${C.skin}"/>
-        <path d="M520,250 Q508,196 556,186 Q612,178 610,226 Q628,214 636,232 Q618,256 600,244 Q586,224 524,256Z" fill="${C.mari}"/>
-        <path d="M526,236 Q564,214 604,226" stroke="${C.clay}" stroke-width="7" fill="none" stroke-linecap="round"/>
-        <circle cx="586" cy="262" r="4" fill="${C.ink}" opacity=".55"/>
-        <path d="M584,312 Q620,350 636,372" stroke="${C.skin}" stroke-width="24" stroke-linecap="round" fill="none"/>
-        <g class="phone-in-hand">
-          <rect x="626" y="336" width="32" height="54" rx="7" fill="${C.ink}"/>
-          <rect x="630" y="342" width="24" height="40" rx="4" fill="${withBox ? C.paper : "#25D366"}" class="hand-screen"/>
-          ${withBox ? `<path d="M636,362 l5,5 l9,-10" stroke="#25D366" stroke-width="4" fill="none" stroke-linecap="round"/>` : ""}
-        </g>
-        <path d="M530,316 Q600,380 640,378" stroke="${C.skin}" stroke-width="22" stroke-linecap="round" fill="none"/>
-      </g>
-    </svg>`;
-  ART.home = () => home(false);
-  ART["home-box"] = () => home(true);
+  // Trajet de l'accroche
+  const R = L({ a: [300, 800], b: [1640, 860], c1: [560, 150], c2: [1340, 170] }, { a: [180, 1560], b: [900, 1660], c1: [80, 330], c2: [1000, 380] });
+  const ROUTE = `M${R.a} C${R.c1} ${R.c2} ${R.b}`;
+  ART.route = () => `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%">
+      <path d="${ROUTE}" fill="none" stroke="rgba(243,239,228,.22)" stroke-width="5" stroke-dasharray="3 18" stroke-linecap="round"/>
+      <path class="r-live" d="${ROUTE}" fill="none" stroke="${C.mari}" stroke-width="7" stroke-linecap="round"/>
+      <circle class="r-a" cx="${R.a[0]}" cy="${R.a[1]}" r="16" fill="${C.mari}"/><circle class="r-b" cx="${R.b[0]}" cy="${R.b[1]}" r="16" fill="${C.clay}"/>
+      <circle class="r-bp" cx="${R.b[0]}" cy="${R.b[1]}" r="16" fill="none" stroke="${C.clay}" stroke-width="4"/>
+      <g class="r-plane"><path d="${PLANE}" fill="${C.paper}"/></g></svg>`;
 
-  // Fenêtre : Montréal la nuit, sous la neige
-  ART.window = () => {
-    const flakes = Array.from({ length: 46 }, (_, i) => {
-      const x = Math.round(rnd() * 560), y = Math.round(rnd() * 400), r = (1.6 + rnd() * 3.2).toFixed(1);
-      return `<circle class="flake" cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity="${(.5 + rnd() * .5).toFixed(2)}"/>`;
-    }).join("");
-    let bx = 0; const bld = [];
-    [[70, 190], [50, 120], [90, 250], [60, 160], [80, 210], [56, 140], [70, 180], [60, 120]].forEach(([w, h], i) => {
-      bld.push(`<rect x="${bx}" y="${400 - h}" width="${w}" height="${h}" fill="${i % 2 ? "#14233A" : "#0F1B2D"}"/>`);
-      for (let yy = 400 - h + 18; yy < 370; yy += 30) for (let xx = bx + 12; xx < bx + w - 14; xx += 22)
-        if (rnd() > .45) bld.push(`<rect x="${xx}" y="${yy}" width="9" height="13" fill="${C.mari}" opacity="${(.55 + rnd() * .45).toFixed(2)}"/>`);
-      bx += w + 4;
-    });
-    return `<svg viewBox="0 0 560 400" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
-      <defs><linearGradient id="mtlsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2C47"/><stop offset="1" stop-color="#3A4E6E"/></linearGradient></defs>
-      <rect width="560" height="400" fill="url(#mtlsky)"/>
-      <path d="M0,300 Q140,170 300,250 Q420,300 560,230 L560,400 L0,400Z" fill="#2A3A55"/>
-      <g>${bld.join("")}</g>
-      <rect y="372" width="560" height="28" fill="#E9EEF5"/>
-      <g class="snow">${flakes}</g>
-      <rect x="272" y="0" width="16" height="400" fill="#FBF8F1"/><rect x="0" y="192" width="560" height="16" fill="#FBF8F1"/>
-    </svg>`;
-  };
-
-  // Cadre photo : la mère
-  ART.portrait = () => `<svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
-    <rect width="200" height="250" fill="#F2C06A"/><circle cx="150" cy="60" r="34" fill="#FFE2A0"/>
-    <path d="M30,250 Q36,170 100,166 Q164,170 170,250Z" fill="${C.clay}"/>
-    <path d="M70,178 Q100,200 130,178" stroke="${C.mari}" stroke-width="8" fill="none"/>
-    <circle cx="100" cy="128" r="38" fill="${C.skin}"/>
-    <path d="M58,128 Q48,70 100,64 Q156,60 150,112 Q168,104 172,122 Q150,140 138,124 Q124,102 62,134Z" fill="${C.mari}"/>
-    <path d="M64,114 Q102,90 146,104" stroke="${C.clay}" stroke-width="8" fill="none" stroke-linecap="round"/>
-  </svg>`;
-
-  // Carton (vue 3/4) en deux couches : le fond (intérieur + rabats arrière) et l'avant (face + rabats avant)
-  ART["box-back"] = () => `<svg viewBox="0 0 600 560" width="100%" height="100%">
-    <path class="flap-bk" d="M200,170 L540,170 L560,84 L220,84Z" fill="#C98E55"/>
-    <path class="flap-lt" d="M80,230 L200,170 L146,104 L26,164Z" fill="#B97C45"/>
-    <path d="M80,230 L420,230 L540,170 L200,170Z" fill="#6E4325"/>
-    <path d="M80,230 L420,230 L540,170 L500,170 L400,214 L96,214Z" fill="#5A361D" opacity=".6"/>
-  </svg>`;
-  const boxFront = (closed, sticker) => `<svg viewBox="0 0 600 560" width="100%" height="100%">
-    <path d="M420,230 L540,170 L540,460 L420,520Z" fill="#B97C45"/>
-    <rect x="80" y="230" width="340" height="290" fill="#D9A066"/>
-    <rect x="80" y="230" width="340" height="40" fill="#C98E55" opacity=".55"/>
-    <path d="M110,470 h70 M110,490 h40" stroke="#B5814E" stroke-width="8" stroke-linecap="round"/>
-    <g class="closed-top" ${closed ? "" : 'opacity="0"'}>
-      <path d="M80,230 L420,230 L540,170 L200,170Z" fill="#E7B67E"/>
-      <path d="M80,230 L420,230 L540,170 L200,170Z" fill="none" stroke="#C98E55" stroke-width="3"/>
-      <path d="M310,230 L250,230 L370,170 L430,170" fill="none" stroke="#C98E55" stroke-width="3" opacity=".5"/>
-    </g>
-    <path class="tape" d="M222,230 L266,230 L386,170 L342,170Z" fill="#EFE2C4" ${closed ? "" : 'opacity="0"'}/>
-    <path class="tape2" d="M222,230 L266,230 L266,300 L222,300Z" fill="#EFE2C4" ${closed ? "" : 'opacity="0"'}/>
-    ${closed ? "" : `
-    <path class="flap-fr" d="M80,230 L420,230 L404,294 L64,294Z" fill="#E3AE73"/>
-    <path d="M80,230 L420,230" stroke="#B5814E" stroke-width="4"/>
-    <path class="flap-rt" d="M420,230 L540,170 L592,220 L472,280Z" fill="#C98E55"/>`}
-    <g class="sticker" ${sticker ? "" : 'opacity="0"'}>
-      <circle cx="330" cy="400" r="62" fill="${C.ink}"/><circle cx="330" cy="400" r="44" fill="none" stroke="${C.mari}" stroke-width="7"/>
-      <text x="330" y="412" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="34" fill="#fff">MBC</text>
-    </g>
-  </svg>`;
-  ART["box-front"] = () => boxFront(false, false);
-  ART["box-closed"] = () => boxFront(true, false);
-  ART["box-small"] = () => boxFront(true, true);
-
-  ART.shirt = () => `<svg viewBox="0 0 220 150" width="100%" height="100%">
-    <rect x="10" y="30" width="200" height="110" rx="14" fill="${C.clay}"/>
-    <path d="M10,70 h200" stroke="#B4512F" stroke-width="5"/>
-    <path d="M80,30 L110,62 L140,30" fill="#F3EFE4"/><path d="M80,30 L110,62 L140,30" fill="none" stroke="#B4512F" stroke-width="5"/>
-    <circle cx="110" cy="84" r="5" fill="#F3EFE4"/><circle cx="110" cy="108" r="5" fill="#F3EFE4"/>
-    <rect x="10" y="14" width="200" height="24" rx="10" fill="${C.mari}"/></svg>`;
-  ART.vitamins = () => `<svg viewBox="0 0 120 180" width="100%" height="100%">
-    <rect x="22" y="10" width="76" height="34" rx="8" fill="#fff"/><rect x="22" y="34" width="76" height="10" fill="#E3DCCB"/>
-    <rect x="12" y="44" width="96" height="130" rx="22" fill="${C.mari}"/>
-    <rect x="12" y="80" width="96" height="62" fill="${C.paper}"/>
-    <rect x="34" y="98" width="52" height="24" rx="12" fill="${C.clay}"/><rect x="34" y="98" width="26" height="24" rx="12" fill="#E07A52"/></svg>`;
-  ART.cash = () => `<svg viewBox="0 0 220 150" width="100%" height="100%">
-    <g transform="rotate(-8 110 60)"><rect x="40" y="10" width="150" height="80" rx="8" fill="#6E9B6A"/><circle cx="115" cy="50" r="20" fill="#89B585"/></g>
-    <g transform="rotate(6 110 60)"><rect x="30" y="20" width="150" height="80" rx="8" fill="#7BA877"/><circle cx="105" cy="60" r="20" fill="#9AC596"/></g>
-    <rect x="10" y="56" width="200" height="90" rx="10" fill="${C.paper}"/>
-    <path d="M10,60 L110,112 L210,60" fill="none" stroke="#D9CDB3" stroke-width="5"/>
-    <circle cx="110" cy="112" r="13" fill="${C.clay}"/></svg>`;
-
-  ART.pricetag = () => `<svg viewBox="0 0 240 320">
-    <path d="M120,0 L120,60" stroke="#C9B48A" stroke-width="4"/>
-    <g class="ptag-body"><path d="M60,60 L180,60 L210,100 L210,300 Q210,316 194,316 L46,316 Q30,316 30,300 L30,100Z" fill="${C.paper}"/>
-    <circle cx="120" cy="96" r="14" fill="#0A1220"/>
-    <text class="pt pt0" x="120" y="210" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="74" fill="${C.clay}">???</text>
-    <text class="pt pt1" x="120" y="210" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="74" fill="${C.clay}" opacity="0">180 $</text>
-    <text class="pt pt2" x="120" y="210" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="74" fill="${C.clay}" opacity="0">340 $</text>
-    <text class="pt pt3" x="120" y="210" text-anchor="middle" font-family="Space Grotesk" font-weight="700" font-size="74" fill="${C.clay}" opacity="0">?!</text>
-    <text x="120" y="268" text-anchor="middle" font-family="Inter" font-weight="600" font-size="24" letter-spacing="3" fill="#8394AA">FRAIS ?</text></g></svg>`;
-
-  // Carte : océan stylisé + trajet Montréal → Ouagadougou
-  const GEO = PORT
-    ? { vb: "0 0 1080 1920", a: [190, 720], b: [860, 960], c1: [300, 480], c2: [760, 540], ocean: [470, 820] }
-    : { vb: "0 0 1240 1080", a: [230, 380], b: [1000, 640], c1: [380, 110], c2: [860, 170], ocean: [640, 470] };
-  const ROUTE = `M${GEO.a} C${GEO.c1} ${GEO.c2} ${GEO.b}`;
-  ART.map = () => {
-    const waves = Array.from({ length: 7 }, (_, i) => {
-      const x = GEO.ocean[0] - 260 + (i % 3) * 190 + (i > 2 ? 90 : 0), y = GEO.ocean[1] - 120 + Math.floor(i / 3) * 110;
-      return `<path d="M${x},${y} q20,-16 40,0 t40,0 t40,0" stroke="#9FB1C6" stroke-width="5" fill="none" stroke-linecap="round" opacity=".55"/>`;
-    }).join("");
-    const pin = ([x, y], cls) => `<g class="${cls}">
-      <circle class="pulse" cx="${x}" cy="${y}" r="34" fill="${C.clay}" opacity=".25"/>
-      <path d="M${x},${y - 10} C${x - 22},${y - 10} ${x - 34},${y - 30} ${x - 34},${y - 46} a34,34 0 0 1 68,0 C${x + 34},${y - 30} ${x + 22},${y - 10} ${x},${y - 10}Z" fill="${C.clay}"/>
-      <circle cx="${x}" cy="${y - 50}" r="12" fill="${C.paper}"/><circle cx="${x}" cy="${y}" r="9" fill="${C.ink}"/></g>`;
-    return `<svg viewBox="${GEO.vb}" width="100%" height="100%">
-      <text x="${GEO.ocean[0]}" y="${GEO.ocean[1] + 120}" text-anchor="middle" font-family="Inter" font-weight="600" font-size="26" letter-spacing="10" fill="#9FB1C6">OCÉAN ATLANTIQUE</text>
-      ${waves}
-      <path class="route-base" d="${ROUTE}" fill="none" stroke="#B9C4D1" stroke-width="6" stroke-dasharray="2 18" stroke-linecap="round"/>
-      <path class="route-live" d="${ROUTE}" fill="none" stroke="${C.mari}" stroke-width="8" stroke-linecap="round"/>
-      ${pin(GEO.a, "pin-a")}${pin(GEO.b, "pin-b")}
-      <g class="plane"><path d="M44 0 L10 -5 L-8 -34 L-16 -34 L-6 -5 L-26 -4 L-34 -16 L-40 -16 L-36 0 L-40 16 L-34 16 L-26 4 L-6 5 L-16 34 L-8 34 L10 5Z" fill="${C.ink}"/></g>
-    </svg>`;
-  };
+  // Destinations : 12 villes en couronne autour de Montréal
+  const DEST = [["🇧🇫", "Ouagadougou", "Burkina Faso"], ["🇧🇫", "Bobo-Dioulasso", "Burkina Faso"], ["🇸🇳", "Dakar", "Sénégal"], ["🇨🇮", "Abidjan", "Côte d'Ivoire"],
+    ["🇲🇱", "Bamako", "Mali"], ["🇳🇪", "Niamey", "Niger"], ["🇹🇬", "Lomé", "Togo"], ["🇬🇭", "Accra", "Ghana"], ["🇧🇯", "Cotonou", "Bénin"],
+    ["🇨🇲", "Douala", "Cameroun"], ["🇬🇳", "Conakry", "Guinée"], ["🇲🇷", "Nouakchott", "Mauritanie"]];
+  const HUB = L({ x: 960, y: 610 }, { x: 540, y: 1100 });
+  const RAD = { rx: 700, ry: 320 };
+  // 16:9 : couronne elliptique ; 9:16 : deux colonnes de part et d'autre de Montréal
+  const destPos = DEST.map((_, i) => {
+    if (PORT) return { x: i % 2 ? 840 : 240, y: 470 + Math.floor(i / 2) * 252 };
+    const a = -Math.PI / 2 + (i / DEST.length) * Math.PI * 2;
+    return { x: HUB.x + Math.cos(a) * RAD.rx, y: HUB.y + Math.sin(a) * RAD.ry };
+  });
+  ART.spokes = () => destPos.map((p) => `<path class="spoke" d="M${HUB.x},${HUB.y} L${p.x.toFixed(1)},${p.y.toFixed(1)}" stroke="rgba(232,163,61,.5)" stroke-width="3" fill="none"/>`).join("");
 
   $$("[data-art]").forEach((el) => { el.innerHTML = ART[el.dataset.art](); });
+  const spokes = $(".spokes"); spokes.setAttribute("viewBox", `0 0 ${W} ${H}`); px(spokes, { width: W, height: H });
+  px($(".hub"), { left: HUB.x - 115, top: HUB.y - 115 });
+  const dests = $(".dests");
+  DEST.forEach(([f, c, p], i) => {
+    const pt = document.createElement("div"); pt.className = "dest-pt"; px(pt, { left: destPos[i].x, top: destPos[i].y });
+    pt.innerHTML = `<div class="dest"><span class="fl">${f}</span><div><b>${c}</b><br><span>${p}</span></div></div>`;
+    dests.appendChild(pt);
+  });
+  px($(".lbl-a"), { left: R.a[0] - 70, top: R.a[1] + 34 });
+  px($(".lbl-b"), L({ left: R.b[0] - 110, top: R.b[1] + 34 }, { left: R.b[0] - 210, top: R.b[1] + 34 }));
 
-  // Position des éléments dépendant du format (constantes, jamais mesurées pendant l'animation)
-  const place = (el, css) => Object.assign(el.style, Object.fromEntries(Object.entries(css).map(([k, v]) => [k, typeof v === "number" ? v + "px" : v])));
-  const L = (land, port) => (PORT ? port : land);
-  const mapScale = PORT ? 1 : 1; // la carte 16:9 fait 1240 px de large, viewBox identique
-  place($(".lbl-mtl"), L({ left: GEO.a[0] - 110, top: GEO.a[1] + 40 }, { left: GEO.a[0] - 110, top: GEO.a[1] + 40 }));
-  place($(".lbl-oua"), L({ left: GEO.b[0] - 150, top: GEO.b[1] + 40 }, { left: GEO.b[0] - 230, top: GEO.b[1] + 40 }));
-  place($(".depot"), L({ left: GEO.a[0] + 40, top: GEO.a[1] - 260, width: 200, height: 187 }, { left: GEO.a[0] + 40, top: GEO.a[1] - 210, width: 200, height: 187 }));
-  place($(".stamp"), L({ left: 380, top: 470 }, { left: 520, top: 690 }));
-  // Plan 2 : objets et étiquettes
-  const BX = L({ x: 1160, y: 300, w: 600 }, { x: 210, y: 1110, w: 660 });
-  const k = BX.w / 600;
-  const itemSize = { shirt: [200, 136], vit: [96, 144], cash: [190, 130] };
-  place($(".it-shirt"), { left: 150 * k, top: 120 * k, width: itemSize.shirt[0] * k, height: itemSize.shirt[1] * k });
-  place($(".it-vit"), { left: 330 * k, top: 80 * k, width: itemSize.vit[0] * k, height: itemSize.vit[1] * k });
-  place($(".it-cash"), { left: 230 * k, top: 110 * k, width: itemSize.cash[0] * k, height: itemSize.cash[1] * k });
-  const tags = L([[820, 470], [820, 555], [820, 640]], [[80, 1760], [400, 1760], [80, 1840]]);
-  $$(".tag").forEach((t, i) => place(t, { left: tags[i][0], top: tags[i][1] }));
-  if (PORT) { place($(".tg-3"), { left: 690, top: 1760 }); }
-  // Plan 3 : points d'interrogation autour du carton
-  const QC = L({ x: 1260, y: 520 }, { x: 540, y: 1250 });
-  const qpos = L([[-340, -360, 130], [330, -340, 110], [-560, 80, 90], [440, 60, 170], [-260, 280, 80], [250, 300, 120]],
-                 [[-400, -420, 140], [300, -470, 110], [-430, 110, 100], [380, 60, 160], [-420, -120, 90], [250, 360, 120]]);
-  const qms = $(".qms");
-  qpos.forEach(([dx, dy, fs], i) => { const q = document.createElement("div"); q.className = "qm"; q.textContent = "?";
-    place(q, { left: QC.x + dx - fs * .3, top: QC.y + dy - fs * .5, fontSize: fs, color: i % 2 ? "#E8A33D" : "#C9603C" }); qms.appendChild(q); });
-
-  // Compteurs (odomètre) du plan 6
+  // Odomètres
   $$("[data-odo]").forEach((el) => {
-    el.innerHTML = [...el.dataset.odo].map((ch) => {
-      if (/\d/.test(ch)) return `<div class="col"><div class="strip" data-d="${ch}">${Array.from({ length: 30 }, (_, i) => `<span>${i % 10}</span>`).join("")}</div></div>`;
-      if (ch === " ") return `<div class="gap"></div>`;
-      return `<div>${ch}</div>`;
-    }).join("");
+    el.innerHTML = [...el.dataset.odo].map((ch) => /\d/.test(ch)
+      ? `<div class="col"><div class="strip" data-d="${ch}">${Array.from({ length: 30 }, (_, i) => `<span>${i % 10}</span>`).join("")}</div></div>`
+      : ch === " " ? `<div class="gap"></div>` : `<div>${ch}</div>`).join("");
+    el.classList.add("odo");
   });
 
-  // Découpage des sous-titres en mots (les espaces insécables restent dans le mot)
-  const splitWords = (node) => {
-    [...node.childNodes].forEach((ch) => {
-      if (ch.nodeType === 3) {
-        const frag = document.createDocumentFragment();
-        ch.textContent.split(/( +)/).forEach((p) => {
-          if (!p) return;
-          if (/^ +$/.test(p)) { frag.appendChild(document.createTextNode(" ")); return; }
-          const s = document.createElement("span"); s.className = "w"; s.textContent = p; frag.appendChild(s);
-        });
-        node.replaceChild(frag, ch);
-      } else if (ch.nodeType === 1 && !ch.classList.contains("xline")) splitWords(ch);
-    });
-  };
-  $$(".cap, .cta-line").forEach(splitWords);
+  // Confettis déterministes (pas de Math.random)
+  let seed = 11;
+  const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const conf = $(".confetti"); const confData = [];
+  for (let i = 0; i < 26; i++) {
+    const c = document.createElement("i"); c.style.background = [C.mari, C.clay, "#25D366", C.paper][i % 4];
+    conf.appendChild(c);
+    const a = rnd() * Math.PI * 2, r = 160 + rnd() * 200;
+    confData.push({ el: c, x: Math.cos(a) * r, y: Math.sin(a) * r - 80, rot: (rnd() - 0.5) * 720 });
+  }
+  const CORR_W = L(340, 440); // largeur de la barre de suivi dans le téléphone
 
-  /* =================== Timeline =================== */
+  /* ---------- Timeline ---------- */
   const build = () => {
     const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+    const lines = (sel, t, stagger = 0.09, dur = 0.7) => tl.fromTo($$(`${sel} .ln > span`), { yPercent: 135 }, { yPercent: 0, duration: dur, ease: "expo.out", stagger }, t);
+    const linesOut = (sel, t, dur = 0.45) => tl.to($$(`${sel} .ln > span`), { yPercent: -135, duration: dur, ease: "expo.in", stagger: 0.04 }, t);
+    const odo = (scope, t, dur = 1.6) => $$(".strip", $(scope)).forEach((s, i) =>
+      tl.fromTo(s, { yPercent: 0 }, { yPercent: -((20 + +s.dataset.d) * 100) / 30, duration: dur + i * 0.1, ease: "power4.out" }, t + i * 0.04));
 
-    const words = (el, t, stagger = 0.06) => {
-      const ws = $$(".w", el).filter((w) => !w.closest("[data-at]"));
-      tl.fromTo(ws, { yPercent: 70, opacity: 0, rotation: 2 }, { yPercent: 0, opacity: 1, rotation: 0, duration: 0.55, stagger }, t);
-      $$("[data-at]", el).forEach((g) => tl.fromTo($$(".w", g), { yPercent: 70, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.45, stagger: 0.05 }, +g.dataset.at - 0.05));
-    };
-    const cap = (sel, t0, t1) => {
-      const el = $(sel);
-      words(el, t0);
-      tl.to(el, { opacity: 0, y: PORT ? -14 : -18, duration: 0.28, ease: "power2.in" }, t1 - 0.28);
-    };
+    /* 1. Accroche (0 → 3,4) */
+    const live = $(".r-live"), len = live.getTotalLength();
+    tl.fromTo(".r-a", { scale: 0 }, { scale: 1, duration: 0.4, ease: "back.out(3)", svgOrigin: R.a.join(" ") }, 0.05);
+    tl.fromTo(".lbl-a", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4 }, 0.15);
+    tl.fromTo(live, { strokeDasharray: `${len} ${len}`, strokeDashoffset: len }, { strokeDashoffset: 0, duration: 2.5, ease: "power2.inOut" }, 0.2);
+    tl.fromTo(".r-plane", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 0.2);
+    tl.to(".r-plane", { motionPath: { path: live, align: live, alignOrigin: [0.5, 0.5], autoRotate: true }, duration: 2.5, ease: "power2.inOut" }, 0.2);
+    tl.fromTo(".r-b", { scale: 0 }, { scale: 1, duration: 0.4, ease: "back.out(3)", svgOrigin: R.b.join(" ") }, 2.55);
+    tl.fromTo(".r-bp", { scale: 1, opacity: 1 }, { scale: 3, opacity: 0, duration: 0.8, ease: "power2.out", svgOrigin: R.b.join(" ") }, 2.65);
+    tl.fromTo(".lbl-b", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4 }, 2.6);
+    lines(".hook", 0.15, 0.32, 0.8);
 
-    /* ---- Plan 1 : Ouaga (0 → 2,4) ---- */
-    tl.fromTo(".s1-cam", { scale: 1.12 }, { scale: 1.02, duration: 2.6, ease: "power2.out", transformOrigin: "50% 80%" }, 0);
-    tl.fromTo(".s1-sun", { y: 60 }, { y: 0, duration: 2.6, ease: "power2.out" }, 0);
-    tl.fromTo(".s1 .skyline", { y: 40 }, { y: 0, duration: 2.4, ease: "power2.out" }, 0);
-    tl.fromTo(".s1-home", { y: 70 }, { y: 0, duration: 1.6, ease: "expo.out" }, 0);
-    tl.fromTo(".s1 .hand-screen", { opacity: 0.4 }, { opacity: 1, duration: 0.5, repeat: 3, yoyo: true, ease: "sine.inOut" }, 0.2);
-    tl.fromTo(".s1-place", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.6 }, 0.15);
-    cap(".c1", 0.1, 2.3);
+    /* 2. Logo (3,3 → 6) */
+    tl.fromTo(".s2 .iris.m", { scale: 0 }, { scale: 1, duration: 0.55, ease: "expo.inOut" }, 3.3);
+    tl.fromTo(".s2 .iris.i", { scale: 0 }, { scale: 1, duration: 0.55, ease: "expo.inOut" }, 3.55);
+    const rl = 2 * Math.PI * 190;
+    tl.fromTo(".ring", { strokeDasharray: `${rl} ${rl}`, strokeDashoffset: rl }, { strokeDashoffset: 0, duration: 0.9, ease: "expo.inOut" }, 3.75);
+    tl.fromTo(".ring-logo", { scale: 0.7, rotation: -40 }, { scale: 1, rotation: 0, duration: 1.1, ease: "expo.out" }, 3.75);
+    tl.fromTo(".ring-logo .mbc span", { yPercent: 110, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.55, stagger: 0.07, ease: "back.out(1.8)" }, 4.15);
+    tl.fromTo(".wordmark span", { opacity: 0, x: (i) => (i - 2) * 70 }, { opacity: 1, x: 0, duration: 0.8, stagger: 0.03, ease: "expo.out" }, 4.5);
+    tl.fromTo(".tagline", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6 }, 4.85);
 
-    /* ---- Transition 1 → 2 : volet de droite à gauche (1,9 → 2,45) ---- */
-    tl.fromTo(".s2-in", { clipPath: PORT ? "inset(100% 0% 0% 0%)" : "inset(0% 0% 0% 100%)" },
-      { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "expo.inOut" }, 1.9);
-    tl.to(".s1-cam", { x: PORT ? 0 : -160, y: PORT ? -160 : 0, duration: 0.55, ease: "expo.inOut" }, 1.9);
-
-    /* ---- Plan 2 : Montréal (2 → 10) ---- */
-    tl.fromTo(".s2 .window", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, 2.2);
-    tl.fromTo(".s2 .frame", { y: 40, opacity: 0, rotation: -6 }, { y: 0, opacity: 1, rotation: -3, duration: 0.8 }, 2.35);
-    tl.fromTo(".s2 .snow", { y: -60 }, { y: 70, duration: 8, ease: "none" }, 2);
-    tl.fromTo(".s2-place", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.6 }, 2.6);
-    tl.fromTo(".s2-box", { y: 160, opacity: 0, rotation: 3 }, { y: 0, opacity: 1, rotation: 0, duration: 0.9, ease: "back.out(1.4)" }, 2.55);
-    tl.fromTo(".s2 .flap-bk, .s2 .flap-lt, .s2 .flap-fr, .s2 .flap-rt", { scale: 0.4, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(2)", stagger: 0.06, transformOrigin: "50% 100%" }, 2.9);
-    cap(".c2", 2.6, 8.25);
-    // Les objets tombent dans le carton, synchronisés sur « des vêtements, des vitamines, un peu d'argent »
-    const drop = (sel, t, fromX, rot) => {
-      tl.fromTo(sel, { x: fromX * k, y: -620 * k, rotation: rot, opacity: 0 },
-        { x: 0, y: -40 * k, rotation: rot / 3, opacity: 1, duration: 0.55, ease: "power2.out" }, t);
-      tl.to(sel, { y: 70 * k, rotation: 0, duration: 0.4, ease: "power2.in" }, t + 0.55);
-    };
-    drop(".it-shirt", 4.25, -420, -28);
-    drop(".it-vit", 5.6, 380, 24);
-    drop(".it-cash", 6.65, -260, -18);
-    [4.6, 5.95, 7.0].forEach((t, i) => {
-      tl.fromTo(`.tg-${i + 1}`, { opacity: 0, x: PORT ? 0 : -30, y: PORT ? 20 : 0, scale: 0.9 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.5, ease: "back.out(2)" }, t);
-      tl.fromTo(".s2-box", { scaleY: 1, scaleX: 1 }, { scaleY: 0.96, scaleX: 1.02, duration: 0.09, yoyo: true, repeat: 1, transformOrigin: "50% 100%", ease: "power1.out", immediateRender: false }, t + 0.42);
+    /* 3. Services (6 → 13) */
+    tl.to(".brand-lock", { y: -120, opacity: 0, duration: 0.5, ease: "expo.in" }, 5.95);
+    tl.fromTo(".s3-in", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.65, ease: "expo.inOut" }, 6.0);
+    tl.fromTo(".s3 .kicker", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.5 }, 6.45);
+    lines(".s3 .sec-head", 6.5);
+    tl.fromTo(".card", { y: 120, opacity: 0, rotation: (i) => [-3, 2, 3][i] }, { y: 0, opacity: 1, rotation: 0, duration: 0.9, ease: "expo.out", stagger: 0.14 }, 6.8);
+    tl.fromTo(".card .ico", { scale: 0 }, { scale: 1, duration: 0.6, ease: "back.out(2.2)", stagger: 0.14 }, 7.1);
+    [[".c-air", 7.9], [".c-sea", 9.1], [".c-car", 10.3]].forEach(([c, t]) => {
+      tl.fromTo(`${c} .bar`, { scaleX: 0 }, { scaleX: 1, duration: 1.0, ease: "power2.inOut" }, t);
+      tl.to(c, { y: -18, duration: 0.4, ease: "power2.out" }, t);
+      tl.to(c, { y: 0, duration: 0.5, ease: "power2.inOut" }, t + 1.0);
+      tl.fromTo(`${c} .fact`, { scale: 1 }, { scale: 1.08, duration: 0.25, yoyo: true, repeat: 1, ease: "power2.out", transformOrigin: "0% 50%" }, t + 0.1);
     });
-    // « Vous la fermez » : rabats repliés, couvercle, ruban adhésif
-    tl.to(".s2 .flap-bk, .s2 .flap-lt", { scaleY: 0, duration: 0.35, ease: "power2.in", transformOrigin: "50% 100%", stagger: 0.08 }, 8.35);
-    tl.to(".s2 .flap-fr", { scaleY: 0, duration: 0.3, ease: "power2.in", svgOrigin: "250 230" }, 8.5);
-    tl.to(".s2 .flap-rt", { scaleX: 0, duration: 0.3, ease: "power2.in", svgOrigin: "480 200" }, 8.55);
-    tl.fromTo(".s2 .closed-top", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 8.7);
-    tl.fromTo(".s2 .tape", { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out", svgOrigin: "244 230" }, 8.95);
-    tl.fromTo(".s2 .tape2", { opacity: 0, scaleY: 0 }, { opacity: 1, scaleY: 1, duration: 0.25, svgOrigin: "244 230" }, 9.25);
-    tl.to(".s2-box", { y: -34, duration: 0.18, yoyo: true, repeat: 1, ease: "power2.out" }, 9.3);
-    tl.to(".s2 .tag", { opacity: 0, y: 10, duration: 0.3, stagger: 0.05, ease: "power2.in" }, 8.3);
-    tl.to(".s2 .items", { opacity: 0, duration: 0.15 }, 8.75);
-    cap(".c3", 8.3, 9.85);
+    tl.fromTo(".c-air .anim", { x: -90, y: 50 }, { x: 0, y: 0, duration: 0.9, ease: "expo.out" }, 7.9);
+    tl.to(".c-air .anim", { x: 110, y: -60, duration: 0.6, ease: "power2.in" }, 8.8);
+    tl.fromTo(".c-air .anim", { x: -110, y: 60 }, { x: 0, y: 0, duration: 0.7, ease: "expo.out", immediateRender: false }, 9.4);
+    tl.fromTo(".c-sea .wave", { x: 0 }, { x: -40, duration: 1.6, ease: "none" }, 9.1);
+    tl.fromTo(".c-sea .anim", { y: 0, rotation: -4 }, { y: -5, rotation: 4, duration: 0.4, yoyo: true, repeat: 3, ease: "sine.inOut", svgOrigin: "50 60" }, 9.1);
+    tl.fromTo(".c-car .anim", { x: -120 }, { x: 0, duration: 0.9, ease: "expo.out" }, 10.3);
+    tl.fromTo(".c-car .wh", { rotation: 0 }, { rotation: 540, duration: 0.9, ease: "expo.out", transformOrigin: "50% 50%" }, 10.3);
+    tl.fromTo(".c-car .road", { strokeDashoffset: 0 }, { strokeDashoffset: 54, duration: 0.9, ease: "expo.out" }, 10.3);
+    tl.fromTo(".extras .pill", { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.12, ease: "back.out(2)" }, 11.4);
 
-    /* ---- Transition 2 → 3 : on éteint la lumière (9,6 → 10,1) ---- */
-    tl.fromTo(".s3-in", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.inOut" }, 9.6);
-    tl.fromTo(".s3-cam", { scale: 1.06 }, { scale: 1.16, duration: 6, ease: "none", transformOrigin: L("66% 48%", "50% 64%") }, 9.6);
-
-    /* ---- Plan 3 : l'angoisse (10 → 15,6) ---- */
-    tl.fromTo(".s3-box", { y: 30 }, { y: 0, duration: 1.2 }, 9.7);
-    $$(".qm").forEach((q, i) => {
-      tl.fromTo(q, { opacity: 0, scale: 0.3, rotation: -40 + i * 15 }, { opacity: 0.9, scale: 1, rotation: (i % 2 ? 12 : -12), duration: 0.7, ease: "back.out(2.2)" }, 10.1 + i * 0.32);
-      tl.to(q, { y: (i % 2 ? -1 : 1) * 26, rotation: (i % 2 ? -8 : 8), duration: 1.6, ease: "sine.inOut", yoyo: true, repeat: 2 }, 10.8 + i * 0.32);
+    /* 4. Comment ça marche (13 → 29) */
+    tl.fromTo(".s4-in", { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(80% at 50% 50%)", duration: 0.8, ease: "expo.inOut" }, 13.0);
+    tl.fromTo(".big-title .kicker", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 13.5);
+    lines(".big-title", 13.55, 0.12, 0.8);
+    tl.to(".big-title .kicker", { opacity: 0, duration: 0.3 }, 14.75);
+    linesOut(".big-title", 14.75);
+    tl.fromTo(".rail .kicker", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 15.0);
+    tl.fromTo(".rail-track", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "expo.out" }, 15.0);
+    tl.fromTo(".rail-fill", { scaleX: 0 }, { scaleX: 0, duration: 0.01 }, 15.0);
+    tl.fromTo(".rail-dot", { scale: 0 }, { scale: 1, duration: 0.4, stagger: 0.08, ease: "back.out(2.5)" }, 15.1);
+    tl.fromTo(".phone", { y: L(80, 200), opacity: 0, rotation: L(8, 0) }, { y: 0, opacity: 1, rotation: 0, duration: 1.0, ease: "expo.out" }, 15.0);
+    const S = [15.2, 18.7, 22.2, 25.9]; // début de chaque étape
+    $$(".rail-dot b").forEach((b, i) => tl.fromTo(b, { scale: 0 }, { scale: 1, duration: 0.4, ease: "back.out(2.5)" }, S[i] + 0.1));
+    S.forEach((t, i) => {
+      const st = `.st${i + 1}`;
+      if (i) tl.to(".rail-fill", { scaleX: i / 3, duration: 0.6, ease: "power2.inOut" }, t);
+      lines(st, t + 0.05, 0.1, 0.75);
+      tl.fromTo(`${st} .step-d`, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6 }, t + 0.35);
+      if (i < 3) {
+        linesOut(st, S[i + 1] - 0.45, 0.4);
+        tl.to(`${st} .step-d`, { opacity: 0, y: -16, duration: 0.3, ease: "power2.in" }, S[i + 1] - 0.4);
+      }
+      if (i) {
+        tl.fromTo(`.scr${i + 1}`, { xPercent: 100 }, { xPercent: 0, duration: 0.6, ease: "expo.inOut" }, t);
+        tl.to(`.scr${i}`, { xPercent: -30, duration: 0.6, ease: "expo.inOut" }, t);
+      }
     });
-    tl.fromTo(".cal", { opacity: 0, y: -40, rotation: -10 }, { opacity: 1, y: 0, rotation: -6, duration: 0.7, ease: "back.out(1.6)" }, 11.7);
-    tl.fromTo(".ptag", { opacity: 0, y: -80 }, { opacity: 1, y: 0, duration: 0.8, ease: "back.out(1.5)" }, 12.9);
-    tl.fromTo(".ptag .ptag-body", { rotation: 14 }, { rotation: -10, duration: 0.9, ease: "sine.inOut", yoyo: true, repeat: 3, svgOrigin: "120 60" }, 12.9);
-    // les montants défilent : ??? → 180 $ → 340 $ → ?!
-    [[".pt0", 13.6], [".pt1", 13.95], [".pt2", 14.3], [".pt3", 14.7]].forEach(([s, t], i, arr) => {
-      if (i) tl.set(`.ptag ${s}`, { opacity: 1 }, t);
-      if (i < arr.length - 1) tl.set(`.ptag ${s}`, { opacity: 0 }, arr[i + 1][1]);
+    // écran 1 : devis WhatsApp
+    tl.fromTo(".b1", { opacity: 0, y: 30, scale: 0.9, transformOrigin: "100% 100%" }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.8)" }, 15.9);
+    tl.fromTo(".typing", { opacity: 0, scale: 0.8, transformOrigin: "0% 100%" }, { opacity: 1, scale: 1, duration: 0.3 }, 16.5);
+    tl.fromTo(".typing i", { y: 0 }, { y: -10, duration: 0.22, yoyo: true, repeat: 3, stagger: 0.1, ease: "sine.inOut" }, 16.6);
+    tl.to(".typing", { opacity: 0, scale: 0.8, duration: 0.15 }, 17.3);
+    tl.fromTo(".b2", { opacity: 0, y: -46, scale: 0.9, transformOrigin: "0% 100%" }, { opacity: 1, y: -76, scale: 1, duration: 0.45, ease: "back.out(1.8)" }, 17.35);
+    // écran 2 : formulaire puis numéro de suivi
+    [[".t1", 19.3], [".t2", 19.75], [".t3", 20.2]].forEach(([s, t]) =>
+      tl.fromTo(`.scr2 ${s}`, { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.4, ease: "steps(10)" }, t));
+    tl.to(".scr2 .btn-p", { scale: 0.94, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 20.8);
+    tl.fromTo(".scr2 .code-card", { opacity: 0, scale: 0.6, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: "back.out(2)" }, 21.0);
+    // écran 3 : suivi en direct
+    const sl = $$(".scr3 .steps li");
+    tl.fromTo(".scr3 .cf", { scaleX: 0 }, { scaleX: 0.78, duration: 3.0, ease: "power1.inOut" }, 22.6);
+    tl.fromTo(".scr3 .cp", { x: 0 }, { x: CORR_W * 0.78, duration: 3.0, ease: "power1.inOut" }, 22.6);
+    tl.fromTo($$(".ok", $(".scr3")), { scale: 0 }, { scale: 0, duration: 0.01 }, 22.0);
+    [22.7, 23.3, 23.9, 24.9].forEach((t, i) => {
+      tl.to($(".ok", sl[i]), { scale: 1, duration: 0.35, ease: "back.out(3)" }, t);
+      tl.to(sl[i], { color: C.ink, duration: 0.25 }, t);
     });
-    tl.to(".s3-box", { x: 6, duration: 0.05, repeat: 9, yoyo: true, ease: "none" }, 13.5);
-    tl.to(".s3-box", { x: -5, duration: 0.05, repeat: 7, yoyo: true, ease: "none" }, 14.6);
-    cap(".c4", 9.92, 11.6);
-    cap(".c5", 11.66, 13.32);
-    cap(".c6", 13.38, 15.55);
-
-    /* ---- Plan 4 : MBC Cargo (15,55 → 19) ---- */
-    tl.fromTo(".s4-iris1", { scale: 0 }, { scale: 1, duration: 0.5, ease: "expo.inOut" }, 15.5);
-    tl.fromTo(".s4-iris2", { scale: 0 }, { scale: 1, duration: 0.55, ease: "expo.inOut" }, 15.78);
-    tl.fromTo(".s4 .ring", { scale: 3.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: "expo.out" }, 15.95);
-    tl.fromTo(".s4 .mbc span", { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.5, stagger: 0.07, ease: "back.out(1.8)" }, 16.08);
-    tl.fromTo(".s4 .cargo span", { opacity: 0, x: (i) => (i - 2) * 60 }, { opacity: 1, x: 0, duration: 0.8, ease: "expo.out", stagger: 0.03 }, 16.45);
-    tl.to(".s4 .logo", { scale: 1.04, duration: 0.25, yoyo: true, repeat: 1, ease: "power2.out" }, 16.6);
-    tl.fromTo(".s4 .chip", { opacity: 0, y: 30, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.12, ease: "back.out(1.8)" }, 17.0);
-    words($(".c8"), 17.62);
-    tl.fromTo(".c8 .xline", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.inOut" }, 18.25);
-    tl.to(".c8", { opacity: 0, duration: 0.25 }, 18.95);
-
-    /* ---- Transition 4 → 5 : le papier remonte (18,6 → 19,15) ---- */
-    tl.fromTo(".s5-in", { yPercent: 100 }, { yPercent: 0, duration: 0.6, ease: "expo.inOut" }, 18.6);
-    tl.to(".s4 .logo, .s4 .cargo, .s4 .chips", { yPercent: -30, opacity: 0, duration: 0.5, ease: "expo.in" }, 18.6);
-
-    /* ---- Plan 5 : le voyage (19 → 32) ---- */
-    const route = $(".route-live"); const len = route.getTotalLength();
-    tl.fromTo(".pin-a", { scale: 0 }, { scale: 1, duration: 0.5, ease: "back.out(2.5)", svgOrigin: GEO.a.join(" ") }, 19.0);
-    tl.fromTo(".lbl-mtl", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 19.15);
-    tl.fromTo(".route-base", { strokeDashoffset: 400, opacity: 0 }, { strokeDashoffset: 0, opacity: 1, duration: 1.2, ease: "power2.out" }, 19.2);
-    tl.fromTo(".pin-b", { scale: 0 }, { scale: 1, duration: 0.5, ease: "back.out(2.5)", svgOrigin: GEO.b.join(" ") }, 19.5);
-    tl.fromTo(".lbl-oua", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 19.6);
-    // Le colis est déposé au dépôt de Montréal, l'étiquette MBC est posée
-    tl.fromTo(".depot", { y: -260, opacity: 0, rotation: -12 }, { y: 0, opacity: 1, rotation: 0, duration: 0.6, ease: "bounce.out" }, 19.3);
-    tl.fromTo(".depot .sticker", { scale: 2.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2)", svgOrigin: "330 400" }, 20.15);
-    tl.fromTo(".phone", { x: PORT ? 0 : 120, y: PORT ? 200 : 0, opacity: 0, rotation: PORT ? 0 : 6 }, { x: 0, y: 0, opacity: 1, rotation: 0, duration: 0.8, ease: "expo.out" }, 19.55);
-    // L'avion part au moment de « WhatsApp » et arrive à Ouaga à 30,6 s
-    tl.to(".depot", { scale: 0.4, opacity: 0, duration: 0.4, ease: "power2.in", transformOrigin: "50% 100%" }, 21.35);
-    tl.fromTo(".plane", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 21.5);
-    tl.to(".plane", { motionPath: { path: route, align: route, alignOrigin: [0.5, 0.5], autoRotate: true }, duration: 9.1, ease: "power1.inOut" }, 21.5);
-    tl.fromTo(route, { strokeDasharray: `${len} ${len}`, strokeDashoffset: len }, { strokeDashoffset: 0, duration: 9.1, ease: "power1.inOut" }, 21.5);
-    tl.to(".pin-b .pulse", { scale: 2.2, opacity: 0, duration: 0.9, repeat: 1, ease: "power2.out", svgOrigin: GEO.b.join(" ") }, 30.55);
-    tl.to(".plane", { opacity: 0, scale: 0.5, duration: 0.3 }, 30.75);
-    tl.fromTo(".stamp", { opacity: 0, scale: 2.6, rotation: -24 }, { opacity: 1, scale: 1, rotation: -12, duration: 0.32, ease: "power4.in" }, 28.85);
-    tl.to(".s5-in .map", { x: 6, duration: 0.05, yoyo: true, repeat: 3, ease: "none" }, 29.17);
-    // Messages WhatsApp, un par étape
-    // hauteurs mesurées une fois, sur un clone visible (le plan 5 est masqué hors de sa fenêtre)
-    const probe = $(".phone").cloneNode(true); probe.style.visibility = "hidden"; probe.style.opacity = "0"; root.appendChild(probe);
-    const bodyH = $(".wa-body", probe).clientHeight; let acc = 26; const shifts = [];
-    $$(".msg", probe).forEach((m) => { acc += m.offsetHeight + 16; shifts.push(Math.max(0, acc - bodyH + 24)); });
-    probe.remove();
-    const msgs = $$(".s5 .msg"); const stack = $(".s5 .wa-stack");
-    [19.95, 21.55, 23.25, 27.05, 28.9, 30.7].forEach((t, i) => {
-      if (shifts[i] > 0) tl.to(stack, { y: -shifts[i], duration: 0.4, ease: "power2.out" }, t - 0.15);
-      tl.fromTo(msgs[i], { opacity: 0, y: 30, scale: 0.92, transformOrigin: "0% 100%" }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.8)" }, t);
+    tl.fromTo(sl[4], { color: "#9AA5B2" }, { color: C.clay, duration: 0.4, yoyo: true, repeat: 1, ease: "sine.inOut" }, 25.2);
+    // écran 4 : livraison confirmée
+    tl.fromTo(".big-ck", { scale: 0 }, { scale: 1, duration: 0.6, ease: "back.out(2.2)" }, 26.3);
+    tl.fromTo(".ckpath", { strokeDasharray: 30, strokeDashoffset: 30 }, { strokeDashoffset: 0, duration: 0.4, ease: "power2.out" }, 26.6);
+    confData.forEach(({ el, x, y, rot }, i) => {
+      tl.fromTo(el, { x: 0, y: 0, rotation: 0, opacity: 0, scale: 0.4 }, { x, y, rotation: rot, opacity: 1, scale: 1, duration: 0.9, ease: "expo.out" }, 26.5 + (i % 5) * 0.02);
+      tl.to(el, { y: y + 260, opacity: 0, duration: 1.4, ease: "power1.in" }, 27.4);
     });
-    tl.to(".phone", { y: PORT ? -12 : -14, duration: 0.18, yoyo: true, repeat: 1, ease: "power2.out" }, 30.7);
-    cap(".c9", 19.22, 21.3);
-    cap(".c10", 21.38, 23.08);
-    cap(".c11", 23.16, 26.9);
-    cap(".c12", 26.98, 28.74);
-    cap(".c13", 28.8, 31.4);
+    tl.fromTo(".done-scr h4, .done-scr p", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.12 }, 26.8);
 
-    /* ---- Transition 5 → 6 (31,8 → 32,4) ---- */
-    tl.fromTo(".s6-in", { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(75% at 50% 50%)", duration: 0.7, ease: "expo.inOut" }, 31.8);
-
-    /* ---- Plan 6 : ils nous font confiance (32 → 40) ---- */
-    tl.fromTo(".s6-title", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7 }, 32.2);
-    tl.fromTo(".stat", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.15 }, 32.6);
-    $$(".strip").forEach((s, i) => {
-      const target = 20 + +s.dataset.d;
-      tl.fromTo(s, { yPercent: 0 }, { yPercent: -(target * 100) / 30, duration: 1.9 + i * 0.12, ease: "power4.out" }, 32.7 + i * 0.05);
+    /* 5. Destinations (29 → 34) */
+    tl.fromTo(".s5-in", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.65, ease: "expo.inOut" }, 29.0);
+    tl.fromTo(".s5 .kicker", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 29.45);
+    lines(".s5 .sec-head", 29.5);
+    tl.fromTo(".hub", { scale: 0 }, { scale: 1, duration: 0.6, ease: "back.out(2)" }, 29.6);
+    $$(".spoke").forEach((sp, i) => {
+      const l = sp.getTotalLength();
+      tl.fromTo(sp, { strokeDasharray: `${l} ${l}`, strokeDashoffset: l }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }, 30.0 + i * 0.09);
     });
-    tl.fromTo(".quote", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.2 }, 34.4);
-    $$(".quote").forEach((q, i) => tl.fromTo($$(".stars svg", q), { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, stagger: 0.07, ease: "back.out(3)" }, 34.9 + i * 0.2));
-    tl.to(".quotes", { y: PORT ? -24 : -16, duration: 5, ease: "none" }, 35);
-    tl.to(".stats", { y: PORT ? -10 : -8, duration: 5, ease: "none" }, 35);
+    tl.fromTo(".dest-pt", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2.2)", stagger: 0.09 }, 30.25);
+    tl.to(".hub", { scale: 1.06, duration: 0.5, yoyo: true, repeat: 2, ease: "sine.inOut" }, 31.6);
 
-    /* ---- Transition 6 → 7 (39,8 → 40,35) ---- */
-    tl.fromTo(".s7-in", { clipPath: PORT ? "inset(100% 0% 0% 0%)" : "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "expo.inOut" }, 39.8);
+    /* 6. Tarifs (34 → 39) */
+    tl.fromTo(".s6-in", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.65, ease: "expo.inOut" }, 34.0);
+    tl.fromTo(".s6 .kicker", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 34.45);
+    lines(".s6 .sec-head", 34.5);
+    tl.fromTo(".price", { y: 120, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: "expo.out", stagger: 0.14 }, 34.75);
+    $$(".price").forEach((p, i) => odo(p, 35.0 + i * 0.14, 1.7));
+    tl.fromTo(".badge-pop", { scale: 0, rotation: -20 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(3)" }, 36.2);
+    tl.to(".price.pop", { y: -20, duration: 0.5, ease: "power2.out" }, 36.2);
+    tl.fromTo(".foot-note", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 36.6);
 
-    /* ---- Plan 7 : appel à l'action (40 → 45) ---- */
-    tl.fromTo(".s7-sun", { y: 50 }, { y: 0, duration: 4, ease: "power2.out" }, 39.9);
-    tl.fromTo(".s7-home", { y: 80 }, { y: 0, duration: 1.4, ease: "expo.out" }, 39.95);
-    tl.fromTo(".s7 .bench-box", { y: -120, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "bounce.out" }, 40.4);
-    tl.fromTo(".s7 .brand", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.6 }, 40.25);
-    tl.fromTo($$(".l1 .w"), { yPercent: 70, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.55, stagger: 0.12 }, 40.98);
-    tl.fromTo($$(".l2 .w"), { yPercent: 70, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.55, stagger: 0.1 }, 42.33);
-    tl.fromTo(".s7 .btn", { opacity: 0, scale: 0.8, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(2)" }, 42.9);
-    tl.to(".s7 .btn", { scale: 1.05, duration: 0.45, yoyo: true, repeat: 2, ease: "sine.inOut" }, 43.6);
-    tl.fromTo(".s7 .contact", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 43.2);
+    /* 7. Confiance + CTA (39 → 45) */
+    tl.fromTo(".s7-in", { clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(80% at 50% 50%)", duration: 0.75, ease: "expo.inOut" }, 39.0);
+    tl.fromTo(".stat", { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.12 }, 39.35);
+    odo(".s7 .stats", 39.4, 1.4);
+    tl.fromTo(".trust .pill", { opacity: 0, y: 24, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.1, ease: "back.out(2)" }, 40.1);
+    tl.fromTo(".cta-bg", { clipPath: "circle(0% at 50% 100%)" }, { clipPath: "circle(150% at 50% 100%)", duration: 0.8, ease: "expo.inOut" }, 41.5);
+    lines(".cta-wrap", 42.0, 0.12, 0.8);
+    tl.fromTo(".cta-sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 42.45);
+    tl.fromTo(".cta-btn", { opacity: 0, scale: 0.7, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(2)" }, 42.65);
+    tl.fromTo(".cta-site", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 42.95);
+    tl.to(".cta-btn", { scale: 1.05, duration: 0.45, yoyo: true, repeat: 3, ease: "sine.inOut" }, 43.3);
 
     window.__timelines["mbc-cargo"] = tl;
   };
