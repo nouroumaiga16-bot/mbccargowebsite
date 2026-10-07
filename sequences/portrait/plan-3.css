@@ -1,0 +1,11 @@
+/* Plan 3 — Angoisse, 9:16 */
+.container { width: 1080px; height: 1920px; }
+.man { scale: 1.8; }
+.box-closed { top: 800px; scale: 1.8; }
+.question { font-size: 58px; }
+.question-1 { top: 300px; left: 70px; }
+.question-2 { top: 470px; right: 70px; }
+.question-mark { font-size: 110px; }
+.question-mark-1 { top: 640px; left: 120px; }
+.question-mark-2 { bottom: 560px; right: 130px; }
+.text-overlay { bottom: 300px; width: 940px; max-width: none; font-size: 56px; }

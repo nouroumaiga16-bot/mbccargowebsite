@@ -192,11 +192,20 @@
             }
         }
     </style>
-<style>html,body{width:1920px;height:1080px;margin:0;overflow:hidden}
+<style>html,body{width:1080px;height:1920px;margin:0;overflow:hidden}
+/* Plan 2 — Préparation, 9:16 : Ouaga en haut, Montréal en bas */
+.container { width: 1080px; height: 1920px; flex-direction: column; }
+.side-ouaga { flex: 0 0 760px; }
+.side-montreal { flex: 1; }
+.kitchen { scale: 1.75; }
+.text-overlay {
+  top: 210px; width: 940px; max-width: none; font-size: 54px; line-height: 1.35;
+  background: rgba(255, 255, 255, 0.88); padding: 36px 40px; border-radius: 28px;
+}
 </style>
 </head>
 <body>
-<div id="root" data-composition-id="plan-2" data-start="0" data-no-timeline data-duration="8" data-width="1920" data-height="1080">
+<div id="root" data-composition-id="plan-2" data-start="0" data-no-timeline data-duration="8" data-width="1080" data-height="1920">
     <div class="container">
         <!-- Split - Ouaga (muted) -->
         <div class="side side-ouaga"></div>

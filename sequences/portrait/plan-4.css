@@ -1,0 +1,9 @@
+/* Plan 4 — Pivot / logo, 9:16 */
+.container { width: 1080px; height: 1920px; }
+.title { top: 330px; font-size: 104px; white-space: nowrap; }
+.subtitle { top: 480px; font-size: 44px; white-space: nowrap; }
+.logo, .glow { scale: 1.6; }
+.icons-container { bottom: 330px; gap: 40px; }
+.icon-box { width: 230px; height: 230px; gap: 18px; }
+.icon-symbol { font-size: 70px; }
+.icon-text { font-size: 28px; }

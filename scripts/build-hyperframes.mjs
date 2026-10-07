@@ -1,5 +1,7 @@
 // Enveloppe chaque plan CSS (sequences/plan-N-*.html) dans une composition
-// HyperFrames : hyperframes/plan-N/index.html, avec sa durée exacte.
+// HyperFrames avec sa durée exacte :
+//   16:9 -> hyperframes/plan-N/index.html           (1920x1080)
+//   9:16 -> hyperframes/portrait/plan-N/index.html  (1080x1920, + sequences/portrait/plan-N.css)
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
@@ -8,20 +10,31 @@ export const PLANS = [
   ["plan-5", 14], ["plan-6", 8], ["plan-7", 5],
 ];
 
+const FORMATS = [
+  { dir: "hyperframes", w: 1920, h: 1080, css: () => "" },
+  {
+    dir: "hyperframes/portrait", w: 1080, h: 1920,
+    css: (id) => readFileSync(join("sequences/portrait", `${id}.css`), "utf8"),
+  },
+];
+
 const files = readdirSync("sequences");
 for (const [id, duration] of PLANS) {
   const src = files.find((f) => f.startsWith(id + "-") && f.endsWith(".html"));
   if (!src) throw new Error(`Plan introuvable : ${id}`);
-  let html = readFileSync(join("sequences", src), "utf8");
-  const frame =
-    "<style>html,body{width:1920px;height:1080px;margin:0;overflow:hidden}</style>\n";
-  html = html.replace("</head>", frame + "</head>");
-  html = html.replace(/<body>([\s\S]*)<\/body>/, (_, inner) =>
-    `<body>\n<div id="root" data-composition-id="${id}" data-start="0" data-no-timeline ` +
-    `data-duration="${duration}" data-width="1920" data-height="1080">` +
-    `${inner}</div>\n</body>`);
-  const dir = join("hyperframes", id);
-  mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, "index.html"), html);
-  console.log(`${src} -> ${dir}/index.html (${duration}s)`);
+  const source = readFileSync(join("sequences", src), "utf8");
+  for (const { dir: base, w, h, css } of FORMATS) {
+    const frame =
+      `<style>html,body{width:${w}px;height:${h}px;margin:0;overflow:hidden}\n${css(id)}</style>\n`;
+    const html = source
+      .replace("</head>", frame + "</head>")
+      .replace(/<body>([\s\S]*)<\/body>/, (_, inner) =>
+        `<body>\n<div id="root" data-composition-id="${id}" data-start="0" data-no-timeline ` +
+        `data-duration="${duration}" data-width="${w}" data-height="${h}">` +
+        `${inner}</div>\n</body>`);
+    const dir = join(base, id);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "index.html"), html);
+    console.log(`${src} -> ${dir}/index.html (${w}x${h}, ${duration}s)`);
+  }
 }
