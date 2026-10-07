@@ -154,39 +154,63 @@ em { font-style: normal; color: var(--mari); }
 .bub time b { color: #53BDEB; }
 .typing { align-self: flex-start; height: 58px; background: #fff; border-radius: 26px; border-top-left-radius: 6px; padding: 22px 26px; display: flex; gap: 10px; }
 .typing i { display: block; width: 14px; height: 14px; border-radius: 50%; background: #8A9AA5; }
-/* écrans 2-4 : pages du site */
-.page { position: absolute; inset: 0; background: var(--paper); }
-.page-top { height: 140px; background: var(--ink); display: flex; align-items: flex-end; padding: 0 30px 22px; gap: 14px; color: var(--paper); font: 700 30px/46px "Space Grotesk", sans-serif; }
-.page-top em { color: var(--mari); }
-.page-top .lg, .page-top .lg svg { width: 46px; height: 46px; }
-.page-in { padding: 28px 30px; }
-.p-kick { font: 600 20px/1 "Inter", sans-serif; letter-spacing: .16em; color: var(--clay); text-transform: uppercase; }
-.p-h { margin: 12px 0 20px; font: 700 46px/1.05 "Space Grotesk", sans-serif; letter-spacing: -0.03em; color: var(--ink); }
-.port .p-h { font-size: 52px; }
-.field { margin-bottom: 12px; }
-.field label { display: block; font: 600 20px/1 "Inter", sans-serif; color: #6C7A8C; margin-bottom: 8px; }
-.field .in { height: 62px; border-radius: 16px; background: #fff; border: 2px solid #E2DACA; display: flex; align-items: center; padding: 0 20px; font: 500 27px/1 "Inter", sans-serif; color: var(--ink); overflow: hidden; white-space: nowrap; }
-.port .field .in { height: 70px; font-size: 30px; }
-.field .in .tx { display: inline-block; white-space: nowrap; }
-.btn-p { margin-top: 18px; height: 70px; border-radius: 999px; background: var(--clay); color: #fff; display: flex; align-items: center; justify-content: center; font: 600 26px/1 "Inter", sans-serif; }
-.code-card { margin-top: 20px; padding: 24px; border-radius: 26px; background: #fff; border: 3px solid var(--mari); text-align: center; }
-.code-card small { display: block; font: 600 19px/1 "Inter", sans-serif; letter-spacing: .14em; color: #6C7A8C; text-transform: uppercase; }
-.code-card b { display: block; margin-top: 12px; font: 700 44px/1 "Space Grotesk", sans-serif; letter-spacing: .02em; color: var(--ink); }
-.port .code-card b { font-size: 50px; }
-.track-res { padding: 26px; border-radius: 26px; background: var(--ink); color: var(--paper); }
-.track-res .num { font: 700 30px/1 "Space Grotesk", sans-serif; letter-spacing: .02em; }
-.track-res .tag { display: inline-block; margin-left: 10px; padding: 6px 12px; border-radius: 99px; background: rgba(232,163,61,.2); color: var(--mari); font: 600 18px/1 "Inter", sans-serif; vertical-align: 4px; }
-.corr { position: relative; margin: 34px 6px 14px; height: 6px; border-radius: 9px; background: rgba(243,239,228,.18); }
-.corr .cf { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 9px; background: var(--mari); transform-origin: 0 50%; }
-.corr .cp { position: absolute; top: -21px; left: -23px; width: 46px; height: 46px; }
-.corr .cp svg { width: 46px; height: 46px; }
-.cities { display: flex; justify-content: space-between; font: 600 20px/1 "Inter", sans-serif; }
-.steps { margin: 18px 0 0; padding: 0; list-style: none; }
-.steps li { display: flex; align-items: center; gap: 16px; padding: 13px 0; border-bottom: 2px solid #E2DACA; font: 500 25px/1.2 "Inter", sans-serif; color: #9AA5B2; }
-.port .steps li { font-size: 28px; }
-.steps li i { position: relative; width: 34px; height: 34px; border-radius: 50%; border: 3px solid #CFC6B3; flex: none; }
-.steps li i .ok { position: absolute; inset: -3px; border-radius: 50%; background: var(--clay); display: flex; align-items: center; justify-content: center; }
-.steps li i svg { width: 18px; height: 18px; }
+/* écran 2 : formulaire.html (thème clair, bleu ciel) */
+.fm { position: absolute; inset: 0; background: #fff; color: #0E3A5F; padding: 96px 30px 0; text-align: left; }
+.fm-eye { text-align: center; font: 600 17px/1 "Inter", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: #2FA8E0; }
+.fm-h { margin: 12px 0 6px; text-align: center; font: 700 40px/1.1 "Space Grotesk", sans-serif; letter-spacing: -0.01em; }
+.fm-sub { text-align: center; font: 400 20px/1.4 "Inter", sans-serif; color: #5b6b78; margin-bottom: 22px; }
+.fm-row { display: flex; gap: 12px; }
+.fm-row .fd { flex: 1; }
+.fd { margin-bottom: 14px; }
+.fd label { display: block; margin-bottom: 7px; font: 600 18px/1 "Inter", sans-serif; }
+.fd .in { height: 56px; border: 2px solid #dbeaf3; border-radius: 9px; display: flex; align-items: center; padding: 0 14px; font: 500 22px/1 "Inter", sans-serif; white-space: nowrap; overflow: hidden; }
+.fd .in.ta { height: 80px; align-items: flex-start; padding-top: 14px; }
+.port .fd .in { font-size: 25px; }
+.fd .tx { display: inline-block; white-space: nowrap; }
+.fm-btn { height: 62px; border-radius: 9px; background: #2FA8E0; color: #fff; display: flex; align-items: center; justify-content: center; font: 600 22px/1 "Inter", sans-serif; }
+.fm-conf { margin-top: 18px; padding: 22px 20px; border-radius: 16px; background: #EAF6FD; border: 1px solid #dbeaf3; text-align: center; }
+.fm-conf .ic { width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 50%; background: #2e9e6b; display: flex; align-items: center; justify-content: center; }
+.fm-conf .ic svg { width: 24px; height: 24px; }
+.fm-conf small { display: block; font: 400 18px/1 "Inter", sans-serif; color: #5b6b78; }
+.fm-conf b { display: block; margin-top: 8px; font: 700 38px/1 "Space Grotesk", sans-serif; letter-spacing: .02em; }
+.port .fm-conf b { font-size: 44px; }
+.fm-conf .cp { display: inline-block; margin-top: 12px; padding: 9px 16px; border: 2px solid #2FA8E0; border-radius: 8px; color: #2FA8E0; font: 600 17px/1 "Inter", sans-serif; }
+/* écran 3 : suivi.html (thème sombre) */
+.sv { position: absolute; inset: 0; background: radial-gradient(ellipse at 80% 0%, #232A36 0%, #0F1B2D 55%); color: var(--paper); }
+.sv-nav { height: 130px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 26px 20px; border-bottom: 1px solid rgba(243,239,228,.14); }
+.sv-brand { font: 700 28px/1 "Space Grotesk", sans-serif; letter-spacing: -0.02em; }
+.sv-brand em { color: var(--mari); }
+.sv-devis { padding: 12px 16px; border-radius: 3px; background: var(--mari); color: var(--ink); font: 600 19px/1 "Inter", sans-serif; }
+.sv-in { padding: 34px 26px; }
+.sv-kick { font: 600 19px/1.35 "Space Grotesk", sans-serif; color: var(--mari); }
+.sv-h { margin: 12px 0 22px; font: 700 50px/1.05 "Space Grotesk", sans-serif; letter-spacing: -0.03em; }
+.sv-h em { color: var(--mari); }
+.land .sv-h { font-size: 42px; margin-bottom: 18px; }
+.land .sv-cities { font-size: 14px; }
+.land .sv-res { margin-top: 16px; padding: 18px; }
+.land .sv-steps li { padding: 9px 0; }
+.sv-input { height: 64px; border-radius: 3px; background: #16263C; border: 2px solid rgba(243,239,228,.14); display: flex; align-items: center; padding: 0 18px; font: 600 25px/1 "Space Grotesk", sans-serif; letter-spacing: .05em; overflow: hidden; white-space: nowrap; }
+.sv-input .tx { display: inline-block; }
+.sv-input .ph { position: absolute; font: 400 23px/1 "Inter", sans-serif; letter-spacing: 0; color: var(--soft); }
+.sv-btn { margin-top: 12px; height: 62px; border-radius: 3px; background: var(--mari); color: var(--ink); display: flex; align-items: center; justify-content: center; font: 600 24px/1 "Inter", sans-serif; }
+.sv-res { margin-top: 22px; padding: 22px; border-radius: 4px; background: #16263C; border: 1px solid rgba(243,239,228,.14); }
+.sv-top { display: flex; justify-content: space-between; align-items: center; }
+.sv-num { font: 700 26px/1 "Space Grotesk", sans-serif; letter-spacing: .03em; }
+.sv-tag { padding: 6px 12px; border-radius: 20px; background: var(--mari); color: var(--ink); font: 600 16px/1 "Inter", sans-serif; }
+.sv-msg { margin-top: 14px; font: 500 20px/1.45 "Inter", sans-serif; }
+.port .sv-msg { font-size: 23px; }
+.sv-track { position: relative; height: 4px; margin: 26px 10px 0; border-radius: 4px; background: rgba(243,239,228,.14); }
+.sv-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--clay), var(--mari)); transform-origin: 0 50%; }
+.sv-plane { position: absolute; top: -17px; left: -17px; width: 34px; height: 34px; }
+.sv-plane svg { width: 34px; height: 34px; }
+.sv-cities { display: flex; justify-content: space-between; margin-top: 14px; font: 500 17px/1 "Inter", sans-serif; color: var(--soft); }
+.sv-cities b { color: var(--paper); font-weight: 500; }
+.sv-steps { margin: 18px 0 0; padding: 0; list-style: none; border-top: 1px solid rgba(243,239,228,.14); }
+.sv-steps li { display: flex; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid rgba(243,239,228,.14); font: 500 20px/1.2 "Inter", sans-serif; color: var(--soft); }
+.port .sv-steps li { font-size: 23px; }
+.sv-steps .dot { position: relative; width: 26px; height: 26px; border-radius: 50%; flex: none; border: 2px solid rgba(243,239,228,.2); }
+.sv-steps .dot .ok { position: absolute; inset: -2px; border-radius: 50%; background: var(--mari); display: flex; align-items: center; justify-content: center; }
+.sv-steps .dot .ok svg { width: 15px; height: 15px; }
 .done-scr { position: absolute; inset: 0; background: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; color: var(--paper); }
 .big-ck { width: 220px; height: 220px; border-radius: 50%; background: var(--wa); display: flex; align-items: center; justify-content: center; }
 .big-ck svg { width: 120px; height: 120px; }
@@ -249,7 +273,7 @@ em { font-style: normal; color: var(--mari); }
 .land .cta-wrap .h { font-size: 118px; }
 .port .cta-wrap .h { font-size: 118px; padding: 0 50px; }
 .cta-sub { margin-top: 34px; font: 600 38px/1.3 "Inter", sans-serif; color: var(--ink); }
-.cta-btn { margin-top: 56px; display: flex; align-items: center; gap: 22px; padding: 30px 54px 30px 34px; border-radius: 999px; background: var(--ink); color: #fff; font: 600 44px/1 "Inter", sans-serif; box-shadow: 0 30px 60px rgba(15,27,45,.3); }
+.cta-btn { margin-top: 56px; display: flex; align-items: center; gap: 22px; padding: 30px 54px 30px 34px; border-radius: 6px; background: var(--ink); color: #fff; font: 600 44px/1 "Inter", sans-serif; box-shadow: 0 30px 60px rgba(15,27,45,.3); }
 .cta-btn .wa { width: 66px; height: 66px; border-radius: 50%; background: var(--wa); display: flex; align-items: center; justify-content: center; }
 .cta-btn .wa svg { width: 40px; height: 40px; }
 .cta-site { margin-top: 40px; display: flex; align-items: center; gap: 18px; font: 700 40px/1 "Space Grotesk", sans-serif; color: var(--ink); letter-spacing: -0.02em; }
@@ -338,35 +362,37 @@ em { font-style: normal; color: var(--mari); }
               <div class="bub in b2">Avec plaisir ! En fret aérien, livré en 5 à 8 jours. Voici votre devis gratuit ✅<time>09:58</time></div>
             </div>
           </div>
-          <div class="scr scr2"><div class="page">
-            <div class="page-top"><div class="lg" data-art="logo"></div>MBC <em>Cargo</em></div>
-            <div class="page-in">
-              <div class="p-kick">Montréal — Ouagadougou</div>
-              <div class="p-h">Enregistrer votre envoi</div>
-              <div class="field"><label>Ville de départ</label><div class="in"><span class="tx t1">Montréal</span></div></div>
-              <div class="field"><label>Ville d'arrivée</label><div class="in"><span class="tx t2">Ouagadougou</span></div></div>
-              <div class="field"><label>Description du colis</label><div class="in"><span class="tx t3">Vêtements, vitamines</span></div></div>
-              <div class="btn-p">Obtenir mon numéro de suivi</div>
-              <div class="code-card"><small>Votre numéro de suivi</small><b>MBC-2609-0001</b></div>
+          <div class="scr scr2"><div class="fm">
+            <div class="fm-eye">MBC Cargo · Montréal — Ouagadougou</div>
+            <div class="fm-h">Enregistrer votre envoi</div>
+            <div class="fm-sub">Remplissez ce formulaire pour recevoir votre numéro de suivi.</div>
+            <div class="fm-row">
+              <div class="fd"><label>Ville de départ</label><div class="in">Montréal</div></div>
+              <div class="fd"><label>Ville d'arrivée</label><div class="in">Ouagadougou</div></div>
             </div>
+            <div class="fd"><label>Description du colis</label><div class="in ta"><span class="tx t3">2 valises + 1 carton</span></div></div>
+            <div class="fm-btn">Obtenir mon numéro de suivi</div>
+            <div class="fm-conf"><div class="ic" data-art="check-w"></div><small>Votre numéro de suivi</small><b>MBC-2609-0001</b><span class="cp">Copier le numéro</span></div>
           </div></div>
-          <div class="scr scr3"><div class="page">
-            <div class="page-top"><div class="lg" data-art="logo"></div>MBC <em>Cargo</em></div>
-            <div class="page-in">
-              <div class="p-kick">Suivi en direct</div>
-              <div class="p-h">Où est votre colis ?</div>
-              <div class="track-res">
-                <div><span class="num">MBC-2609-0001</span><span class="tag">Fret aérien</span></div>
-                <div class="corr"><div class="cf"></div><div class="cp" data-art="plane-mari"></div></div>
-                <div class="cities"><span>Montréal</span><span>Ouagadougou</span></div>
+          <div class="scr scr3"><div class="sv">
+            <div class="sv-nav"><div class="sv-brand">MBC <em>Cargo</em></div><div class="sv-devis">Devis gratuit</div></div>
+            <div class="sv-in">
+              <div class="sv-kick">Suivi en direct · Canada ⇄ Afrique de l'Ouest</div>
+              <div class="sv-h">Où est votre <em>colis</em> ?</div>
+              <div class="sv-input"><span class="ph">Ex. MBC-2609-0001</span><span class="tx tcode">MBC-2609-0001</span></div>
+              <div class="sv-btn">Suivre</div>
+              <div class="sv-res">
+                <div class="sv-top"><span class="sv-num">MBC-2609-0001</span><span class="sv-tag">Fret aérien</span></div>
+                <div class="sv-msg">Votre colis est en plein vol vers l'Afrique.</div>
+                <div class="sv-track"><div class="sv-fill"></div><div class="sv-plane" data-art="plane-mari"></div></div>
+                <div class="sv-cities"><span><b>Montréal</b> · Canada</span><span><b>Ouagadougou</b> · Burkina Faso</span></div>
+                <ul class="sv-steps">
+                  <li><span class="dot"><span class="ok" data-art="check"></span></span>Reçu au dépôt Canada</li>
+                  <li><span class="dot"><span class="ok" data-art="check"></span></span>Emballé / Préparé pour expédition</li>
+                  <li><span class="dot"><span class="ok" data-art="check"></span></span>En vol</li>
+                  <li><span class="dot"><span class="ok" data-art="check"></span></span>Arrivé à Ouagadougou</li>
+                </ul>
               </div>
-              <ul class="steps">
-                <li><i><span class="ok" data-art="check-w"></span></i>Reçu au dépôt Canada</li>
-                <li><i><span class="ok" data-art="check-w"></span></i>Emballé, prêt à partir</li>
-                <li><i><span class="ok" data-art="check-w"></span></i>En vol</li>
-                <li><i><span class="ok" data-art="check-w"></span></i>Arrivé à Ouagadougou</li>
-                <li><i><span class="ok" data-art="check-w"></span></i>Dédouanement en cours</li>
-              </ul>
             </div>
           </div></div>
           <div class="scr scr4"><div class="done-scr">
@@ -521,7 +547,7 @@ em { font-style: normal; color: var(--mari); }
     const a = rnd() * Math.PI * 2, r = 160 + rnd() * 200;
     confData.push({ el: c, x: Math.cos(a) * r, y: Math.sin(a) * r - 80, rot: (rnd() - 0.5) * 720 });
   }
-  const CORR_W = L(340, 440); // largeur de la barre de suivi dans le téléphone
+  const SV_W = L(348, 448); // largeur de la barre de suivi dans le téléphone
 
   /* ---------- Timeline ---------- */
   const build = () => {
@@ -609,21 +635,26 @@ em { font-style: normal; color: var(--mari); }
     tl.fromTo(".typing i", { y: 0 }, { y: -10, duration: 0.22, yoyo: true, repeat: 3, stagger: 0.1, ease: "sine.inOut" }, 16.6);
     tl.to(".typing", { opacity: 0, scale: 0.8, duration: 0.15 }, 17.3);
     tl.fromTo(".b2", { opacity: 0, y: -46, scale: 0.9, transformOrigin: "0% 100%" }, { opacity: 1, y: -76, scale: 1, duration: 0.45, ease: "back.out(1.8)" }, 17.35);
-    // écran 2 : formulaire puis numéro de suivi
-    [[".t1", 19.3], [".t2", 19.75], [".t3", 20.2]].forEach(([s, t]) =>
-      tl.fromTo(`.scr2 ${s}`, { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.4, ease: "steps(10)" }, t));
-    tl.to(".scr2 .btn-p", { scale: 0.94, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 20.8);
-    tl.fromTo(".scr2 .code-card", { opacity: 0, scale: 0.6, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: "back.out(2)" }, 21.0);
-    // écran 3 : suivi en direct
-    const sl = $$(".scr3 .steps li");
-    tl.fromTo(".scr3 .cf", { scaleX: 0 }, { scaleX: 0.78, duration: 3.0, ease: "power1.inOut" }, 22.6);
-    tl.fromTo(".scr3 .cp", { x: 0 }, { x: CORR_W * 0.78, duration: 3.0, ease: "power1.inOut" }, 22.6);
+    // écran 2 : formulaire.html, puis numéro de suivi
+    tl.fromTo(".scr2 .t3", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.6, ease: "steps(14)" }, 19.4);
+    tl.to(".scr2 .fm-btn", { scale: 0.95, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 20.2);
+    tl.fromTo(".scr2 .fm-conf", { opacity: 0, scale: 0.7, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: "back.out(2)" }, 20.45);
+    tl.fromTo(".scr2 .fm-conf b", { scale: 1 }, { scale: 1.08, duration: 0.2, yoyo: true, repeat: 1, ease: "power2.out" }, 21.0);
+    // écran 3 : suivi.html — on tape le numéro, « Suivre », le résultat s'affiche
+    const sl = $$(".scr3 .sv-steps li");
+    tl.fromTo(".scr3 .tcode", { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.6, ease: "steps(13)" }, 22.55);
+    tl.fromTo(".scr3 .ph", { opacity: 1 }, { opacity: 0, duration: 0.01 }, 22.55);
+    tl.fromTo(".scr3 .sv-input", { borderColor: "rgba(243,239,228,0.14)" }, { borderColor: "#E8A33D", duration: 0.2 }, 22.45);
+    tl.to(".scr3 .sv-btn", { scale: 0.95, duration: 0.1, yoyo: true, repeat: 1, ease: "power2.out" }, 23.2);
+    tl.fromTo(".scr3 .sv-res", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, 23.4);
+    tl.fromTo(".scr3 .sv-fill", { scaleX: 0 }, { scaleX: 0.62, duration: 1.8, ease: "power2.inOut" }, 23.7);
+    tl.fromTo(".scr3 .sv-plane", { x: 0 }, { x: SV_W * 0.62, duration: 1.8, ease: "power2.inOut" }, 23.7);
     tl.fromTo($$(".ok", $(".scr3")), { scale: 0 }, { scale: 0, duration: 0.01 }, 22.0);
-    [22.7, 23.3, 23.9, 24.9].forEach((t, i) => {
+    [23.8, 24.2, 24.6].forEach((t, i) => {
       tl.to($(".ok", sl[i]), { scale: 1, duration: 0.35, ease: "back.out(3)" }, t);
-      tl.to(sl[i], { color: C.ink, duration: 0.25 }, t);
+      tl.to(sl[i], { color: C.paper, duration: 0.25 }, t);
     });
-    tl.fromTo(sl[4], { color: "#9AA5B2" }, { color: C.clay, duration: 0.4, yoyo: true, repeat: 1, ease: "sine.inOut" }, 25.2);
+    tl.to(sl[2], { color: C.mari, duration: 0.25 }, 24.9);
     // écran 4 : livraison confirmée
     tl.fromTo(".big-ck", { scale: 0 }, { scale: 1, duration: 0.6, ease: "back.out(2.2)" }, 26.3);
     tl.fromTo(".ckpath", { strokeDasharray: 30, strokeDashoffset: 30 }, { strokeDashoffset: 0, duration: 0.4, ease: "power2.out" }, 26.6);
