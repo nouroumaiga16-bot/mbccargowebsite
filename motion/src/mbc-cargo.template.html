@@ -90,7 +90,7 @@ em { font-style: normal; color: var(--mari); }
 /* ===== 3. Services ===== */
 .s3-bg { background: var(--paper); }
 .cards { position: absolute; display: flex; gap: 36px; }
-.land .cards { left: 140px; right: 140px; top: 400px; height: 520px; }
+.land .cards { left: 140px; right: 140px; top: 390px; height: 545px; }
 .port .cards { left: 80px; right: 80px; top: 600px; flex-direction: column; gap: 32px; }
 .card { position: relative; flex: 1; border-radius: 36px; background: #fff; overflow: hidden; color: var(--ink);
   box-shadow: 0 30px 60px rgba(15,27,45,.10); padding: 44px 44px 40px; display: flex; flex-direction: column; }
@@ -98,7 +98,7 @@ em { font-style: normal; color: var(--mari); }
 .card .ico { width: 132px; height: 132px; border-radius: 50%; background: var(--ink); display: flex; align-items: center; justify-content: center; flex: none; overflow: hidden; }
 .card .ico svg { width: 76px; height: 76px; }
 .card h3 { margin: 34px 0 12px; font: 700 50px/1.05 "Space Grotesk", sans-serif; letter-spacing: -0.03em; }
-.port .card h3 { margin: 0 0 8px; font-size: 52px; }
+.port .card h3 { margin: 0 0 8px; font-size: 46px; }
 .card .fact { font: 700 64px/1 "Space Grotesk", sans-serif; color: var(--clay); letter-spacing: -0.03em; margin-top: auto; }
 .port .card .fact { flex-basis: 100%; margin-top: 18px; padding-left: 168px; font-size: 54px; }
 .card p { margin: 10px 0 0; font: 500 26px/1.35 "Inter", sans-serif; color: #5B6878; }
@@ -270,8 +270,20 @@ em { font-style: normal; color: var(--mari); }
 .cta-bg { background: var(--mari); }
 .cta-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .cta-wrap .h { color: var(--ink); }
-.land .cta-wrap .h { font-size: 118px; }
-.port .cta-wrap .h { font-size: 118px; padding: 0 50px; }
+.land .cta-wrap { right: 960px; }
+.port .cta-wrap { top: 960px; padding-bottom: 40px; }
+.amb { position: absolute; overflow: hidden; background: var(--ink); }
+.land .amb { left: 960px; top: 0; right: 0; bottom: 0; }
+.port .amb { left: 0; right: 0; top: 0; height: 960px; }
+.amb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.land .amb img { object-position: 52% 50%; }
+.port .amb img { object-position: 50% 30%; }
+.amb-tag { position: absolute; display: flex; align-items: center; gap: 12px; padding: 14px 24px 14px 16px; border-radius: 4px; background: var(--ink); color: var(--paper); font: 600 26px/1 "Inter", sans-serif; letter-spacing: .04em; }
+.amb-tag i { width: 14px; height: 14px; border-radius: 50%; background: var(--mari); display: block; }
+.land .amb-tag { left: 40px; bottom: 40px; }
+.port .amb-tag { left: 40px; bottom: 36px; }
+.land .cta-wrap .h { font-size: 100px; }
+.port .cta-wrap .h { font-size: 100px; padding: 0 50px; }
 .cta-sub { margin-top: 34px; font: 600 38px/1.3 "Inter", sans-serif; color: var(--ink); }
 .cta-btn { margin-top: 56px; display: flex; align-items: center; gap: 22px; padding: 30px 54px 30px 34px; border-radius: 6px; background: var(--ink); color: #fff; font: 600 44px/1 "Inter", sans-serif; box-shadow: 0 30px 60px rgba(15,27,45,.3); }
 .cta-btn .wa { width: 66px; height: 66px; border-radius: 50%; background: var(--wa); display: flex; align-items: center; justify-content: center; }
@@ -326,7 +338,7 @@ em { font-style: normal; color: var(--mari); }
       <div class="cards">
         <div class="card c-air"><div class="ico" data-art="plane-ico"></div><div><h3>Fret aérien</h3><p>Envois urgents, objets de valeur</p></div><div class="fact">5 à 8 jours</div><div class="bar"></div></div>
         <div class="card c-sea"><div class="ico" data-art="ship-ico"></div><div><h3>Fret maritime</h3><p>La solution économique en volume</p></div><div class="fact">35 à 60 jours</div><div class="bar"></div></div>
-        <div class="card c-car"><div class="ico" data-art="car-ico"></div><div><h3>Véhicules</h3><p>Voiture, moto, utilitaire</p></div><div class="fact">Conteneur sécurisé</div><div class="bar"></div></div>
+        <div class="card c-car"><div class="ico" data-art="car-ico"></div><div><h3>Expédition de véhicules</h3><p>Documents et douane inclus</p></div><div class="fact">Conteneur sécurisé</div><div class="bar"></div></div>
       </div>
       <div class="extras">
         <div class="pill"><div class="ck" data-art="check"></div>Dédouanement géré</div>
@@ -448,6 +460,7 @@ em { font-style: normal; color: var(--mari); }
         <div class="pill"><div class="ck" data-art="check"></div>Réponse sous 2 h</div>
       </div>
       <div class="fill cta-bg"></div>
+      <div class="amb"><img src="assets/ambassadeur.jpg" alt="Ambassadeur MBC Cargo"><div class="amb-tag"><i></i>Notre ambassadeur</div></div>
       <div class="cta-wrap">
         <div class="h"><span class="ln"><span>Prêt à expédier</span></span><span class="ln"><span>vers l'Afrique ?</span></span></div>
         <div class="cta-sub">Devis gratuit en moins de 2 heures</div>
@@ -692,6 +705,9 @@ em { font-style: normal; color: var(--mari); }
     odo(".s7 .stats", 39.4, 1.4);
     tl.fromTo(".trust .pill", { opacity: 0, y: 24, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.1, ease: "back.out(2)" }, 40.1);
     tl.fromTo(".cta-bg", { clipPath: "circle(0% at 50% 100%)" }, { clipPath: "circle(150% at 50% 100%)", duration: 0.8, ease: "expo.inOut" }, 41.5);
+    tl.fromTo(".amb", { clipPath: PORT ? "inset(0% 0% 100% 0%)" : "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.8, ease: "expo.inOut" }, 41.7);
+    tl.fromTo(".amb img", { scale: 1.18 }, { scale: 1.02, duration: 3.6, ease: "power2.out" }, 41.7);
+    tl.fromTo(".amb-tag", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(2)" }, 42.5);
     lines(".cta-wrap", 42.0, 0.12, 0.8);
     tl.fromTo(".cta-sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 42.45);
     tl.fromTo(".cta-btn", { opacity: 0, scale: 0.7, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(2)" }, 42.65);
