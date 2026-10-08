@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Groupe Facebook « Cargo & Envois Diaspora Afrique » — vidéo de promotion (inviter à rejoindre gratuitement), 34 s.
+  Groupe Facebook « Cargo & Envois Diaspora Afrique » — vidéo de promotion (inviter à rejoindre gratuitement), 44 s avec voix off.
   Gabarit unique : motion/groupe/build.mjs en tire motion/groupe/build/{9x16,1x1,16x9}/index.html.
   Contenu repris de la section « À propos » du groupe ; style repris de sa bannière (nuit, or, capitales).
     1 Accroche ............. 0 → 4,2 s
@@ -130,12 +130,13 @@ svg { display: block; overflow: visible; }
 </style>
 </head>
 <body>
-<div id="root" class="{{FMT}}" data-composition-id="groupe-diaspora" data-start="0" data-duration="34" data-width="{{W}}" data-height="{{H}}">
-  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="34" data-volume="1"></audio>
-  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="34" data-volume="0.7"></audio>
+<div id="root" class="{{FMT}}" data-composition-id="groupe-diaspora" data-start="0" data-duration="44" data-width="{{W}}" data-height="{{H}}">
+  <audio id="voix-off" src="assets/voix-off.m4a" data-start="0" data-duration="44" data-volume="1"></audio>
+  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="44" data-volume="1"></audio>
+  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="44" data-volume="0.7"></audio>
 
   <!-- fond permanent -->
-  <div id="fond" class="clip" data-start="0" data-duration="34" data-track-index="0">
+  <div id="fond" class="clip" data-start="0" data-duration="44" data-track-index="0">
     <div class="fill ciel"></div>
     <div class="halo"></div>
     <div class="etoiles"></div>
@@ -143,7 +144,7 @@ svg { display: block; overflow: visible; }
   </div>
 
   <!-- 1. Accroche -->
-  <section id="s1-accroche" class="clip s1" data-start="0" data-duration="4.4" data-track-index="1">
+  <section id="s1-accroche" class="clip s1" data-start="0" data-duration="4.88" data-track-index="1">
     <div class="stage">
       <div class="hook">
         <div class="ph p1"><span class="ln"><span>Tu voyages</span></span><span class="ln"><span>vers l'Afrique ?</span></span></div>
@@ -154,7 +155,7 @@ svg { display: block; overflow: visible; }
   </section>
 
   <!-- 2. Titre -->
-  <section id="s2-titre" class="clip s2" data-start="4.0" data-duration="4.3" data-track-index="2">
+  <section id="s2-titre" class="clip s2" data-start="4.38" data-duration="5.98" data-track-index="2">
     <div class="stage">
       <div class="avion-titre" data-art="avion"></div>
       <div class="t-cargo">CARGO &amp; ENVOIS</div>
@@ -166,7 +167,7 @@ svg { display: block; overflow: visible; }
   </section>
 
   <!-- 3. Communauté -->
-  <section id="s3-communaute" class="clip s3" data-start="8.0" data-duration="4.8" data-track-index="3">
+  <section id="s3-communaute" class="clip s3" data-start="10" data-duration="5.81" data-track-index="3">
     <div class="stage">
       <div class="kick">Un groupe qui réunit</div>
       <div class="net">
@@ -182,7 +183,7 @@ svg { display: block; overflow: visible; }
   </section>
 
   <!-- 4. Ici, tu peux -->
-  <section id="s4-ici" class="clip s4" data-start="12.3" data-duration="7.5" data-track-index="4">
+  <section id="s4-ici" class="clip s4" data-start="15.16" data-duration="10.32" data-track-index="4">
     <div class="stage">
       <div class="h2"><span class="ln"><span>Ici, <span class="or">tu peux :</span></span></span></div>
       <div class="liste">
@@ -196,7 +197,7 @@ svg { display: block; overflow: visible; }
   </section>
 
   <!-- 5. Depuis / vers -->
-  <section id="s5-pays" class="clip s5" data-start="19.3" data-duration="4.5" data-track-index="5">
+  <section id="s5-pays" class="clip s5" data-start="24.73" data-duration="6.99" data-track-index="5">
     <div class="stage">
       <div class="kick">Depuis</div>
       <div class="drapeaux">
@@ -211,7 +212,7 @@ svg { display: block; overflow: visible; }
   </section>
 
   <!-- 6. Règles -->
-  <section id="s6-regles" class="clip s6" data-start="23.5" data-duration="3.8" data-track-index="6">
+  <section id="s6-regles" class="clip s6" data-start="31.4" data-duration="4.08" data-track-index="6">
     <div class="stage">
       <div class="h2"><span class="ln"><span>Les <span class="or">règles</span></span></span></div>
       <div class="regles">
@@ -224,7 +225,7 @@ svg { display: block; overflow: visible; }
   </section>
 
   <!-- 7. Rejoindre -->
-  <section id="s7-rejoindre" class="clip s7" data-start="27.0" data-duration="7.0" data-track-index="7">
+  <section id="s7-rejoindre" class="clip s7" data-start="35.1" data-duration="8.9" data-track-index="7">
     <div class="stage">
       <div class="kick">Déjà</div>
       <div class="membres"><span class="n"><span class="odo" data-odo="1,2"></span>&nbsp;K</span><span class="u">membres</span></div>
@@ -236,7 +237,7 @@ svg { display: block; overflow: visible; }
     </div>
   </section>
 
-  <div id="grain" class="clip grain" data-start="0" data-duration="34" data-track-index="9"></div>
+  <div id="grain" class="clip grain" data-start="0" data-duration="44" data-track-index="9"></div>
 </div>
 
 <script>
@@ -383,7 +384,13 @@ svg { display: block; overflow: visible; }
     tl.fromTo(".partage", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 30.0);
     tl.fromTo(".mbc", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, 30.6);
 
-    window.__timelines["groupe-diaspora"] = tl;
+    // La voix off (41,9 s) est plus longue que l'animation d'origine (34 s) : chaque plan est étiré
+    // pour tomber sur sa phrase. [début, fin d'origine, début, fin dans la vidéo finale]
+    const PLANS = [[0, 4.2, 0, 4.6], [4.2, 8, 4.6, 10], [8, 12.5, 10, 15.4], [12.5, 19.5, 15.4, 25],
+                   [19.5, 23.5, 25, 31.4], [23.5, 27, 31.4, 35.1], [27, 34, 35.1, 44]];
+    const master = gsap.timeline({ paused: true });
+    PLANS.forEach(([a, b, c, d]) => master.add(tl.tweenFromTo(a, b, { duration: d - c, ease: "none", immediateRender: false }), c));
+    window.__timelines["groupe-diaspora"] = master;
   };
   document.fonts.ready.then(build);
 })();

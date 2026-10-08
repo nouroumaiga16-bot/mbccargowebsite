@@ -1,4 +1,4 @@
-"""Musique (composée en code, libre de droits) + effets sonores de la vidéo du groupe (34 s).
+"""Musique (composée en code, libre de droits) + effets sonores de la vidéo du groupe (44 s), voix off ElevenLabs calée.
 Usage : python motion/groupe/son_groupe.py  →  motion/groupe/assets/musique.m4a et sfx.m4a
 """
 import os, subprocess, tempfile, wave
@@ -6,7 +6,7 @@ import numpy as np
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SFX = os.path.join(ICI, "..", "son", "sfx")
-SR, D, BPM = 44100, 34.0, 104
+SR, D, BPM = 44100, 44.0, 104
 BEAT = 60 / BPM; BAR = 4 * BEAT; N = int(SR * D)
 rng = np.random.default_rng(11)
 hz = lambda m: 440 * 2 ** ((m - 69) / 12)
@@ -62,8 +62,14 @@ mix /= np.abs(mix).max() * 1.15
 tmp = tempfile.mkdtemp(); brut = os.path.join(tmp, "m.wav")
 with wave.open(brut, "wb") as w:
     w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes((mix * 32767).astype("<i2").tobytes())
-subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-i", brut, "-af", "loudnorm=I=-17:TP=-2:LRA=11,aresample=48000",
-                       "-ac", "2", "-c:a", "aac", "-b:a", "192k", os.path.join(ICI, "assets", "musique.m4a")])
+voix = os.path.join(ICI, "assets", "voix-off.m4a")
+subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-i", os.path.join(ICI, "voix-off", "elevenlabs-voix-off.mp3"), "-af",
+                       f"adelay=50:all=1,apad=whole_dur={D},atrim=0:{D},loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000",
+                       "-ac", "2", "-c:a", "aac", "-b:a", "192k", voix])
+subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-i", brut, "-i", voix, "-filter_complex",
+                       "[0:a]loudnorm=I=-21:TP=-3:LRA=11,aresample=48000,aformat=channel_layouts=stereo[m];"
+                       "[1:a]aformat=channel_layouts=stereo[v];[m][v]sidechaincompress=threshold=0.03:ratio=5:attack=40:release=450[o]",
+                       "-map", "[o]", "-t", str(D), "-c:a", "aac", "-b:a", "192k", os.path.join(ICI, "assets", "musique.m4a")])
 
 CUES = [(0.1, "whoosh.mp3", .45), (1.75, "whoosh-short.mp3", .3), (3.1, "whoosh-short.mp3", .3),
         (4.25, "impact-bass-1.mp3", .45), (4.95, "sparkle.mp3", .35), (5.6, "click-soft.mp3", .25),
@@ -73,6 +79,14 @@ CUES = [(0.1, "whoosh.mp3", .45), (1.75, "whoosh-short.mp3", .3), (3.1, "whoosh-
         (21.2, "sparkle.mp3", .3), (23.45, "whoosh.mp3", .4), (24.0, "click.mp3", .28), (24.45, "click.mp3", .28),
         (24.9, "error.mp3", .22), (25.75, "impact-bass-2.mp3", .5), (26.9, "whoosh.mp3", .4), (27.25, "ping.mp3", .3),
         (28.1, "whoosh-short.mp3", .3), (28.7, "pop.mp3", .38), (29.3, "click-soft.mp3", .25), (30.6, "chime.mp3", .3), (6.4, "pop.mp3", .32)]
+# les effets suivent le même étirement des plans que l'animation (voix off plus longue)
+PLANS = [(0, 4.2, 0, 4.6), (4.2, 8, 4.6, 10), (8, 12.5, 10, 15.4), (12.5, 19.5, 15.4, 25),
+         (19.5, 23.5, 25, 31.4), (23.5, 27, 31.4, 35.1), (27, 34, 35.1, 44)]
+def remap(t):
+    for a, b, c, d in PLANS:
+        if a <= t <= b: return c + (t - a) * (d - c) / (b - a)
+    return t
+CUES = [(remap(t0), f, v) for t0, f, v in CUES]
 ent, fil = [], []
 for i, (t0, f, v) in enumerate(CUES):
     ent += ["-i", os.path.join(SFX, f)]

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Groupe « Cargo & Envois Diaspora Afrique » — rendu HyperFrames (34 s) en 9:16, 1:1 et 16:9
+# Groupe « Cargo & Envois Diaspora Afrique » — rendu HyperFrames (44 s, voix off incluse) en 9:16, 1:1 et 16:9
 # Usage : bash scripts/render-groupe.sh   (depuis la racine du dépôt)
 set -euo pipefail
 export HYPERFRAMES_NO_TELEMETRY=1 DO_NOT_TRACK=1 HYPERFRAMES_NO_UPDATE_CHECK=1 HYPERFRAMES_SKIP_SKILLS=1
