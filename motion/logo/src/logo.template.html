@@ -1,0 +1,114 @@
+<!doctype html>
+<!--
+  MBC Cargo — animation du logo (6 s) + signature « Toujours au cœur des défis ».
+  Gabarit unique : motion/logo/build.mjs en tire motion/logo/build/{16x9,9x16,1x1}/index.html.
+  Calques du logo : motion/logo/decouper_logo.py   ·   Son : motion/logo/son_logo.py
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width={{W}}, height={{H}}">
+<title>MBC Cargo — logo animé</title>
+<script src="assets/gsap.min.js"></script>
+<style>
+@font-face { font-family: "Space Grotesk"; font-weight: 500; src: url(assets/fonts/space-grotesk-latin-500-normal.woff2) format("woff2"); }
+:root { --bleu: #1566A7; --cyan: #0DA3C6; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #fff; }
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; background: #fff; }
+.clip { position: absolute; inset: 0; overflow: hidden; }
+.fond { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, #FFFFFF 0%, #F3F8FC 55%, #E6F0F8 100%); }
+.arcs { position: absolute; left: 50%; top: 45%; width: 0; height: 0; }
+.arcs svg { position: absolute; left: -1200px; top: -1200px; width: 2400px; height: 2400px; }
+.logo { position: absolute; left: 50%; }
+.land .logo { width: 1100px; height: 281px; margin-left: -550px; top: 300px; }
+.port .logo { width: 920px; height: 235px; margin-left: -460px; top: 760px; }
+.sq .logo { width: 880px; height: 225px; margin-left: -440px; top: 360px; }
+.lay { position: absolute; inset: 0; width: 100%; height: 100%; }
+.courbe { -webkit-mask-image: conic-gradient(from 303deg at 16% 40%, transparent calc(360deg - var(--a)), #000 calc(360deg - var(--a)));
+          mask-image: conic-gradient(from 303deg at 16% 40%, transparent calc(360deg - var(--a)), #000 calc(360deg - var(--a))); --a: 0deg; }
+.reflet { position: absolute; inset: 0; overflow: hidden;
+  -webkit-mask-image: url(assets/calques/logo-complet.png); -webkit-mask-size: 100% 100%;
+  mask-image: url(assets/calques/logo-complet.png); mask-size: 100% 100%; }
+.reflet i { position: absolute; top: -20%; bottom: -20%; left: 0; width: 22%; display: block;
+  background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 100%); }
+.signature { position: absolute; left: 0; right: 0; text-align: center; color: var(--bleu);
+  font: 500 58px/1 "Space Grotesk", sans-serif; letter-spacing: .04em; white-space: nowrap; }
+.land .signature { top: 680px; }
+.port .signature { top: 1090px; font-size: 54px; }
+.sq .signature { top: 690px; font-size: 50px; }
+.signature span { display: inline-block; }
+.trait { position: absolute; left: 50%; width: 140px; height: 6px; margin-left: -70px; border-radius: 6px; background: var(--cyan); transform-origin: 50% 50%; }
+.land .trait { top: 776px; }
+.port .trait { top: 1180px; }
+.sq .trait { top: 780px; }
+</style>
+</head>
+<body>
+<div id="root" class="{{FMT}}" data-composition-id="mbc-logo" data-start="0" data-duration="6" data-width="{{W}}" data-height="{{H}}">
+  <audio id="son-logo" src="assets/son-logo.m4a" data-start="0" data-duration="6" data-volume="1"></audio>
+
+  <section id="logo-anime" class="clip" data-start="0" data-duration="6" data-track-index="1">
+    <div class="fond"></div>
+    <div class="arcs"><svg viewBox="-1200 -1200 2400 2400">
+      <ellipse class="arc1" cx="0" cy="0" rx="1050" ry="420" fill="none" stroke="#1566A7" stroke-opacity=".05" stroke-width="40"/>
+      <ellipse class="arc2" cx="0" cy="0" rx="820" ry="300" fill="none" stroke="#0DA3C6" stroke-opacity=".06" stroke-width="18"/>
+    </svg></div>
+    <div class="logo">
+      <div class="lay courbe"><img class="lay" src="assets/calques/emb-courbe.png" alt=""></div>
+      <img class="lay bateau" src="assets/calques/emb-bateau.png" alt="">
+      <img class="lay cyan" src="assets/calques/emb-cyan.png" alt="">
+      <img class="lay lettre l-M" src="assets/calques/l-M.png" alt="">
+      <img class="lay lettre l-B" src="assets/calques/l-B.png" alt="">
+      <img class="lay lettre l-C" src="assets/calques/l-C.png" alt="">
+      <img class="lay petite" src="assets/calques/l-c.png" alt="">
+      <img class="lay petite" src="assets/calques/l-a.png" alt="">
+      <img class="lay petite" src="assets/calques/l-r.png" alt="">
+      <img class="lay petite" src="assets/calques/l-g.png" alt="">
+      <img class="lay petite" src="assets/calques/l-o.png" alt="">
+      <div class="reflet"><i></i></div>
+    </div>
+    <div class="signature">Toujours au cœur des défis</div>
+    <div class="trait"></div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  // signature découpée en lettres (les espaces restent des espaces)
+  const sig = document.querySelector(".signature");
+  sig.innerHTML = [...sig.textContent].map((c) => (c === " " ? " " : `<span>${c}</span>`)).join("");
+
+  const build = () => {
+    const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+    // fond : deux ellipses discrètes qui tournent lentement (rappel de la courbe du logo)
+    tl.fromTo(".arc1", { rotation: -18, scale: 0.9 }, { rotation: 6, scale: 1, duration: 6, ease: "power1.out", svgOrigin: "0 0" }, 0);
+    tl.fromTo(".arc2", { rotation: 22, scale: 0.85 }, { rotation: -4, scale: 1, duration: 6, ease: "power1.out", svgOrigin: "0 0" }, 0);
+    tl.fromTo(".fond", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "none" }, 0);
+
+    // 1. la grande courbe se dessine
+    tl.fromTo(".courbe", { "--a": "0deg" }, { "--a": "360deg", duration: 0.95, ease: "power2.inOut" }, 0.15);
+    // 2. le bateau entre, puis les traits cyan filent
+    tl.fromTo(".bateau", { x: -160, y: 50, opacity: 0, rotation: -6 }, { x: 0, y: 0, opacity: 1, rotation: 0, duration: 0.8, ease: "expo.out", transformOrigin: "30% 50%" }, 0.5);
+    tl.fromTo(".cyan", { clipPath: "inset(0% 100% 0% 0%)", x: -60 }, { clipPath: "inset(0% 0% 0% 0%)", x: 0, duration: 0.6, ease: "power3.out" }, 0.72);
+    // 3. M B C en italique dynamique
+    tl.fromTo(".lettre", { x: 240, skewX: -24, opacity: 0 }, { x: 0, skewX: 0, opacity: 1, duration: 0.7, ease: "expo.out", stagger: 0.08 }, 1.1);
+    tl.fromTo(".logo", { scale: 1 }, { scale: 1.025, duration: 0.14, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, 1.32);
+    // 4. cargo, lettre par lettre
+    tl.fromTo(".petite", { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, stagger: 0.06 }, 1.6);
+    // 5. reflet lumineux
+    tl.fromTo(".reflet i", { xPercent: -120 }, { xPercent: 560, duration: 0.95, ease: "power2.inOut" }, 2.3);
+    // 6. signature
+    tl.fromTo(".signature span", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.028 }, 2.6);
+    tl.fromTo(".trait", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "expo.out" }, 3.2);
+    // respiration finale
+    tl.to(".logo", { scale: 1.03, duration: 2.4, ease: "sine.inOut" }, 3.6);
+
+    window.__timelines["mbc-logo"] = tl;
+  };
+  document.fonts.ready.then(build);
+})();
+</script>
+</body>
+</html>
