@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Groupe Facebook « Cargo & Envois Diaspora Afrique » — vidéo motion design, 32 s.
+  Groupe Facebook « Cargo & Envois Diaspora Afrique » — vidéo de promotion (inviter à rejoindre gratuitement), 34 s.
   Gabarit unique : motion/groupe/build.mjs en tire motion/groupe/build/{9x16,1x1,16x9}/index.html.
   Contenu repris de la section « À propos » du groupe ; style repris de sa bannière (nuit, or, capitales).
     1 Accroche ............. 0 → 4,2 s
@@ -9,7 +9,7 @@
     4 Ici, tu peux ......... 12,5 → 19,5 s
     5 Depuis / vers ........ 19,5 → 23,5 s
     6 Les règles ........... 23,5 → 27 s
-    7 Rejoindre ............ 27 → 32 s
+    7 Rejoindre gratuitement 27 → 34 s
 -->
 <html lang="fr">
 <head>
@@ -107,16 +107,20 @@ svg { display: block; overflow: visible; }
 
 /* 7. rejoindre */
 .membres { display: flex; align-items: baseline; gap: 18px; margin-top: calc(var(--k) * 16px); }
-.membres .n { font: 800 calc(var(--k) * 190px)/1 "Montserrat", sans-serif; color: var(--or); letter-spacing: -0.03em; display: inline-flex; }
+.membres .n { font: 800 calc(var(--k) * 160px)/1 "Montserrat", sans-serif; color: var(--or); letter-spacing: -0.03em; display: inline-flex; }
 .membres .u { font: 800 calc(var(--k) * 64px)/1 "Montserrat", sans-serif; color: var(--blanc); }
 .odo { display: inline-flex; }
 .odo .col { height: 1em; overflow: hidden; }
 .odo .strip { display: flex; flex-direction: column; }
 .odo .strip span { display: block; height: 1em; line-height: 1em; }
-.btn { margin-top: calc(var(--k) * 46px); display: flex; align-items: center; gap: 18px; padding: calc(var(--k) * 28px) calc(var(--k) * 54px); border-radius: 18px; background: var(--fb); color: #fff; font: 800 calc(var(--k) * 44px)/1 "Montserrat", sans-serif; box-shadow: 0 24px 60px rgba(24,119,242,.35); }
+.btn { margin-top: calc(var(--k) * 30px); display: flex; align-items: center; gap: 18px; padding: calc(var(--k) * 28px) calc(var(--k) * 54px); border-radius: 18px; background: var(--fb); color: #fff; font: 800 calc(var(--k) * 44px)/1 "Montserrat", sans-serif; box-shadow: 0 24px 60px rgba(24,119,242,.35); }
 .btn svg { width: calc(var(--k) * 46px); height: calc(var(--k) * 46px); }
+.gratuit { margin-top: calc(var(--k) * 30px); padding: calc(var(--k) * 14px) calc(var(--k) * 30px); border: 3px solid var(--or); border-radius: 999px; color: var(--or); font: 800 calc(var(--k) * 30px)/1 "Montserrat", sans-serif; letter-spacing: .12em; }
+.rej { margin-top: calc(var(--k) * 30px); }
+.land .rej, .sq .rej { font-size: 56px; }
+.lien-desc { margin-top: calc(var(--k) * 22px); font: 700 calc(var(--k) * 32px)/1.2 "Montserrat", sans-serif; color: var(--or2); }
 .partage { margin-top: calc(var(--k) * 30px); font: 600 calc(var(--k) * 32px)/1.3 "Montserrat", sans-serif; color: var(--blanc); }
-.mbc { margin-top: calc(var(--k) * 46px); display: flex; align-items: center; gap: 22px; padding: calc(var(--k) * 16px) calc(var(--k) * 30px) calc(var(--k) * 16px) calc(var(--k) * 20px); border-radius: 20px; background: #fff; color: #0E3A5F; text-align: left; }
+.mbc { margin-top: calc(var(--k) * 34px); display: flex; align-items: center; gap: 22px; padding: calc(var(--k) * 16px) calc(var(--k) * 30px) calc(var(--k) * 16px) calc(var(--k) * 20px); border-radius: 20px; background: #fff; color: #0E3A5F; text-align: left; }
 .mbc img { height: calc(var(--k) * 64px); }
 .mbc p { margin: 0; font: 600 calc(var(--k) * 24px)/1.3 "Montserrat", sans-serif; }
 .mbc p b { font-weight: 800; }
@@ -126,12 +130,12 @@ svg { display: block; overflow: visible; }
 </style>
 </head>
 <body>
-<div id="root" class="{{FMT}}" data-composition-id="groupe-diaspora" data-start="0" data-duration="32" data-width="{{W}}" data-height="{{H}}">
-  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="32" data-volume="1"></audio>
-  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="32" data-volume="0.7"></audio>
+<div id="root" class="{{FMT}}" data-composition-id="groupe-diaspora" data-start="0" data-duration="34" data-width="{{W}}" data-height="{{H}}">
+  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="34" data-volume="1"></audio>
+  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="34" data-volume="0.7"></audio>
 
   <!-- fond permanent -->
-  <div id="fond" class="clip" data-start="0" data-duration="32" data-track-index="0">
+  <div id="fond" class="clip" data-start="0" data-duration="34" data-track-index="0">
     <div class="fill ciel"></div>
     <div class="halo"></div>
     <div class="etoiles"></div>
@@ -157,6 +161,7 @@ svg { display: block; overflow: visible; }
       <div class="t-dias">DIASPORA AFRIQUE</div>
       <div class="regle"></div>
       <div class="tags"><span>Kilos</span> • <span>Place avion</span> • <span>Colis</span> • <span>Cargo</span> • <span>Communauté</span></div>
+      <div class="gratuit">100 % GRATUIT · OUVERT À TOUS</div>
     </div>
   </section>
 
@@ -219,17 +224,19 @@ svg { display: block; overflow: visible; }
   </section>
 
   <!-- 7. Rejoindre -->
-  <section id="s7-rejoindre" class="clip s7" data-start="27.0" data-duration="5.0" data-track-index="7">
+  <section id="s7-rejoindre" class="clip s7" data-start="27.0" data-duration="7.0" data-track-index="7">
     <div class="stage">
       <div class="kick">Déjà</div>
       <div class="membres"><span class="n"><span class="odo" data-odo="1,2"></span>&nbsp;K</span><span class="u">membres</span></div>
+      <div class="h2 rej"><span class="ln"><span>Rejoins-nous <span class="or">gratuitement</span></span></span></div>
       <div class="btn" data-art="rejoindre-ic"></div>
-      <div class="partage">Partage à tous tes contacts : chacun y trouvera son compte 💪</div>
+      <div class="lien-desc">Lien du groupe en description 👇</div>
+      <div class="partage">Partage à tes contacts : chacun y trouvera son compte 💪</div>
       <div class="mbc"><img src="assets/logo-mbc.png" alt="MBC Cargo"><p>Envois <b>Canada → Burkina Faso</b><br>contactez MBC Cargo en MP</p></div>
     </div>
   </section>
 
-  <div id="grain" class="clip grain" data-start="0" data-duration="32" data-track-index="9"></div>
+  <div id="grain" class="clip grain" data-start="0" data-duration="34" data-track-index="9"></div>
 </div>
 
 <script>
@@ -263,7 +270,7 @@ svg { display: block; overflow: visible; }
     camion: () => ico(`<rect x="6" y="18" width="32" height="24" rx="3"/><path d="M38 26 h11 l8 9 v7 h-19z"/><circle cx="18" cy="46" r="5"/><circle cx="46" cy="46" r="5"/>`),
     check: () => `<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     croix: () => `<svg viewBox="0 0 24 24"><path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></svg>`,
-    "rejoindre-ic": () => `<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4" fill="#fff"/><path d="M1 21 c0-5 4-8 8-8 s8 3 8 8z" fill="#fff"/><path d="M19 7 v8 M15 11 h8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>Rejoindre le groupe`,
+    "rejoindre-ic": () => `<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4" fill="#fff"/><path d="M1 21 c0-5 4-8 8-8 s8 3 8 8z" fill="#fff"/><path d="M19 7 v8 M15 11 h8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>Rejoindre gratuitement`,
   };
   // horizon : grand arc en pointillés + trajectoire de l'avion
   const HZ = { land: { cx: 960, cy: 1500, rx: 1250, ry: 900 }, port: { cx: 540, cy: 2200, rx: 900, ry: 1150 }, sq: { cx: 540, cy: 1560, rx: 900, ry: 760 } }[FMT];
@@ -322,6 +329,7 @@ svg { display: block; overflow: visible; }
     tl.fromTo(".t-dias span", { opacity: 0, x: (i) => (i - 7.5) * 18 }, { opacity: 1, x: 0, duration: 0.8, ease: "expo.out", stagger: 0.02 }, 4.95);
     tl.fromTo(".regle", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "expo.out" }, 5.35);
     tl.fromTo(".tags span", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.14 }, 5.6);
+    tl.fromTo(".gratuit", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2.5)" }, 6.4);
     tl.to(".s2 .stage", { scale: 0.92, opacity: 0, duration: 0.45, ease: "expo.in" }, 7.75);
 
     /* 3. communauté */
@@ -367,10 +375,13 @@ svg { display: block; overflow: visible; }
     tl.fromTo(".s7 .kick", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 27.1);
     tl.fromTo(".membres", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.8)" }, 27.2);
     $$(".strip").forEach((s, i) => tl.fromTo(s, { yPercent: 0 }, { yPercent: -((20 + +s.dataset.d) * 100) / 30, duration: 1.4 + i * 0.15, ease: "power4.out" }, 27.25));
-    tl.fromTo(".btn", { opacity: 0, y: 40, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(2)" }, 28.3);
-    tl.to(".btn", { scale: 1.06, duration: 0.45, yoyo: true, repeat: 5, ease: "sine.inOut" }, 29.0);
-    tl.fromTo(".partage", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 28.8);
-    tl.fromTo(".mbc", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, 29.4);
+    lignes(".rej", 28.1, 0.1, 0.7);
+    tl.fromTo(".btn", { opacity: 0, y: 40, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(2)" }, 28.7);
+    tl.to(".btn", { scale: 1.07, duration: 0.42, yoyo: true, repeat: 9, ease: "sine.inOut" }, 29.4);
+    tl.fromTo(".lien-desc", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 29.3);
+    tl.fromTo(".lien-desc", { y: 0 }, { y: 8, duration: 0.4, yoyo: true, repeat: 7, ease: "sine.inOut", immediateRender: false }, 30.0);
+    tl.fromTo(".partage", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 30.0);
+    tl.fromTo(".mbc", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, 30.6);
 
     window.__timelines["groupe-diaspora"] = tl;
   };

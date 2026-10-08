@@ -1,4 +1,4 @@
-"""Musique (composée en code, libre de droits) + effets sonores de la vidéo du groupe (32 s).
+"""Musique (composée en code, libre de droits) + effets sonores de la vidéo du groupe (34 s).
 Usage : python motion/groupe/son_groupe.py  →  motion/groupe/assets/musique.m4a et sfx.m4a
 """
 import os, subprocess, tempfile, wave
@@ -6,7 +6,7 @@ import numpy as np
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SFX = os.path.join(ICI, "..", "son", "sfx")
-SR, D, BPM = 44100, 32.0, 104
+SR, D, BPM = 44100, 34.0, 104
 BEAT = 60 / BPM; BAR = 4 * BEAT; N = int(SR * D)
 rng = np.random.default_rng(11)
 hz = lambda m: 440 * 2 ** ((m - 69) / 12)
@@ -72,7 +72,7 @@ CUES = [(0.1, "whoosh.mp3", .45), (1.75, "whoosh-short.mp3", .3), (3.1, "whoosh-
         (19.3, "whoosh.mp3", .4)] + [(19.65 + i * 0.12, "click-soft.mp3", .22) for i in range(6)] + [
         (21.2, "sparkle.mp3", .3), (23.45, "whoosh.mp3", .4), (24.0, "click.mp3", .28), (24.45, "click.mp3", .28),
         (24.9, "error.mp3", .22), (25.75, "impact-bass-2.mp3", .5), (26.9, "whoosh.mp3", .4), (27.25, "ping.mp3", .3),
-        (28.3, "pop.mp3", .35), (29.4, "chime.mp3", .3)]
+        (28.1, "whoosh-short.mp3", .3), (28.7, "pop.mp3", .38), (29.3, "click-soft.mp3", .25), (30.6, "chime.mp3", .3), (6.4, "pop.mp3", .32)]
 ent, fil = [], []
 for i, (t0, f, v) in enumerate(CUES):
     ent += ["-i", os.path.join(SFX, f)]
