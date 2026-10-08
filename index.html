@@ -837,5 +837,68 @@ if ('serviceWorker' in navigator) {
   }).catch(function(){});
 }
 </script>
+<!-- Google Analytics + bannière de consentement + suivi des boutons -->
+<div id="cookieBanner" style="display:none;position:fixed;left:16px;right:16px;bottom:16px;z-index:300;background:#16263C;color:#F3EFE4;padding:16px 18px;border-radius:6px;font-family:Inter,system-ui,sans-serif;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.35);">
+  <p style="margin:0 0 12px;line-height:1.5;">Nous utilisons des témoins pour mesurer la fréquentation de notre site et l'améliorer. Acceptez-vous ?</p>
+  <div style="display:flex;gap:10px;justify-content:flex-end;">
+    <button id="cookieRefuse" style="background:none;border:1px solid rgba(243,239,228,.3);color:#F3EFE4;padding:8px 14px;border-radius:3px;cursor:pointer;">Refuser</button>
+    <button id="cookieAccept" style="background:#E8A33D;border:none;color:#0F1B2D;padding:8px 14px;border-radius:3px;font-weight:600;cursor:pointer;">Accepter</button>
+  </div>
+</div>
+<script>
+  (function(){
+    var GA_ID = 'G-8KWJNQQJBQ';
+    var gaLoaded = false;
+
+    function loadGA() {
+      if (gaLoaded) return;
+      gaLoaded = true;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(){ window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', GA_ID);
+    }
+
+    var banner = document.getElementById('cookieBanner');
+    var choix = localStorage.getItem('mbc_cookies');
+
+    if (choix === 'accepte') loadGA();
+    if (!choix) banner.style.display = 'block';
+
+    document.getElementById('cookieAccept').onclick = function(){
+      localStorage.setItem('mbc_cookies', 'accepte');
+      banner.style.display = 'none';
+      loadGA();
+    };
+    document.getElementById('cookieRefuse').onclick = function(){
+      localStorage.setItem('mbc_cookies', 'refuse');
+      banner.style.display = 'none';
+    };
+
+    // Suivi des boutons WhatsApp et devis
+    document.addEventListener('click', function(e){
+      var a = e.target.closest('a');
+      if (!a || !window.gtag) return;
+      var href = a.getAttribute('href') || '';
+      if (href.indexOf('wa.me') !== -1) {
+        window.gtag('event', 'clic_whatsapp', { bouton: a.textContent.trim() || 'flottant' });
+      } else if (href === '#contact') {
+        window.gtag('event', 'clic_devis', { bouton: a.textContent.trim() });
+      }
+    });
+
+    // Suivi de l'envoi du formulaire de devis
+    var form = document.getElementById('quoteForm');
+    if (form) {
+      form.addEventListener('submit', function(){
+        if (window.gtag) window.gtag('event', 'envoi_devis');
+      });
+    }
+  })();
+</script>
 </body>
 </html>
