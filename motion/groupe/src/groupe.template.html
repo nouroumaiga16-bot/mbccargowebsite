@@ -1,0 +1,381 @@
+<!doctype html>
+<!--
+  Groupe Facebook « Cargo & Envois Diaspora Afrique » — vidéo motion design, 32 s.
+  Gabarit unique : motion/groupe/build.mjs en tire motion/groupe/build/{9x16,1x1,16x9}/index.html.
+  Contenu repris de la section « À propos » du groupe ; style repris de sa bannière (nuit, or, capitales).
+    1 Accroche ............. 0 → 4,2 s
+    2 Titre ................ 4,2 → 8 s
+    3 La communauté ........ 8 → 12,5 s
+    4 Ici, tu peux ......... 12,5 → 19,5 s
+    5 Depuis / vers ........ 19,5 → 23,5 s
+    6 Les règles ........... 23,5 → 27 s
+    7 Rejoindre ............ 27 → 32 s
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width={{W}}, height={{H}}">
+<title>Cargo & Envois Diaspora Afrique</title>
+<script src="assets/gsap.min.js"></script>
+<script src="assets/MotionPathPlugin.min.js"></script>
+<style>
+@font-face { font-family: "Montserrat"; font-weight: 500; src: url(assets/fonts/montserrat-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 600; src: url(assets/fonts/montserrat-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 600; font-style: italic; src: url(assets/fonts/montserrat-latin-600-italic.woff2) format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 700; src: url(assets/fonts/montserrat-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 800; src: url(assets/fonts/montserrat-latin-800-normal.woff2) format("woff2"); }
+:root { --nuit: #0B1430; --nuit2: #13204A; --or: #E2B24F; --or2: #F4D27A; --or3: #B8862C; --blanc: #F7F3EA; --gris: #A9B3CC; --rouge: #E5484D; --fb: #1877F2; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--nuit); }
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--nuit); font-family: "Montserrat", sans-serif; color: var(--blanc); --k: 1; }
+#root.port { --k: 1.12; }
+.clip { position: absolute; inset: 0; overflow: hidden; }
+.fill { position: absolute; inset: 0; }
+svg { display: block; overflow: visible; }
+.stage { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 70px; }
+.ln { display: block; overflow: hidden; padding: 0 .05em .12em; margin-bottom: -.12em; }
+.ln > span { display: block; }
+.or { color: var(--or); }
+.kick { font: 700 calc(var(--k) * 26px)/1 "Montserrat", sans-serif; letter-spacing: .3em; text-transform: uppercase; color: var(--or); }
+.h1 { font: 800 calc(var(--k) * 92px)/1.02 "Montserrat", sans-serif; letter-spacing: -0.02em; }
+.h2 { font: 800 calc(var(--k) * 64px)/1.08 "Montserrat", sans-serif; letter-spacing: -0.015em; }
+
+/* fond : nuit étoilée + arc en pointillés */
+.ciel { background: radial-gradient(ellipse at 50% 30%, #1A2A5C 0%, #0F1A3C 45%, #070D22 100%); }
+.etoiles { position: absolute; inset: 0; }
+.etoiles i { position: absolute; display: block; border-radius: 50%; background: #fff; }
+.horizon { position: absolute; left: 0; top: 0; }
+.halo { position: absolute; left: 50%; width: 1400px; height: 1400px; margin-left: -700px; border-radius: 50%; background: radial-gradient(circle, rgba(226,178,79,.16) 0%, rgba(226,178,79,0) 60%); }
+.land .halo { top: -200px; } .port .halo { top: 260px; } .sq .halo { top: -160px; }
+
+/* 1. accroche */
+.hook { position: relative; width: 100%; height: calc(var(--k) * 300px); }
+.hook .ph { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); }
+.hook .ph .ln > span { font: 800 calc(var(--k) * 84px)/1.05 "Montserrat", sans-serif; letter-spacing: -0.02em; }
+
+/* 2. titre */
+.avion-titre { width: calc(var(--k) * 280px); height: calc(var(--k) * 170px); margin-bottom: calc(var(--k) * 30px); }
+.t-cargo { font: 800 calc(var(--k) * 108px)/1 "Montserrat", sans-serif; letter-spacing: .04em; color: #fff; white-space: nowrap; }
+.land .t-cargo { font-size: 136px; }
+.port .t-cargo { font-size: 90px; }
+.t-cargo span, .t-dias span { display: inline-block; }
+.t-dias { margin-top: calc(var(--k) * 22px); font: 800 calc(var(--k) * 54px)/1 "Montserrat", sans-serif; letter-spacing: .22em; color: var(--or); white-space: nowrap; }
+.land .t-dias { font-size: 68px; }
+.port .t-dias { font-size: 46px; }
+.regle { width: calc(var(--k) * 860px); height: 3px; margin-top: calc(var(--k) * 34px); background: linear-gradient(90deg, rgba(226,178,79,0), var(--or) 15%, var(--or) 85%, rgba(226,178,79,0)); }
+.tags { margin-top: calc(var(--k) * 26px); font: 600 calc(var(--k) * 30px)/1.3 "Montserrat", sans-serif; font-style: italic; color: var(--blanc); }
+.tags span { display: inline-block; }
+
+/* 3. communauté */
+.net { position: relative; width: 860px; height: 640px; margin-top: calc(var(--k) * 40px); }
+.port .net { transform: scale(1.12); margin-top: 90px; }
+.net svg.liens { position: absolute; inset: 0; width: 100%; height: 100%; }
+.noeud { position: absolute; width: 210px; margin-left: -105px; text-align: center; }
+.noeud .rond { width: 150px; height: 150px; margin: 0 auto; border-radius: 50%; background: var(--nuit2); border: 3px solid var(--or); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 14px rgba(226,178,79,.08); }
+.noeud .rond svg { width: 78px; height: 78px; }
+.noeud b { display: block; margin-top: 18px; font: 700 32px/1.1 "Montserrat", sans-serif; }
+.centre { position: absolute; left: 50%; top: 56%; width: 230px; height: 230px; margin: -115px 0 0 -115px; border-radius: 50%; background: radial-gradient(circle, var(--or2), var(--or3)); color: var(--nuit); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 80px rgba(226,178,79,.45); }
+.centre b { font: 800 66px/1 "Montserrat", sans-serif; }
+.centre span { font: 700 22px/1.2 "Montserrat", sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.port .sous { margin-top: 90px !important; }
+.sous { margin-top: calc(var(--k) * 30px); font: 600 calc(var(--k) * 34px)/1.35 "Montserrat", sans-serif; color: var(--gris); }
+
+/* 4. ici, tu peux */
+.liste { width: calc(var(--k) * 900px); margin-top: calc(var(--k) * 42px); display: flex; flex-direction: column; gap: calc(var(--k) * 20px); text-align: left; }
+.land .liste { width: 1000px; }
+.item { display: flex; align-items: center; gap: calc(var(--k) * 26px); padding: calc(var(--k) * 18px) calc(var(--k) * 26px); border-radius: 22px; background: rgba(255,255,255,.05); border: 2px solid rgba(226,178,79,.18); }
+.item .ic { flex: none; width: calc(var(--k) * 82px); height: calc(var(--k) * 82px); border-radius: 50%; background: rgba(226,178,79,.14); display: flex; align-items: center; justify-content: center; }
+.item .ic svg { width: 58%; height: 58%; }
+.item p { margin: 0; font: 700 calc(var(--k) * 37px)/1.2 "Montserrat", sans-serif; }
+
+/* 5. depuis / vers */
+.drapeaux { width: calc(var(--k) * 920px); margin-top: calc(var(--k) * 40px); display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--k) * 18px); }
+.drap { display: flex; align-items: center; gap: 14px; padding: calc(var(--k) * 14px) calc(var(--k) * 26px) calc(var(--k) * 14px) calc(var(--k) * 18px); border-radius: 999px; background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.14); font: 700 calc(var(--k) * 34px)/1 "Montserrat", sans-serif; }
+.drap .f { font-size: calc(var(--k) * 44px); line-height: 1; }
+.partout { margin-top: calc(var(--k) * 30px); font: 600 calc(var(--k) * 34px)/1.3 "Montserrat", sans-serif; font-style: italic; color: var(--gris); }
+.fleche { margin: calc(var(--k) * 34px) 0 0; width: calc(var(--k) * 90px); height: calc(var(--k) * 60px); }
+.vers { margin-top: calc(var(--k) * 26px); }
+
+/* 6. règles */
+.regles { width: calc(var(--k) * 900px); margin-top: calc(var(--k) * 42px); display: flex; flex-direction: column; gap: calc(var(--k) * 22px); text-align: left; position: relative; }
+.rg { display: flex; align-items: center; gap: 24px; font: 700 calc(var(--k) * 40px)/1.2 "Montserrat", sans-serif; }
+.rg .m { flex: none; width: calc(var(--k) * 64px); height: calc(var(--k) * 64px); border-radius: 16px; display: flex; align-items: center; justify-content: center; }
+.rg .m svg { width: 60%; height: 60%; }
+.rg.ok .m { background: #2FA36B; }
+.rg.no .m { background: var(--rouge); }
+.tampon { position: absolute; right: calc(var(--k) * -10px); bottom: calc(var(--k) * -150px); padding: 16px 30px; border: 7px solid var(--rouge); border-radius: 16px; color: var(--rouge); font: 800 calc(var(--k) * 52px)/1 "Montserrat", sans-serif; letter-spacing: .06em; background: rgba(11,20,48,.6); }
+
+/* 7. rejoindre */
+.membres { display: flex; align-items: baseline; gap: 18px; margin-top: calc(var(--k) * 16px); }
+.membres .n { font: 800 calc(var(--k) * 190px)/1 "Montserrat", sans-serif; color: var(--or); letter-spacing: -0.03em; display: inline-flex; }
+.membres .u { font: 800 calc(var(--k) * 64px)/1 "Montserrat", sans-serif; color: var(--blanc); }
+.odo { display: inline-flex; }
+.odo .col { height: 1em; overflow: hidden; }
+.odo .strip { display: flex; flex-direction: column; }
+.odo .strip span { display: block; height: 1em; line-height: 1em; }
+.btn { margin-top: calc(var(--k) * 46px); display: flex; align-items: center; gap: 18px; padding: calc(var(--k) * 28px) calc(var(--k) * 54px); border-radius: 18px; background: var(--fb); color: #fff; font: 800 calc(var(--k) * 44px)/1 "Montserrat", sans-serif; box-shadow: 0 24px 60px rgba(24,119,242,.35); }
+.btn svg { width: calc(var(--k) * 46px); height: calc(var(--k) * 46px); }
+.partage { margin-top: calc(var(--k) * 30px); font: 600 calc(var(--k) * 32px)/1.3 "Montserrat", sans-serif; color: var(--blanc); }
+.mbc { margin-top: calc(var(--k) * 46px); display: flex; align-items: center; gap: 22px; padding: calc(var(--k) * 16px) calc(var(--k) * 30px) calc(var(--k) * 16px) calc(var(--k) * 20px); border-radius: 20px; background: #fff; color: #0E3A5F; text-align: left; }
+.mbc img { height: calc(var(--k) * 64px); }
+.mbc p { margin: 0; font: 600 calc(var(--k) * 24px)/1.3 "Montserrat", sans-serif; }
+.mbc p b { font-weight: 800; }
+
+.grain { z-index: 60; pointer-events: none; opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+</style>
+</head>
+<body>
+<div id="root" class="{{FMT}}" data-composition-id="groupe-diaspora" data-start="0" data-duration="32" data-width="{{W}}" data-height="{{H}}">
+  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="32" data-volume="1"></audio>
+  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="32" data-volume="0.7"></audio>
+
+  <!-- fond permanent -->
+  <div id="fond" class="clip" data-start="0" data-duration="32" data-track-index="0">
+    <div class="fill ciel"></div>
+    <div class="halo"></div>
+    <div class="etoiles"></div>
+    <svg class="horizon" data-art="horizon"></svg>
+  </div>
+
+  <!-- 1. Accroche -->
+  <section id="s1-accroche" class="clip s1" data-start="0" data-duration="4.4" data-track-index="1">
+    <div class="stage">
+      <div class="hook">
+        <div class="ph p1"><span class="ln"><span>Tu voyages</span></span><span class="ln"><span>vers l'Afrique ?</span></span></div>
+        <div class="ph p2"><span class="ln"><span>Tu envoies</span></span><span class="ln"><span>des colis ?</span></span></div>
+        <div class="ph p3"><span class="ln"><span>Ce groupe est</span></span><span class="ln"><span class="or">fait pour toi.</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Titre -->
+  <section id="s2-titre" class="clip s2" data-start="4.0" data-duration="4.3" data-track-index="2">
+    <div class="stage">
+      <div class="avion-titre" data-art="avion"></div>
+      <div class="t-cargo">CARGO &amp; ENVOIS</div>
+      <div class="t-dias">DIASPORA AFRIQUE</div>
+      <div class="regle"></div>
+      <div class="tags"><span>Kilos</span> • <span>Place avion</span> • <span>Colis</span> • <span>Cargo</span> • <span>Communauté</span></div>
+    </div>
+  </section>
+
+  <!-- 3. Communauté -->
+  <section id="s3-communaute" class="clip s3" data-start="8.0" data-duration="4.8" data-track-index="3">
+    <div class="stage">
+      <div class="kick">Un groupe qui réunit</div>
+      <div class="net">
+        <svg class="liens" viewBox="0 0 860 640"><g fill="none" stroke="#E2B24F" stroke-width="4" stroke-dasharray="2 14" stroke-linecap="round">
+          <path class="lien" d="M430,358 L430,150"/><path class="lien" d="M430,358 L150,500"/><path class="lien" d="M430,358 L710,500"/></g></svg>
+        <div class="noeud" style="left:430px;top:0px"><div class="rond" data-art="valise"></div><b>Voyageurs</b></div>
+        <div class="noeud" style="left:150px;top:425px"><div class="rond" data-art="colis"></div><b>Expéditeurs</b></div>
+        <div class="noeud" style="left:710px;top:425px"><div class="rond" data-art="camion"></div><b>Transporteurs</b></div>
+        <div class="centre"><b>1,2 K</b><span>membres</span></div>
+      </div>
+      <div class="sous">du monde entier vers toute l'Afrique</div>
+    </div>
+  </section>
+
+  <!-- 4. Ici, tu peux -->
+  <section id="s4-ici" class="clip s4" data-start="12.3" data-duration="7.5" data-track-index="4">
+    <div class="stage">
+      <div class="h2"><span class="ln"><span>Ici, <span class="or">tu peux :</span></span></span></div>
+      <div class="liste">
+        <div class="item"><div class="ic" data-art="kilos"></div><p>Vendre ou acheter des kilos de bagages</p></div>
+        <div class="item"><div class="ic" data-art="avion-ic"></div><p>Trouver des places avion vers l'Afrique</p></div>
+        <div class="item"><div class="ic" data-art="annonce"></div><p>Poster tes annonces d'envoi de colis</p></div>
+        <div class="item"><div class="ic" data-art="bouclier"></div><p>Trouver des transporteurs fiables</p></div>
+        <div class="item"><div class="ic" data-art="ampoule"></div><p>Partager tes bons plans logistique</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Depuis / vers -->
+  <section id="s5-pays" class="clip s5" data-start="19.3" data-duration="4.5" data-track-index="5">
+    <div class="stage">
+      <div class="kick">Depuis</div>
+      <div class="drapeaux">
+        <div class="drap"><span class="f">🇨🇦</span>Canada</div><div class="drap"><span class="f">🇫🇷</span>France</div>
+        <div class="drap"><span class="f">🇺🇸</span>USA</div><div class="drap"><span class="f">🇧🇪</span>Belgique</div>
+        <div class="drap"><span class="f">🇨🇭</span>Suisse</div><div class="drap"><span class="f">🇩🇪</span>Allemagne</div>
+      </div>
+      <div class="partout">… et partout dans le monde</div>
+      <svg class="fleche" viewBox="0 0 90 60"><path class="fl" d="M45 4 V52 M24 32 L45 54 L66 32" fill="none" stroke="#E2B24F" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="h2 vers"><span class="ln"><span>Toutes les destinations</span></span><span class="ln"><span class="or">africaines 🌍</span></span></div>
+    </div>
+  </section>
+
+  <!-- 6. Règles -->
+  <section id="s6-regles" class="clip s6" data-start="23.5" data-duration="3.8" data-track-index="6">
+    <div class="stage">
+      <div class="h2"><span class="ln"><span>Les <span class="or">règles</span></span></span></div>
+      <div class="regles">
+        <div class="rg ok"><div class="m" data-art="check"></div>Annonce claire : prix + destination</div>
+        <div class="rg ok"><div class="m" data-art="check"></div>Respect et sérieux obligatoires</div>
+        <div class="rg no"><div class="m" data-art="croix"></div>Arnaque = bannissement immédiat</div>
+        <div class="tampon">ZÉRO ARNAQUE</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Rejoindre -->
+  <section id="s7-rejoindre" class="clip s7" data-start="27.0" data-duration="5.0" data-track-index="7">
+    <div class="stage">
+      <div class="kick">Déjà</div>
+      <div class="membres"><span class="n"><span class="odo" data-odo="1,2"></span>&nbsp;K</span><span class="u">membres</span></div>
+      <div class="btn" data-art="rejoindre-ic"></div>
+      <div class="partage">Partage à tous tes contacts : chacun y trouvera son compte 💪</div>
+      <div class="mbc"><img src="assets/logo-mbc.png" alt="MBC Cargo"><p>Envois <b>Canada → Burkina Faso</b><br>contactez MBC Cargo en MP</p></div>
+    </div>
+  </section>
+
+  <div id="grain" class="clip grain" data-start="0" data-duration="32" data-track-index="9"></div>
+</div>
+
+<script>
+(() => {
+  const root = document.getElementById("root");
+  const FMT = ["land", "port", "sq"].find((c) => root.classList.contains(c));
+  const W = FMT === "land" ? 1920 : 1080, H = FMT === "port" ? 1920 : 1080;
+  const $ = (s, el = document) => (typeof s === "string" ? el.querySelector(s) : s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  gsap.registerPlugin(MotionPathPlugin);
+  const OR = "#E2B24F";
+
+  // avion doré vu de dessus (comme sur la bannière), pointe vers la droite
+  const AVION = `<defs><linearGradient id="gOr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7DA8A"/><stop offset="1" stop-color="#C08A2E"/></linearGradient></defs>
+    <g fill="url(#gOr)">
+      <path d="M8,-9 L-30,-62 L-14,-62 L34,-9Z"/><path d="M8,9 L-30,62 L-14,62 L34,9Z"/>
+      <path d="M-50,-5 L-72,-30 L-62,-30 L-38,-5Z"/><path d="M-50,5 L-72,30 L-62,30 L-38,5Z"/>
+      <ellipse cx="0" cy="0" rx="74" ry="13"/>
+      <ellipse cx="-6" cy="-33" rx="11" ry="5"/><ellipse cx="-6" cy="33" rx="11" ry="5"/>
+    </g><path d="M30,-3 h22" stroke="#7A5418" stroke-width="3" stroke-linecap="round" opacity=".55"/>`;
+  const ico = (d) => `<svg viewBox="0 0 64 64" fill="none" stroke="${OR}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const ART = {
+    avion: () => `<svg viewBox="-90 -70 180 140" width="100%" height="100%"><g class="av-g">${AVION}</g></svg>`,
+    "avion-ic": () => `<svg viewBox="-90 -70 180 140"><g transform="rotate(-25)">${AVION}</g></svg>`,
+    kilos: () => ico(`<path d="M18 26 h28 l7 28 H11z"/><path d="M25 26 a7 7 0 1 1 14 0"/><text x="32" y="47" text-anchor="middle" font-family="Montserrat" font-weight="800" font-size="13" fill="${OR}" stroke="none">KG</text>`),
+    annonce: () => ico(`<path d="M10 26 v12 h10 l20 12 V14 L20 26z"/><path d="M48 24 q6 8 0 16"/><path d="M20 38 l4 14 h7 l-3 -12"/>`),
+    bouclier: () => ico(`<path d="M32 8 l20 8 v14 c0 14 -9 22 -20 26 c-11 -4 -20 -12 -20 -26 V16z"/><path d="M23 32 l7 7 l12 -13"/>`),
+    ampoule: () => ico(`<path d="M24 42 c0 -6 -10 -10 -10 -20 a18 18 0 0 1 36 0 c0 10 -10 14 -10 20z"/><path d="M25 50 h14 M27 57 h10"/>`),
+    valise: () => ico(`<rect x="12" y="20" width="40" height="32" rx="6"/><path d="M24 20 v-7 h16 v7 M12 34 h40"/>`),
+    colis: () => ico(`<path d="M32 8 l22 11 v26 l-22 11 l-22 -11 V19z"/><path d="M10 19 l22 11 l22 -11 M32 30 v26 M21 13.5 l22 11"/>`),
+    camion: () => ico(`<rect x="6" y="18" width="32" height="24" rx="3"/><path d="M38 26 h11 l8 9 v7 h-19z"/><circle cx="18" cy="46" r="5"/><circle cx="46" cy="46" r="5"/>`),
+    check: () => `<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    croix: () => `<svg viewBox="0 0 24 24"><path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></svg>`,
+    "rejoindre-ic": () => `<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="4" fill="#fff"/><path d="M1 21 c0-5 4-8 8-8 s8 3 8 8z" fill="#fff"/><path d="M19 7 v8 M15 11 h8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>Rejoindre le groupe`,
+  };
+  // horizon : grand arc en pointillés + trajectoire de l'avion
+  const HZ = { land: { cx: 960, cy: 1500, rx: 1250, ry: 900 }, port: { cx: 540, cy: 2200, rx: 900, ry: 1150 }, sq: { cx: 540, cy: 1560, rx: 900, ry: 760 } }[FMT];
+  const arcPath = `M${HZ.cx - HZ.rx},${HZ.cy} A${HZ.rx},${HZ.ry} 0 0 1 ${HZ.cx + HZ.rx},${HZ.cy}`;
+  ART.horizon = () => `<path class="arc" d="${arcPath}" fill="none" stroke="#E2B24F" stroke-opacity=".45" stroke-width="3" stroke-dasharray="6 16"/>
+    <path class="trace" d="${arcPath}" fill="none" stroke="#F4D27A" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+    <g class="av-vol" opacity="0"><g transform="scale(0.55)">${AVION}</g></g>`;
+  $$("[data-art]").forEach((el) => { el.insertAdjacentHTML("afterbegin", ART[el.dataset.art]()); });
+  const hz = $(".horizon"); hz.setAttribute("viewBox", `0 0 ${W} ${H}`); hz.setAttribute("width", W); hz.setAttribute("height", H);
+
+  // étoiles déterministes
+  let seed = 21;
+  const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const et = $(".etoiles"); const stars = [];
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement("i"); const r = 1 + rnd() * 2.6;
+    Object.assign(s.style, { left: `${rnd() * W}px`, top: `${rnd() * H * 0.8}px`, width: `${r}px`, height: `${r}px`, opacity: (0.25 + rnd() * 0.6).toFixed(2) });
+    et.appendChild(s); stars.push(s);
+  }
+  // titres découpés en lettres
+  $$(".t-cargo, .t-dias").forEach((el) => { el.innerHTML = [...el.textContent].map((c) => (c === " " ? "&nbsp;" : `<span>${c}</span>`)).join(""); });
+  // odomètre « 1,2 »
+  $$("[data-odo]").forEach((el) => {
+    el.innerHTML = [...el.dataset.odo].map((ch) => /\d/.test(ch)
+      ? `<div class="col"><div class="strip" data-d="${ch}">${Array.from({ length: 30 }, (_, i) => `<span>${i % 10}</span>`).join("")}</div></div>`
+      : `<div>${ch}</div>`).join("");
+  });
+
+  const build = () => {
+    const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+    const lignes = (sel, t, st = 0.1, d = 0.7) => tl.fromTo($$(`${sel} .ln > span`), { yPercent: 130 }, { yPercent: 0, duration: d, ease: "expo.out", stagger: st }, t);
+    const sortie = (sel, t) => tl.to($$(`${sel} .ln > span`), { yPercent: -130, duration: 0.4, ease: "expo.in", stagger: 0.05 }, t);
+
+    // fond vivant
+    stars.forEach((s, i) => tl.to(s, { opacity: 0.1 + (i % 5) * 0.12, duration: 1.4 + (i % 4) * 0.4, yoyo: true, repeat: 5, ease: "sine.inOut" }, (i % 7) * 0.3));
+    tl.fromTo(".etoiles", { y: 0 }, { y: -60, duration: 32, ease: "none" }, 0);
+    tl.fromTo(".halo", { scale: 0.9, opacity: 0.6 }, { scale: 1.1, opacity: 1, duration: 16, yoyo: true, repeat: 1, ease: "sine.inOut" }, 0);
+
+    /* 1. accroche : l'avion trace l'arc */
+    const trace = $(".trace"), len = trace.getTotalLength();
+    tl.fromTo(trace, { strokeDasharray: `${len} ${len}`, strokeDashoffset: len }, { strokeDashoffset: 0, duration: 3.8, ease: "power1.inOut" }, 0.1);
+    tl.fromTo(".av-vol", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.1);
+    tl.to(".av-vol", { motionPath: { path: trace, align: trace, alignOrigin: [0.5, 0.5], autoRotate: true }, duration: 3.8, ease: "power1.inOut" }, 0.1);
+    tl.to(".av-vol", { opacity: 0, duration: 0.3 }, 3.9);
+    tl.to(trace, { opacity: 0.12, duration: 1 }, 4.0);
+    tl.fromTo(".arc", { opacity: 1 }, { opacity: 0.45, duration: 1 }, 4.0);
+    lignes(".p1", 0.2); sortie(".p1", 1.5);
+    lignes(".p2", 1.75); sortie(".p2", 2.95);
+    lignes(".p3", 3.1); sortie(".p3", 4.15);
+
+    /* 2. titre */
+    tl.fromTo(".avion-titre", { scale: 0.3, opacity: 0, y: 60 }, { scale: 1, opacity: 1, y: 0, duration: 0.9, ease: "back.out(1.6)" }, 4.25);
+    tl.fromTo(".av-g", { rotation: -8 }, { rotation: 4, duration: 1.6, yoyo: true, repeat: 1, ease: "sine.inOut", svgOrigin: "0 0" }, 4.6);
+    tl.fromTo(".t-cargo span", { yPercent: 120, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.6, ease: "expo.out", stagger: 0.035 }, 4.45);
+    tl.fromTo(".t-dias span", { opacity: 0, x: (i) => (i - 7.5) * 18 }, { opacity: 1, x: 0, duration: 0.8, ease: "expo.out", stagger: 0.02 }, 4.95);
+    tl.fromTo(".regle", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "expo.out" }, 5.35);
+    tl.fromTo(".tags span", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.45, stagger: 0.14 }, 5.6);
+    tl.to(".s2 .stage", { scale: 0.92, opacity: 0, duration: 0.45, ease: "expo.in" }, 7.75);
+
+    /* 3. communauté */
+    tl.fromTo(".s3 .kick", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 8.15);
+    tl.fromTo(".centre", { scale: 0 }, { scale: 1, duration: 0.7, ease: "back.out(2)" }, 8.3);
+    $$(".lien").forEach((l, i) => { const L2 = l.getTotalLength();
+      tl.fromTo(l, { strokeDasharray: `${L2} ${L2}`, strokeDashoffset: L2 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }, 8.6 + i * 0.25); });
+    tl.fromTo(".noeud", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(2.2)", stagger: 0.25 }, 8.9);
+    tl.to(".lien", { strokeDasharray: "2 14", duration: 0.01 }, 9.9);
+    tl.fromTo(".lien", { strokeDashoffset: 0 }, { strokeDashoffset: -64, duration: 2.5, ease: "none", immediateRender: false }, 9.95);
+    tl.fromTo(".sous", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 9.9);
+    tl.to(".centre", { scale: 1.07, duration: 0.5, yoyo: true, repeat: 3, ease: "sine.inOut" }, 10.4);
+    tl.to(".s3 .stage", { y: -40, opacity: 0, duration: 0.4, ease: "expo.in" }, 12.2);
+
+    /* 4. ici, tu peux */
+    lignes(".s4 .h2", 12.45);
+    $$(".item").forEach((it, i) => {
+      const t = 13.0 + i * 1.12;
+      tl.fromTo(it, { x: -80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "expo.out" }, t);
+      tl.fromTo($(".ic", it), { scale: 0, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.55, ease: "back.out(2.4)" }, t + 0.1);
+      tl.to(it, { borderColor: "rgba(226,178,79,.75)", backgroundColor: "rgba(226,178,79,.12)", duration: 0.3 }, t + 0.15);
+      tl.to(it, { borderColor: "rgba(226,178,79,.18)", backgroundColor: "rgba(255,255,255,.05)", duration: 0.5 }, t + 1.0);
+    });
+    tl.to(".s4 .stage", { x: -60, opacity: 0, duration: 0.4, ease: "expo.in" }, 19.3);
+
+    /* 5. depuis / vers */
+    tl.fromTo(".s5 .kick", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 19.5);
+    tl.fromTo(".drap", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2.2)", stagger: 0.12 }, 19.65);
+    tl.fromTo(".partout", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 20.5);
+    tl.fromTo(".fl", { strokeDasharray: 120, strokeDashoffset: 120 }, { strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }, 20.9);
+    lignes(".vers", 21.2, 0.12, 0.75);
+    tl.to(".s5 .stage", { scale: 1.06, opacity: 0, duration: 0.4, ease: "expo.in" }, 23.35);
+
+    /* 6. règles */
+    lignes(".s6 .h2", 23.6);
+    tl.fromTo(".rg", { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.55, ease: "expo.out", stagger: 0.45 }, 24.0);
+    tl.fromTo(".rg .m", { scale: 0 }, { scale: 1, duration: 0.4, ease: "back.out(3)", stagger: 0.45 }, 24.1);
+    tl.fromTo(".tampon", { scale: 2.8, opacity: 0, rotation: -22 }, { scale: 1, opacity: 1, rotation: -9, duration: 0.3, ease: "power4.in" }, 25.6);
+    tl.to(".s6 .regles", { x: 8, duration: 0.05, yoyo: true, repeat: 3, ease: "none" }, 25.9);
+    tl.to(".s6 .stage", { y: 40, opacity: 0, duration: 0.4, ease: "expo.in" }, 26.85);
+
+    /* 7. rejoindre */
+    tl.fromTo(".s7 .kick", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 27.1);
+    tl.fromTo(".membres", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.8)" }, 27.2);
+    $$(".strip").forEach((s, i) => tl.fromTo(s, { yPercent: 0 }, { yPercent: -((20 + +s.dataset.d) * 100) / 30, duration: 1.4 + i * 0.15, ease: "power4.out" }, 27.25));
+    tl.fromTo(".btn", { opacity: 0, y: 40, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(2)" }, 28.3);
+    tl.to(".btn", { scale: 1.06, duration: 0.45, yoyo: true, repeat: 5, ease: "sine.inOut" }, 29.0);
+    tl.fromTo(".partage", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 28.8);
+    tl.fromTo(".mbc", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, 29.4);
+
+    window.__timelines["groupe-diaspora"] = tl;
+  };
+  document.fonts.ready.then(build);
+})();
+</script>
+</body>
+</html>
