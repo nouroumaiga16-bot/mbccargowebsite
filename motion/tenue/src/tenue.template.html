@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Ensemble running 5 pièces (blanc / noir) — vidéo motion design, 23 s.
+  Ensemble running 5 pièces (blanc / noir) — vidéo motion design, 21 s, voix off ElevenLabs calée.
   Gabarit unique : motion/tenue/build.mjs en tire motion/tenue/build/{9x16,1x1,16x9}/index.html.
   Visuels découpés par motion/tenue/decouper.py (coureur seul + 5 vignettes par coloris).
     1 Accroche ............. 0 → 2,6 s
@@ -98,15 +98,16 @@ body { margin: 0; background: var(--noir); }
 </style>
 </head>
 <body>
-<div id="root" class="{{FMT}}" data-composition-id="tenue-running" data-start="0" data-duration="23" data-width="{{W}}" data-height="{{H}}">
-  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="23" data-volume="1"></audio>
-  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="23" data-volume="0.7"></audio>
+<div id="root" class="{{FMT}}" data-composition-id="tenue-running" data-start="0" data-duration="21" data-width="{{W}}" data-height="{{H}}">
+  <audio id="voix-off" src="assets/voix-off.m4a" data-start="0" data-duration="21" data-volume="1"></audio>
+  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="21" data-volume="1"></audio>
+  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="21" data-volume="0.7"></audio>
 
-  <div id="fond" class="clip" data-start="0" data-duration="23" data-track-index="0">
+  <div id="fond" class="clip" data-start="0" data-duration="21" data-track-index="0">
     <div class="fill fond"></div><div class="lignes-fond"></div>
   </div>
 
-  <section id="s1-accroche" class="clip s1" data-start="0" data-duration="2.8" data-track-index="1">
+  <section id="s1-accroche" class="clip s1" data-start="0" data-duration="2.79" data-track-index="1">
     <div class="hook">
       <div class="k">NOUVEAU</div>
       <div class="t it"><span class="ln"><span>Ensemble</span></span><span class="ln"><span class="bleu">running</span></span></div>
@@ -114,7 +115,7 @@ body { margin: 0; background: var(--noir); }
     </div>
   </section>
 
-  <section id="s2-s3-tenues" class="clip s23" data-start="2.4" data-duration="14.3" data-track-index="2">
+  <section id="s2-s3-tenues" class="clip s23" data-start="2.54" data-duration="12.29" data-track-index="2">
     <div class="entete"><div class="t it"><span class="ln"><span>Ensemble</span></span><span class="ln"><span class="bleu">running</span></span></div><div class="s">5 PIÈCES · 2 COLORIS</div></div>
     <div class="puce c-blanc"><span class="rond"></span>Coloris <b>BLANC</b></div>
     <div class="puce c-noir"><span class="rond"></span>Coloris <b>NOIR</b></div>
@@ -126,7 +127,7 @@ body { margin: 0; background: var(--noir); }
     </div>
   </section>
 
-  <section id="s4-duo" class="clip s4" data-start="16.4" data-duration="3.3" data-track-index="3">
+  <section id="s4-duo" class="clip s4" data-start="14.6" data-duration="2.64" data-track-index="3">
     <div class="q it"><span class="ln"><span>Blanc <span class="bleu">ou</span> noir ?</span></span></div>
     <div class="duo">
       <div class="m m1"><img src="assets/blanc-coureur.jpg" alt=""><span>Blanc</span></div>
@@ -134,7 +135,7 @@ body { margin: 0; background: var(--noir); }
     </div>
   </section>
 
-  <section id="s5-commander" class="clip s5" data-start="19.4" data-duration="3.6" data-track-index="4">
+  <section id="s5-commander" class="clip s5" data-start="16.9" data-duration="4.1" data-track-index="4">
     <div class="cta">
       <div class="t it"><span class="ln"><span>Commande</span></span><span class="ln"><span class="bleu">ton ensemble</span></span></div>
       <div class="f">5 pièces · 2 coloris · bandes réfléchissantes</div>
@@ -225,7 +226,13 @@ body { margin: 0; background: var(--noir); }
     tl.fromTo(".cta .btn", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(2.2)" }, 20.4);
     tl.to(".cta .btn", { scale: 1.06, duration: 0.4, yoyo: true, repeat: 4, ease: "sine.inOut" }, 21.0);
 
-    window.__timelines["tenue-running"] = tl;
+    // Recalage sur la voix off (18,8 s) : chaque plan d'origine est étiré ou resserré pour tomber
+    // sur sa phrase — chaque pièce surgit quand elle est nommée. [début, fin d'origine, début, fin finale]
+    const PLANS = [[0, 2.6, 0, 2.75], [2.6, 3.9, 2.75, 3.0], [3.9, 7.9, 3.0, 6.5], [7.9, 9.9, 6.5, 7.25],
+                   [9.9, 13.3, 7.25, 8.8], [13.3, 16.4, 8.8, 14.6], [16.4, 19.4, 14.6, 16.9], [19.4, 23, 16.9, 21]];
+    const master = gsap.timeline({ paused: true });
+    PLANS.forEach(([a, b, c, d]) => master.add(tl.tweenFromTo(a, b, { duration: d - c, ease: "none", immediateRender: false }), c));
+    window.__timelines["tenue-running"] = master;
   };
   document.fonts.ready.then(build);
 })();

@@ -1,4 +1,4 @@
-"""Musique énergique (composée en code, libre de droits) + effets sonores de la vidéo de l'ensemble running (23 s).
+"""Musique énergique (composée en code, libre de droits) + effets sonores de la vidéo de l'ensemble running (21 s), voix off calée.
 Usage : python motion/tenue/son_tenue.py  →  motion/tenue/assets/musique.m4a et sfx.m4a
 """
 import os, subprocess, tempfile, wave
@@ -6,7 +6,7 @@ import numpy as np
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SFX = os.path.join(ICI, "..", "son", "sfx")
-SR, D, BPM = 44100, 23.0, 124
+SR, D, BPM = 44100, 21.0, 124
 BEAT = 60 / BPM; BAR = 4 * BEAT; N = int(SR * D)
 rng = np.random.default_rng(5)
 hz = lambda m: 440 * 2 ** ((m - 69) / 12)
@@ -55,7 +55,7 @@ for b in range(int(np.ceil(D / BAR))):
     for m in ch:
         add(mix, e * np.sin(2 * np.pi * hz(m) * tt), t0, 0.05)
 # « riser » de bruit avant le passage au noir (9,9 s) et le final
-for t_hit in (9.9, 19.4):
+for t_hit in (7.25, 16.9):
     n = int(1.5 * SR); tt = np.arange(n) / SR
     add(mix, bruit(n, 2000, 9000) * (tt / 1.5) ** 2, t_hit - 1.5, 0.25)
 t = np.arange(N) / SR
@@ -64,14 +64,27 @@ mix /= np.abs(mix).max() * 1.1
 tmp = tempfile.mkdtemp(); brut = os.path.join(tmp, "m.wav")
 with wave.open(brut, "wb") as w:
     w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes((mix * 32767).astype("<i2").tobytes())
-subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-i", brut, "-af", "loudnorm=I=-15:TP=-1.5:LRA=9,aresample=48000",
-                       "-ac", "2", "-c:a", "aac", "-b:a", "192k", os.path.join(ICI, "assets", "musique.m4a")])
+voix = os.path.join(ICI, "assets", "voix-off.m4a")
+subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-i", os.path.join(ICI, "voix-off", "elevenlabs-voix-off.mp3"), "-af",
+                       f"adelay=100:all=1,apad=whole_dur={D},atrim=0:{D},loudnorm=I=-15:TP=-1.5:LRA=11,aresample=48000",
+                       "-ac", "2", "-c:a", "aac", "-b:a", "192k", voix])
+subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-i", brut, "-i", voix, "-filter_complex",
+                       "[0:a]loudnorm=I=-20:TP=-2:LRA=9,aresample=48000,aformat=channel_layouts=stereo[m];"
+                       "[1:a]aformat=channel_layouts=stereo[v];[m][v]sidechaincompress=threshold=0.03:ratio=5:attack=30:release=350[o]",
+                       "-map", "[o]", "-t", str(D), "-c:a", "aac", "-b:a", "192k", os.path.join(ICI, "assets", "musique.m4a")])
 
 CUES = [(0.1, "impact-bass-1.mp3", .5), (0.85, "pop.mp3", .35), (2.35, "whoosh.mp3", .45), (2.45, "whoosh-short.mp3", .3)] + \
        [(3.9 + i * 1.0, "pop.mp3", .3) for i in range(5)] + [(9.9, "whoosh.mp3", .5)] + \
        [(10.6 + i * 0.32, "click-soft.mp3", .3) for i in range(5)] + \
        [(13.3, "whoosh-short.mp3", .35), (14.0, "sparkle.mp3", .35), (15.8, "whoosh-short.mp3", .3),
         (16.5, "whoosh.mp3", .4), (19.3, "whoosh.mp3", .45), (20.4, "impact-bass-2.mp3", .4)]
+PLANS = [(0, 2.6, 0, 2.75), (2.6, 3.9, 2.75, 3.0), (3.9, 7.9, 3.0, 6.5), (7.9, 9.9, 6.5, 7.25),
+         (9.9, 13.3, 7.25, 8.8), (13.3, 16.4, 8.8, 14.6), (16.4, 19.4, 14.6, 16.9), (19.4, 23, 16.9, 21)]
+def remap(t):
+    for a, b, c, d in PLANS:
+        if a <= t <= b: return c + (t - a) * (d - c) / (b - a)
+    return t
+CUES = [(remap(t0), f, v) for t0, f, v in CUES]
 ent, fil = [], []
 for i, (t0, f, v) in enumerate(CUES):
     ent += ["-i", os.path.join(SFX, f)]
