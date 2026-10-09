@@ -1,0 +1,234 @@
+<!doctype html>
+<!--
+  Ensemble running 5 pièces (blanc / noir) — vidéo motion design, 23 s.
+  Gabarit unique : motion/tenue/build.mjs en tire motion/tenue/build/{9x16,1x1,16x9}/index.html.
+  Visuels découpés par motion/tenue/decouper.py (coureur seul + 5 vignettes par coloris).
+    1 Accroche ............. 0 → 2,6 s
+    2 Coloris blanc ........ 2,4 → 10 s   les 5 pièces surgissent au bout de leurs lignes
+    3 Coloris noir ......... 10 → 16,5 s  + zoom sur les bandes réfléchissantes
+    4 Blanc ou noir ? ...... 16,5 → 19,5 s
+    5 Commander ............ 19,5 → 23 s
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width={{W}}, height={{H}}">
+<title>Ensemble running 5 pièces</title>
+<script src="assets/gsap.min.js"></script>
+<style>
+@font-face { font-family: "Montserrat"; font-weight: 600; src: url(assets/fonts/montserrat-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 700; src: url(assets/fonts/montserrat-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 800; font-style: italic; src: url(assets/fonts/montserrat-latin-800-italic.woff2) format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 900; font-style: italic; src: url(assets/fonts/montserrat-latin-900-italic.woff2) format("woff2"); }
+:root { --bleu: #2F9BFF; --noir: #0D0F13; --gris: #9AA3B2; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--noir); }
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--noir); color: #fff; font-family: "Montserrat", sans-serif; }
+.clip { position: absolute; inset: 0; overflow: hidden; }
+.fill { position: absolute; inset: 0; }
+.it { font-style: italic; font-weight: 900; letter-spacing: -0.02em; text-transform: uppercase; }
+.ln { display: block; overflow: hidden; padding: 0 .08em .08em; margin-bottom: -.08em; }
+.ln > span { display: block; }
+.bleu { color: var(--bleu); }
+
+/* fond */
+.fond { background: radial-gradient(ellipse at 60% 40%, #1B2433 0%, #12161E 45%, #0B0D11 100%); }
+.lignes-fond { position: absolute; inset: -20%; background: repeating-linear-gradient(115deg, rgba(47,155,255,.06) 0 2px, transparent 2px 70px); }
+
+/* 1. accroche */
+.hook { position: absolute; left: 0; right: 0; top: 50%; text-align: center; }
+.hook .k { font: 700 30px/1 "Montserrat", sans-serif; letter-spacing: .4em; color: var(--bleu); margin-bottom: 26px; }
+.hook .t { font-size: 150px; line-height: .92; }
+.port .hook .t { font-size: 140px; }
+.sq .hook .t { font-size: 128px; }
+.hook .p { display: inline-block; margin-top: 34px; padding: 16px 34px; background: var(--bleu); color: #fff; font-size: 54px; }
+
+/* plateau (le visuel 800x800 reconstruit) */
+.plateau { position: absolute; overflow: hidden; border-radius: 28px; background: #4a4c52; }
+.port .plateau { left: 40px; top: 470px; width: 1000px; height: 1000px; }
+.sq .plateau { left: 350px; top: 300px; width: 700px; height: 700px; }
+.land .plateau { left: 880px; top: 40px; width: 1000px; height: 1000px; }
+.zoom { position: absolute; inset: 0; }
+.coloris { position: absolute; inset: 0; }
+.coloris img.coureur { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vig { position: absolute; }
+.vig img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vig .nom { position: absolute; left: 6%; bottom: 6%; padding: 6px 12px; border-radius: 6px; background: var(--bleu); color: #fff; font: 700 2.3cqw/1.1 "Montserrat", sans-serif; white-space: nowrap; }
+.plateau { container-type: inline-size; }
+.point { position: absolute; width: 0; height: 0; }
+.point i { position: absolute; left: -2.2cqw; top: -2.2cqw; width: 4.4cqw; height: 4.4cqw; border-radius: 50%; border: .5cqw solid var(--bleu); display: block; }
+.reflet-tag { position: absolute; left: 30%; top: 56%; padding: 1.2cqw 2.4cqw; border-radius: 1cqw; background: var(--bleu); color: #fff; font: 900 italic 3.4cqw/1 "Montserrat", sans-serif; text-transform: uppercase; white-space: nowrap; }
+
+/* en-tête permanent + pastille de coloris */
+.entete { position: absolute; }
+.port .entete { left: 0; right: 0; top: 150px; text-align: center; }
+.sq .entete { left: 60px; top: 60px; }
+.land .entete { left: 110px; top: 300px; }
+.entete .t { font-size: 84px; line-height: .95; }
+.sq .entete .t { font-size: 60px; }
+.land .entete .t { font-size: 104px; }
+.entete .s { margin-top: 16px; font: 700 34px/1 "Montserrat", sans-serif; color: var(--gris); letter-spacing: .08em; }
+.sq .entete .s { font-size: 26px; }
+.puce { position: absolute; display: flex; align-items: center; gap: 16px; padding: 18px 30px; border-radius: 999px; background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.18); font: 700 34px/1 "Montserrat", sans-serif; }
+.puce .rond { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--bleu); }
+.puce b { font-style: italic; font-weight: 900; }
+.port .puce { left: 50%; margin-left: -190px; top: 1530px; }
+.sq .puce { left: 60px; top: 232px; font-size: 26px; padding: 12px 22px; }
+.land .puce { left: 110px; top: 610px; }
+.c-blanc .rond { background: #fff; } .c-noir .rond { background: #111; }
+
+/* 4. comparaison */
+.duo { position: absolute; display: flex; justify-content: center; gap: 30px; }
+.port .duo { left: 0; right: 0; top: 470px; }
+.sq .duo { left: 0; right: 0; top: 240px; }
+.land .duo { left: 0; right: 0; top: 230px; }
+.duo .m { position: relative; border-radius: 24px; overflow: hidden; background: #4a4c52; }
+.port .duo .m { width: 470px; height: 1140px; } .sq .duo .m { width: 330px; height: 800px; } .land .duo .m { width: 320px; height: 776px; }
+.duo .m img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
+.duo .m span { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 0; background: rgba(13,15,19,.82); text-align: center; font: 900 italic 44px/1 "Montserrat", sans-serif; text-transform: uppercase; }
+.q { position: absolute; left: 0; right: 0; text-align: center; }
+.port .q { top: 230px; font-size: 104px; } .sq .q { top: 70px; font-size: 92px; } .land .q { top: 70px; font-size: 104px; }
+
+/* 5. commander */
+.cta { position: absolute; left: 0; right: 0; top: 50%; text-align: center; }
+.cta .t { font-size: 110px; line-height: .95; }
+.sq .cta .t, .land .cta .t { font-size: 96px; }
+.cta .f { margin-top: 30px; font: 700 38px/1.3 "Montserrat", sans-serif; color: var(--gris); }
+.cta .btn { display: inline-flex; margin-top: 46px; padding: 30px 56px; border-radius: 14px; background: var(--bleu); color: #fff; font: 900 italic 48px/1 "Montserrat", sans-serif; text-transform: uppercase; box-shadow: 0 20px 60px rgba(47,155,255,.4); }
+</style>
+</head>
+<body>
+<div id="root" class="{{FMT}}" data-composition-id="tenue-running" data-start="0" data-duration="23" data-width="{{W}}" data-height="{{H}}">
+  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="23" data-volume="1"></audio>
+  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="23" data-volume="0.7"></audio>
+
+  <div id="fond" class="clip" data-start="0" data-duration="23" data-track-index="0">
+    <div class="fill fond"></div><div class="lignes-fond"></div>
+  </div>
+
+  <section id="s1-accroche" class="clip s1" data-start="0" data-duration="2.8" data-track-index="1">
+    <div class="hook">
+      <div class="k">NOUVEAU</div>
+      <div class="t it"><span class="ln"><span>Ensemble</span></span><span class="ln"><span class="bleu">running</span></span></div>
+      <div class="p it">5 pièces</div>
+    </div>
+  </section>
+
+  <section id="s2-s3-tenues" class="clip s23" data-start="2.4" data-duration="14.3" data-track-index="2">
+    <div class="entete"><div class="t it"><span class="ln"><span>Ensemble</span></span><span class="ln"><span class="bleu">running</span></span></div><div class="s">5 PIÈCES · 2 COLORIS</div></div>
+    <div class="puce c-blanc"><span class="rond"></span>Coloris <b>BLANC</b></div>
+    <div class="puce c-noir"><span class="rond"></span>Coloris <b>NOIR</b></div>
+    <div class="plateau">
+      <div class="zoom">
+        <div class="coloris blanc" data-coloris="blanc"></div>
+        <div class="coloris noir" data-coloris="noir"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="s4-duo" class="clip s4" data-start="16.4" data-duration="3.3" data-track-index="3">
+    <div class="q it"><span class="ln"><span>Blanc <span class="bleu">ou</span> noir ?</span></span></div>
+    <div class="duo">
+      <div class="m m1"><img src="assets/blanc-coureur.jpg" alt=""><span>Blanc</span></div>
+      <div class="m m2"><img src="assets/noir-coureur.jpg" alt=""><span>Noir</span></div>
+    </div>
+  </section>
+
+  <section id="s5-commander" class="clip s5" data-start="19.4" data-duration="3.6" data-track-index="4">
+    <div class="cta">
+      <div class="t it"><span class="ln"><span>Commande</span></span><span class="ln"><span class="bleu">ton ensemble</span></span></div>
+      <div class="f">5 pièces · 2 coloris · bandes réfléchissantes</div>
+      <div class="btn">Commander maintenant</div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (s, el = document) => (typeof s === "string" ? el.querySelector(s) : s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  // positions dans le visuel d'origine (800 px) : vignette, bout de ligne, point sur la tenue, nom
+  const PIECES = [
+    { id: "veste", box: [30, 35, 232, 271], bout: [236, 192], point: [340, 192], nom: "Veste zippée" },
+    { id: "tshirt", box: [30, 284, 232, 520], bout: [236, 375], point: [352, 288], nom: "T-shirt" },
+    { id: "short", box: [30, 533, 232, 754], bout: [236, 582], point: [341, 442], nom: "Short" },
+    { id: "manches-longues", box: [571, 157, 790, 399], bout: [566, 265], point: [456, 265], nom: "Manches longues" },
+    { id: "legging", box: [571, 423, 790, 783], bout: [566, 518], point: [460, 518], nom: "Legging" },
+  ];
+  const pc = (v) => `${(v / 800) * 100}%`;
+  $$("[data-coloris]").forEach((el) => {
+    const c = el.dataset.coloris;
+    el.innerHTML = `<img class="coureur" src="assets/${c}-coureur.jpg" alt="">` +
+      PIECES.map((p) => `<div class="point p-${p.id}" style="left:${pc(p.point[0])};top:${pc(p.point[1])}"><i></i></div>`).join("") +
+      PIECES.map((p) => { const [x0, y0, x1, y1] = p.box;
+        return `<div class="vig v-${p.id}" style="left:${pc(x0)};top:${pc(y0)};width:${pc(x1 - x0)};height:${pc(y1 - y0)}"><img src="assets/${c}-${p.id}.png" alt=""><span class="nom">${p.nom}</span></div>`; }).join("") +
+      (c === "noir" ? `<div class="reflet-tag">Bandes réfléchissantes</div>` : "");
+  });
+
+  const build = () => {
+    const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+    const lignes = (sel, t, st = 0.08) => tl.fromTo($$(`${sel} .ln > span`), { yPercent: 120, skewX: -12 }, { yPercent: 0, skewX: 0, duration: 0.6, ease: "expo.out", stagger: st }, t);
+    tl.fromTo(".lignes-fond", { x: 0 }, { x: -140, duration: 23, ease: "none" }, 0);
+
+    /* 1. accroche */
+    tl.fromTo(".hook .k", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.4 }, 0.1);
+    tl.fromTo(".hook", { yPercent: -50 }, { yPercent: -50, duration: 0.01 }, 0);
+    lignes(".hook", 0.25, 0.1);
+    tl.fromTo(".hook .p", { scale: 0, rotation: -8 }, { scale: 1, rotation: -3, duration: 0.5, ease: "back.out(2.5)" }, 0.85);
+    tl.to(".hook", { scale: 1.08, duration: 1.4, ease: "none" }, 1.0);
+    tl.to(".hook", { opacity: 0, scale: 1.3, duration: 0.35, ease: "power2.in" }, 2.35);
+
+    /* 2. coloris blanc */
+    tl.fromTo(".plateau", { opacity: 0, y: 120, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "expo.out" }, 2.45);
+    lignes(".entete", 2.55);
+    tl.fromTo(".entete .s", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 2.9);
+    tl.fromTo(".c-blanc", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.5 }, 3.0);
+    tl.fromTo(".noir", { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)" }, { clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)", duration: 0.01 }, 2.4);
+    const sortir = (col, t0, pas) => PIECES.forEach((p, i) => {
+      const t = t0 + i * pas, v = `.${col} .v-${p.id}`, pt = `.${col} .p-${p.id} i`;
+      const ox = ((p.bout[0] - p.box[0]) / (p.box[2] - p.box[0])) * 100, oy = ((p.bout[1] - p.box[1]) / (p.box[3] - p.box[1])) * 100;
+      tl.fromTo(pt, { scale: 0.4, opacity: 1 }, { scale: 2.2, opacity: 0, duration: 0.6, ease: "power2.out" }, t);
+      tl.fromTo(v, { scale: 0.2, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(1.7)", transformOrigin: `${ox}% ${oy}%` }, t + 0.08);
+      tl.fromTo(`${v} .nom`, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4 }, t + 0.4);
+    });
+    sortir("blanc", 3.9, 1.0);
+    tl.to(".zoom", { scale: 1.04, duration: 5, ease: "sine.inOut", transformOrigin: "50% 50%" }, 4.0);
+
+    /* 3. coloris noir : balayage diagonal */
+    tl.fromTo(".noir", { clipPath: "polygon(0% 0%, 0% 0%, -40% 100%, -40% 100%)" }, { clipPath: "polygon(0% 0%, 140% 0%, 100% 100%, -40% 100%)", duration: 0.7, ease: "expo.inOut", immediateRender: false }, 9.9);
+    tl.to(".noir .vig", { opacity: 0, duration: 0.01 }, 9.9);
+    tl.to(".c-blanc", { opacity: 0, x: 40, duration: 0.35, ease: "power2.in" }, 9.9);
+    tl.fromTo(".c-noir", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.5 }, 10.3);
+    tl.to(".zoom", { scale: 1, duration: 0.6, ease: "power2.inOut" }, 9.9);
+    sortir("noir", 10.6, 0.32);
+    // zoom sur les bandes réfléchissantes (short et legging)
+    tl.to(".noir .vig", { opacity: 0, duration: 0.3 }, 13.2);
+    tl.to(".zoom", { scale: 2.1, duration: 0.9, ease: "expo.inOut", transformOrigin: "52% 68%" }, 13.3);
+    tl.fromTo(".reflet-tag", { opacity: 0, scale: 0.6, rotation: -6 }, { opacity: 1, scale: 0.5, rotation: -4, duration: 0.45, ease: "back.out(2.5)", transformOrigin: "0% 50%" }, 14.0);
+    tl.to(".zoom", { scale: 2.25, duration: 1.6, ease: "none" }, 14.2);
+    tl.to(".zoom", { scale: 1, duration: 0.7, ease: "expo.inOut" }, 15.8);
+    tl.to(".reflet-tag", { opacity: 0, duration: 0.2 }, 15.7);
+    tl.to(".s23 .plateau, .s23 .entete, .c-noir", { opacity: 0, duration: 0.3 }, 16.35);
+
+    /* 4. blanc ou noir ? */
+    lignes(".s4 .q", 16.5);
+    tl.fromTo(".m1", { x: -200, opacity: 0, rotation: -4 }, { x: 0, opacity: 1, rotation: 0, duration: 0.7, ease: "expo.out" }, 16.6);
+    tl.fromTo(".m2", { x: 200, opacity: 0, rotation: 4 }, { x: 0, opacity: 1, rotation: 0, duration: 0.7, ease: "expo.out" }, 16.75);
+    tl.to(".m1", { y: -16, duration: 0.5, yoyo: true, repeat: 3, ease: "sine.inOut" }, 17.5);
+    tl.to(".m2", { y: 16, duration: 0.5, yoyo: true, repeat: 3, ease: "sine.inOut" }, 17.5);
+    tl.to(".s4 .q, .duo", { opacity: 0, scale: 0.95, duration: 0.3, ease: "power2.in" }, 19.25);
+
+    /* 5. commander */
+    tl.fromTo(".cta", { yPercent: -50 }, { yPercent: -50, duration: 0.01 }, 19.4);
+    lignes(".cta", 19.5, 0.1);
+    tl.fromTo(".cta .f", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 20.1);
+    tl.fromTo(".cta .btn", { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(2.2)" }, 20.4);
+    tl.to(".cta .btn", { scale: 1.06, duration: 0.4, yoyo: true, repeat: 4, ease: "sine.inOut" }, 21.0);
+
+    window.__timelines["tenue-running"] = tl;
+  };
+  document.fonts.ready.then(build);
+})();
+</script>
+</body>
+</html>
