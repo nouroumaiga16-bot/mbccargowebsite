@@ -1,0 +1,412 @@
+<!doctype html>
+<!--
+  « Culture sous serre — Le guide pratique pour réussir en Afrique » — motion design, 26 s.
+  Gabarit unique : motion/serre/build.mjs en tire motion/serre/build/{9x16,1x1,16x9}/index.html.
+  Visuels : motion/serre/decouper.py (livre détouré + photo de la serre).   Son : motion/serre/son_serre.py
+    1 Accroche ................ 0 → 3,4 s
+    2 Même en saison sèche .... 3,2 → 6,8 s
+    3 Le livre ................ 6,6 → 11,2 s
+    4 Au programme (4 points) . 11 → 17,8 s
+    5 16 chapitres ............ 17,6 → 22 s
+    6 Prix + commande ......... 21,8 → 26 s
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width={{W}}, height={{H}}">
+<title>Culture sous serre — le guide</title>
+<script src="assets/gsap.min.js"></script>
+<style>
+@font-face { font-family: "Oswald"; font-weight: 500; src: url(assets/fonts/oswald-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Oswald"; font-weight: 600; src: url(assets/fonts/oswald-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Oswald"; font-weight: 700; src: url(assets/fonts/oswald-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Fraunces"; font-weight: 600; src: url(assets/fonts/fraunces-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Fraunces"; font-weight: 600; font-style: italic; src: url(assets/fonts/fraunces-latin-600-italic.woff2) format("woff2"); }
+@font-face { font-family: "Fraunces"; font-weight: 400; font-style: italic; src: url(assets/fonts/fraunces-latin-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 500; src: url(assets/fonts/inter-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 600; src: url(assets/fonts/inter-latin-600-normal.woff2) format("woff2"); }
+:root { --vert: #0F2A1D; --vert2: #143A28; --vert3: #1F5A3B; --or: #F2C230; --kraft: #E9D8B4; --creme: #F6EEDC; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--vert); }
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--vert); color: #fff; font-family: "Inter", sans-serif; }
+.clip { position: absolute; inset: 0; overflow: hidden; }
+.fill { position: absolute; inset: 0; }
+.os { font-family: "Oswald", sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: .005em; }
+.fr { font-family: "Fraunces", serif; font-style: italic; font-weight: 600; text-transform: none; letter-spacing: 0; }
+.or { color: var(--or); }
+.ln { display: block; overflow: hidden; padding: 0 .06em .1em; margin-bottom: -.1em; }
+.ln > span { display: block; }
+.kick { font: 600 26px/1 "Inter", sans-serif; letter-spacing: .32em; text-transform: uppercase; color: var(--or); }
+.kick i { display: inline-block; width: 46px; height: 2px; background: var(--or); vertical-align: middle; margin-right: 18px; font-style: normal; }
+
+/* fond permanent : dégradé, soleil, grain, feuilles */
+.fond { background: radial-gradient(ellipse at 50% 30%, #1B4A31 0%, #12331F 45%, #0A1D13 100%); }
+.soleil { position: absolute; left: 50%; border-radius: 50%; background: radial-gradient(circle, rgba(242,194,48,.55) 0%, rgba(242,194,48,.18) 38%, rgba(242,194,48,0) 70%); }
+.port .soleil { width: 1500px; height: 1500px; margin-left: -750px; top: -380px; }
+.sq .soleil { width: 1100px; height: 1100px; margin-left: -550px; top: -330px; }
+.land .soleil { width: 1300px; height: 1300px; margin-left: -650px; top: -520px; }
+.anneaux { position: absolute; left: 50%; top: 0; width: 0; height: 0; }
+.anneaux svg { position: absolute; left: -900px; top: -900px; width: 1800px; height: 1800px; }
+.grain { position: absolute; inset: 0; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>"); }
+.feuille { position: absolute; width: 0; height: 0; }
+.feuille svg { position: absolute; left: -120px; top: -120px; width: 240px; height: 240px; }
+.cadre { position: absolute; inset: 34px; border: 1.5px solid rgba(242,194,48,.28); border-radius: 6px; pointer-events: none; }
+.sq .cadre, .land .cadre { inset: 26px; }
+
+/* 1. accroche */
+.hook { position: absolute; left: 0; right: 0; text-align: center; }
+.port .hook { top: 640px; } .sq .hook { top: 270px; } .land .hook { top: 270px; }
+.hook .kick { margin-bottom: 44px; }
+.hook .t { font-size: 108px; line-height: 1.02; }
+.sq .hook .t { font-size: 92px; }
+.land .hook .t { font-size: 96px; }
+.hook .t .fr { font-size: 1.18em; line-height: .95; }
+.hook .souligne { position: relative; display: inline-block; }
+.hook .souligne svg { position: absolute; left: -2%; bottom: -26px; width: 104%; height: 40px; overflow: visible; }
+
+/* 2. saison sèche */
+.photo { position: absolute; inset: 0; overflow: hidden; }
+.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.voile { position: absolute; inset: 0; opacity: 0; background: linear-gradient(180deg, rgba(10,29,19,.15) 0%, rgba(10,29,19,.25) 40%, rgba(10,29,19,.92) 100%); }
+.land .voile { background: linear-gradient(90deg, rgba(10,29,19,.94) 0%, rgba(10,29,19,.6) 45%, rgba(10,29,19,.05) 100%); }
+.saison { position: absolute; }
+.port .saison { left: 90px; right: 90px; bottom: 260px; }
+.sq .saison { left: 80px; right: 80px; bottom: 110px; }
+.land .saison { left: 130px; top: 290px; width: 900px; }
+.saison .t { font-size: 172px; line-height: 1.12; }
+.saison .t .ln { padding-top: .04em; }
+.sq .saison .t { font-size: 138px; }
+.saison .s { margin-top: 30px; font: 600 italic 52px/1.15 "Fraunces", serif; color: var(--creme); }
+.sq .saison .s { font-size: 44px; }
+.trait-or { height: 8px; width: 280px; background: var(--or); border-radius: 8px; margin-top: 34px; transform-origin: 0 50%; }
+.thermo { position: absolute; display: flex; align-items: center; gap: 16px; padding: 16px 28px; border-radius: 999px; background: rgba(242,194,48,.95); color: var(--vert); font: 700 36px/1 "Oswald", sans-serif; text-transform: uppercase; }
+.port .thermo { right: 80px; top: 160px; } .sq .thermo { right: 70px; top: 70px; } .land .thermo { right: 110px; top: 90px; }
+.thermo svg { width: 34px; height: 34px; }
+
+/* 3. livre */
+.scene-livre { position: absolute; }
+.livre-wrap { position: absolute; }
+.port .livre-wrap { left: 210px; top: 560px; width: 660px; height: 937px; }
+.sq .livre-wrap { left: 90px; top: 150px; width: 520px; height: 738px; }
+.land .livre-wrap { left: 230px; top: 110px; width: 600px; height: 852px; }
+.livre-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ombre-sol { position: absolute; left: 6%; right: 2%; bottom: -3%; height: 9%; border-radius: 50%; background: radial-gradient(ellipse, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 70%); }
+.lueur { position: absolute; left: 50%; top: 50%; width: 160%; height: 120%; margin-left: -80%; margin-top: -60%; border-radius: 50%; background: radial-gradient(ellipse, rgba(242,194,48,.38) 0%, rgba(242,194,48,0) 62%); }
+.eclat { position: absolute; inset: 0; overflow: hidden;
+  -webkit-mask-image: url(assets/livre.png); -webkit-mask-size: 100% 100%; mask-image: url(assets/livre.png); mask-size: 100% 100%; }
+.eclat i { position: absolute; top: -20%; bottom: -20%; left: 0; width: 34%; display: block;
+  background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 100%); }
+.titre-livre { position: absolute; }
+.port .titre-livre { left: 0; right: 0; top: 170px; text-align: center; }
+.sq .titre-livre { left: 640px; right: 50px; top: 300px; }
+.land .titre-livre { left: 980px; right: 100px; top: 300px; }
+.titre-livre .t { font-size: 118px; line-height: .98; }
+.sq .titre-livre .t { font-size: 70px; }
+.titre-livre .s { margin-top: 22px; font: 600 italic 46px/1.2 "Fraunces", serif; color: var(--or); }
+.sq .titre-livre .s { font-size: 34px; }
+.titre-livre .kick { margin-bottom: 26px; }
+.sq .titre-livre .kick { font-size: 20px; }
+.change { position: absolute; font: 400 italic 46px/1.2 "Fraunces", serif; color: var(--creme); }
+.port .change { left: 0; right: 0; top: 1560px; text-align: center; }
+.sq .change { left: 640px; right: 50px; top: 640px; font-size: 36px; }
+.land .change { left: 980px; right: 100px; top: 690px; }
+.change b { font-weight: 600; color: var(--or); }
+
+/* 4. au programme */
+.prog-titre { position: absolute; }
+.port .prog-titre { left: 90px; right: 90px; top: 170px; }
+.sq .prog-titre { left: 70px; right: 70px; top: 80px; }
+.land .prog-titre { left: 760px; right: 100px; top: 120px; }
+.prog-titre .t { font-size: 96px; line-height: 1; }
+.sq .prog-titre .t { font-size: 70px; }
+.prog-titre .kick { margin-bottom: 20px; }
+.mini-livre { position: absolute; }
+.port .mini-livre { right: 70px; top: 120px; width: 230px; height: 327px; }
+.sq .mini-livre { display: none; }
+.land .mini-livre { left: 150px; top: 170px; width: 520px; height: 738px; }
+.mini-livre img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.liste { position: absolute; display: flex; flex-direction: column; }
+.port .liste { left: 90px; right: 90px; top: 520px; gap: 34px; }
+.sq .liste { left: 70px; right: 70px; top: 290px; gap: 22px; }
+.land .liste { left: 760px; right: 100px; top: 330px; gap: 24px; }
+.point { position: relative; display: flex; align-items: center; gap: 34px; padding: 34px 40px; border-radius: 22px; background: rgba(246,238,220,.06); border: 1.5px solid rgba(246,238,220,.14); }
+.port .point { padding-right: 70px; }
+.sq .point { padding: 20px 56px 20px 28px; gap: 24px; border-radius: 16px; }
+.land .point { padding: 22px 56px 22px 30px; gap: 26px; border-radius: 16px; }
+.point .ic { flex: 0 0 auto; width: 120px; height: 120px; border-radius: 50%; background: var(--or); display: flex; align-items: center; justify-content: center; }
+.sq .point .ic, .land .point .ic { width: 84px; height: 84px; }
+.point .ic svg { width: 58%; height: 58%; }
+.point .tx { font: 600 44px/1.22 "Inter", sans-serif; color: var(--creme); }
+.sq .point .tx { font-size: 32px; }
+.land .point .tx { font-size: 34px; }
+.point .tx em { font: 600 italic 1.08em/1 "Fraunces", serif; color: var(--or); }
+.point .num { position: absolute; right: 30px; top: 18px; font: 600 26px/1 "Oswald", sans-serif; color: rgba(242,194,48,.55); letter-spacing: .1em; }
+.sq .point .num, .land .point .num { font-size: 20px; top: 12px; right: 20px; }
+.point.offert { background: rgba(242,194,48,.14); border-color: rgba(242,194,48,.6); }
+
+/* 5. 16 chapitres */
+.chiffre { position: absolute; left: 0; right: 0; text-align: center; }
+.port .chiffre { top: 250px; } .sq .chiffre { top: 70px; } .land .chiffre { top: 70px; }
+.chiffre .n { font: 700 520px/0.9 "Oswald", sans-serif; color: var(--or); }
+.sq .chiffre .n { font-size: 300px; }
+.land .chiffre .n { font-size: 400px; }
+.chiffre .l { margin-top: -10px; font: 600 italic 76px/1 "Fraunces", serif; color: var(--creme); }
+.sq .chiffre .l, .land .chiffre .l { font-size: 58px; }
+.atouts { position: absolute; left: 0; right: 0; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.port .atouts { top: 1000px; gap: 24px; } .sq .atouts { top: 520px; gap: 16px; } .land .atouts { top: 600px; gap: 18px; }
+.atout { display: inline-flex; align-items: center; gap: 18px; padding: 18px 34px; border-radius: 999px; background: rgba(246,238,220,.08); border: 1.5px solid rgba(246,238,220,.18); font: 600 42px/1 "Inter", sans-serif; color: var(--creme); }
+.sq .atout { font-size: 32px; padding: 14px 28px; }
+.land .atout { font-size: 38px; padding: 16px 32px; }
+.atout b { color: var(--or); font-weight: 600; }
+.atout i { width: 14px; height: 14px; border-radius: 50%; background: var(--or); display: block; }
+.adapte { position: absolute; left: 60px; right: 60px; text-align: center; font: 600 54px/1.3 "Inter", sans-serif; color: var(--creme); }
+.port .adapte { top: 1400px; } .sq .adapte { top: 790px; font-size: 40px; } .land .adapte { top: 860px; font-size: 50px; }
+.adapte .mot { font: 600 italic 1.3em/1 "Fraunces", serif; display: inline-block; }
+.adapte .m1 { color: var(--or); } .adapte .m2 { color: #E3A86B; } .adapte .m3 { color: #8FD3A0; }
+
+/* 6. prix + commande */
+.final-livre { position: absolute; }
+.port .final-livre { left: 140px; top: 680px; width: 560px; height: 795px; }
+.sq .final-livre { left: 90px; top: 170px; width: 470px; height: 667px; }
+.land .final-livre { left: 220px; top: 120px; width: 580px; height: 823px; }
+.final-livre img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tampon { position: absolute; width: 0; height: 0; }
+.port .tampon { left: 790px; top: 1350px; } .sq .tampon { left: 560px; top: 760px; } .land .tampon { left: 750px; top: 820px; }
+.tampon .disque { position: absolute; left: -170px; top: -170px; width: 340px; height: 340px; border-radius: 50%; background: var(--or); color: var(--vert);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 24px 60px rgba(0,0,0,.4); }
+.sq .tampon .disque { left: -135px; top: -135px; width: 270px; height: 270px; }
+.tampon .disque .p { font: 700 104px/0.9 "Oswald", sans-serif; }
+.sq .tampon .disque .p { font-size: 82px; }
+.tampon .disque .d { font: 700 46px/1 "Oswald", sans-serif; letter-spacing: .08em; }
+.sq .tampon .disque .d { font-size: 36px; }
+.tampon .disque .u { margin-top: 8px; font: 600 italic 26px/1 "Fraunces", serif; }
+.sq .tampon .disque .u { font-size: 21px; }
+.tampon .tour { position: absolute; left: -200px; top: -200px; width: 400px; height: 400px; }
+.sq .tampon .tour { left: -160px; top: -160px; width: 320px; height: 320px; }
+.cta { position: absolute; }
+.port .cta { left: 0; right: 0; top: 170px; text-align: center; }
+.sq .cta { left: 610px; right: 50px; top: 210px; }
+.land .cta { left: 960px; right: 100px; top: 230px; }
+.cta .t { font-size: 104px; line-height: 1; }
+.sq .cta .t { font-size: 66px; }
+.land .cta .t { font-size: 100px; }
+.cta .s { margin-top: 22px; font: 600 italic 44px/1.2 "Fraunces", serif; color: var(--or); }
+.sq .cta .s { font-size: 32px; }
+.cta .btn { display: inline-flex; align-items: center; gap: 18px; margin-top: 40px; padding: 26px 46px; border-radius: 14px; background: var(--or); color: var(--vert); font: 700 44px/1 "Oswald", sans-serif; text-transform: uppercase; box-shadow: 0 18px 50px rgba(242,194,48,.35); }
+.sq .cta .btn { font-size: 30px; padding: 18px 28px; margin-top: 30px; }
+.cta .btn svg { width: 1em; height: 1em; }
+.signe { position: absolute; font: 500 30px/1.3 "Inter", sans-serif; color: rgba(246,238,220,.75); letter-spacing: .04em; }
+.port .signe { left: 0; right: 0; bottom: 150px; text-align: center; }
+.sq .signe { left: 0; right: 0; top: 985px; text-align: center; font-size: 22px; }
+.land .signe { left: 1000px; right: 100px; top: 720px; font-size: 28px; }
+.signe b { color: var(--or); font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="root" class="{{FMT}}" data-composition-id="culture-serre" data-start="0" data-duration="26" data-width="{{W}}" data-height="{{H}}">
+  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="26" data-volume="1"></audio>
+  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="26" data-volume="0.7"></audio>
+
+  <div id="fond" class="clip" data-start="0" data-duration="26" data-track-index="0">
+    <div class="fill fond"></div>
+    <div class="soleil"></div>
+    <div class="anneaux"><svg viewBox="-900 -900 1800 1800">
+      <circle class="an1" r="560" fill="none" stroke="#F2C230" stroke-opacity=".14" stroke-width="2" stroke-dasharray="4 14"/>
+      <circle class="an2" r="760" fill="none" stroke="#F2C230" stroke-opacity=".08" stroke-width="2"/>
+    </svg></div>
+    <div class="feuilles"></div>
+    <div class="grain"></div>
+    <div class="cadre"></div>
+  </div>
+
+  <section id="s1-accroche" class="clip s1" data-start="0" data-duration="3.4" data-track-index="1">
+    <div class="hook">
+      <div class="kick"><i></i>Afrique de l'Ouest</div>
+      <div class="t os">
+        <span class="ln"><span>Tu veux produire</span></span>
+        <span class="ln"><span>et vendre des</span></span>
+        <span class="ln"><span>légumes frais</span></span>
+        <span class="ln"><span class="fr or souligne">toute l'année ?<svg viewBox="0 0 400 40" preserveAspectRatio="none"><path class="trace" d="M4 26 C 90 8, 200 6, 396 20" fill="none" stroke="#F2C230" stroke-width="7" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg></span></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="s2-saison" class="clip s2" data-start="3.2" data-duration="3.6" data-track-index="2">
+    <div class="photo"><img src="assets/serre-photo.jpg" alt=""></div>
+    <div class="voile"></div>
+    <div class="thermo"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>Saison sèche</div>
+    <div class="saison">
+      <div class="t os"><span class="ln"><span>Même en</span></span><span class="ln"><span class="or">saison</span></span><span class="ln"><span class="or">sèche.</span></span></div>
+      <div class="trait-or"></div>
+      <div class="s"><span class="ln"><span>Produisez toute l'année.</span></span></div>
+    </div>
+  </section>
+
+  <section id="s3-livre" class="clip s3" data-start="6.6" data-duration="4.6" data-track-index="3">
+    <div class="titre-livre">
+      <div class="kick"><i></i>Le guide pratique</div>
+      <div class="t os"><span class="ln"><span>Culture</span></span><span class="ln"><span>sous serre</span></span></div>
+      <div class="s"><span class="ln"><span>pour réussir en Afrique</span></span></div>
+    </div>
+    <div class="livre-wrap l3">
+      <div class="lueur"></div>
+      <div class="ombre-sol"></div>
+      <img src="assets/livre.png" alt="Culture sous serre">
+      <div class="eclat"><i></i></div>
+    </div>
+    <div class="change"><span class="ln"><span>Un guide qui <b>change des vies.</b></span></span></div>
+  </section>
+
+  <section id="s4-programme" class="clip s4" data-start="11" data-duration="6.8" data-track-index="4">
+    <div class="mini-livre"><img src="assets/livre.png" alt=""></div>
+    <div class="prog-titre">
+      <div class="kick"><i></i>Dans le guide</div>
+      <div class="t os"><span class="ln"><span>Au <span class="fr or">programme</span></span></span></div>
+    </div>
+    <div class="liste">
+      <div class="point"><span class="num">01</span><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="1.9" stroke-linejoin="round"><path d="M3 20V11a9 7 0 0 1 18 0v9z"/><path d="M12 4v16M3 13h18M7.5 6.2V20M16.5 6.2V20"/></svg></div>
+        <div class="tx">Choisir et installer la bonne serre pour le <em>climat sahélien</em></div></div>
+      <div class="point"><span class="num">02</span><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="7"/><path d="M12 7c0-2 1-3.5 3-4M9 6.5l3 1 3-1"/></svg></div>
+        <div class="tx">Les cultures les plus <em>rentables</em>&nbsp;: tomate, poivron, laitue…</div></div>
+      <div class="point"><span class="num">03</span><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/><path d="M9.5 15a2.5 2.5 0 0 0 2.5 2.5" stroke-linecap="round"/></svg></div>
+        <div class="tx">Arrosage, engrais et <em>protection</em> contre les maladies</div></div>
+      <div class="point offert"><span class="num">04</span><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M9 14.5l2 2 4-4"/></svg></div>
+        <div class="tx">Calendrier de culture <em>offert</em></div></div>
+    </div>
+  </section>
+
+  <section id="s5-chapitres" class="clip s5" data-start="17.6" data-duration="4.4" data-track-index="5">
+    <div class="chiffre"><div class="n"><span class="compte">0</span></div><div class="l">chapitres</div></div>
+    <div class="atouts">
+      <div class="atout"><i></i><span>Des techniques <b>concrètes</b></span></div>
+      <div class="atout"><i></i><span>Des chiffres réels en <b>francs CFA</b></span></div>
+    </div>
+    <div class="adapte">Adapté à <span class="mot m1">notre soleil</span>, <span class="mot m2">notre terre</span>, <span class="mot m3">notre marché.</span></div>
+  </section>
+
+  <section id="s6-prix" class="clip s6" data-start="21.8" data-duration="4.2" data-track-index="6">
+    <div class="cta">
+      <div class="t os"><span class="ln"><span>Commandez</span></span><span class="ln"><span class="fr or">votre guide</span></span></div>
+      <div class="s"><span class="ln"><span>+ calendrier de culture offert</span></span></div>
+      <div class="btn">Disponible maintenant<svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    </div>
+    <div class="final-livre">
+      <div class="lueur"></div>
+      <div class="ombre-sol"></div>
+      <img src="assets/livre.png" alt="">
+      <div class="eclat"><i></i></div>
+    </div>
+    <div class="tampon">
+      <svg class="tour" viewBox="0 0 400 400"><circle cx="200" cy="200" r="190" fill="none" stroke="#F2C230" stroke-width="3" stroke-dasharray="6 12"/></svg>
+      <div class="disque"><div class="p">8 000</div><div class="d">FCFA</div><div class="u">seulement</div></div>
+    </div>
+    <div class="signe">Écrit par un <b>ingénieur agronome</b></div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  const W = {{W}}, H = {{H}};
+  // pseudo-aléatoire déterministe (rendu image par image)
+  let seed = 11;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+  // feuilles flottantes dans le fond
+  const feuilles = $(".feuilles");
+  const FEUILLE = '<svg viewBox="-60 -60 120 120"><path d="M0 -50 C 32 -30, 34 22, 0 50 C -34 22, -32 -30, 0 -50 Z" fill="#2E7A4E" fill-opacity=".38"/><path d="M0 -44 L0 46" stroke="#F2C230" stroke-opacity=".28" stroke-width="2"/></svg>';
+  for (let i = 0; i < 9; i++) {
+    const d = document.createElement("div");
+    d.className = "feuille";
+    d.style.left = `${Math.round(rnd() * W)}px`;
+    d.style.top = `${Math.round(rnd() * H)}px`;
+    d.innerHTML = FEUILLE;
+    feuilles.appendChild(d);
+  }
+
+  const build = () => {
+    const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+    const D = 26;
+
+    // ---------- fond (toute la durée)
+    tl.fromTo(".soleil", { yPercent: 18, scale: 0.8, opacity: 0 }, { yPercent: 0, scale: 1, opacity: 1, duration: 3.5, ease: "power2.out" }, 0);
+    tl.fromTo(".an1", { rotation: 0 }, { rotation: 60, duration: D, ease: "none", svgOrigin: "0 0" }, 0);
+    tl.fromTo(".an2", { rotation: 0, scale: 0.9 }, { rotation: -25, scale: 1.05, duration: D, ease: "none", svgOrigin: "0 0" }, 0);
+    $$(".feuille").forEach((f, i) => {
+      const r0 = rnd() * 360, dr = (rnd() - 0.5) * 120, dy = -120 - rnd() * 200, dx = (rnd() - 0.5) * 160, s = 0.5 + rnd() * 0.8;
+      tl.fromTo(f, { x: 0, y: 0, rotation: r0, scale: s, opacity: 0 }, { x: dx, y: dy, rotation: r0 + dr, opacity: 1, duration: D, ease: "none" }, 0);
+    });
+    tl.fromTo(".cadre", { opacity: 0, scale: 1.03 }, { opacity: 1, scale: 1, duration: 1.2 }, 0.2);
+
+    // ---------- 1. accroche (0 → 3,4)
+    tl.fromTo(".s1 .kick", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 0.15);
+    tl.fromTo(".s1 .ln > span", { yPercent: 135 }, { yPercent: 0, duration: 0.8, stagger: 0.16, ease: "expo.out" }, 0.3);
+    tl.fromTo(".s1 .trace", { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.7, ease: "power2.inOut" }, 1.2);
+    tl.fromTo(".s1 .hook", { scale: 1 }, { scale: 1.04, duration: 3, ease: "none", immediateRender: false }, 0.3);
+    tl.to(".s1 .ln > span", { yPercent: -135, duration: 0.5, stagger: 0.05, ease: "power3.in" }, 2.85);
+    tl.to(".s1 .kick", { opacity: 0, duration: 0.3 }, 2.9);
+
+    // ---------- 2. saison sèche (3,2 → 6,8)
+    tl.fromTo(".s2 .photo", { clipPath: "inset(50% 0% 50% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9, ease: "expo.inOut" }, 3.2);
+    tl.fromTo(".s2 .photo img", { scale: 1.25 }, { scale: 1.05, duration: 3.6, ease: "power1.out" }, 3.2);
+    tl.fromTo(".s2 .voile", { opacity: 0 }, { opacity: 1, duration: 0.8 }, 3.6);
+    tl.fromTo(".s2 .ln > span", { yPercent: 135 }, { yPercent: 0, duration: 0.8, stagger: 0.14, ease: "expo.out" }, 3.75);
+    tl.fromTo(".s2 .trait-or", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "expo.out" }, 4.2);
+    tl.fromTo(".s2 .thermo", { opacity: 0, y: -30, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(2)" }, 4.0);
+    tl.to(".s2 .thermo svg", { rotation: 90, duration: 2.5, ease: "none" }, 4.0);
+    tl.to(".s2 .photo", { clipPath: "inset(0% 0% 100% 0%)", duration: 0.6, ease: "power3.in" }, 6.2);
+    tl.to([".s2 .saison", ".s2 .thermo", ".s2 .voile"], { opacity: 0, duration: 0.4 }, 6.2);
+
+    // ---------- 3. le livre (6,6 → 11,2)
+    tl.fromTo(".l3", { y: 260, opacity: 0, rotation: -7, scale: 0.88 }, { y: 0, opacity: 1, rotation: 0, scale: 1, duration: 1.2, ease: "expo.out" }, 6.6);
+    tl.fromTo(".l3 .lueur", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 1.4, ease: "power2.out" }, 6.8);
+    tl.fromTo(".l3 .eclat i", { xPercent: -140 }, { xPercent: 360, duration: 1.1, ease: "power2.inOut" }, 7.6);
+    tl.to(".l3", { y: -18, duration: 3.2, ease: "sine.inOut" }, 7.8);
+    tl.fromTo(".s3 .kick", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6 }, 7.0);
+    tl.fromTo(".s3 .titre-livre .ln > span", { yPercent: 135 }, { yPercent: 0, duration: 0.85, stagger: 0.14, ease: "expo.out" }, 7.1);
+    tl.fromTo(".s3 .change .ln > span", { yPercent: 135 }, { yPercent: 0, duration: 0.8, ease: "expo.out" }, 8.9);
+    tl.to([".s3 .titre-livre", ".s3 .change"], { opacity: 0, y: -30, duration: 0.45, ease: "power2.in" }, 10.7);
+    tl.to(".l3", { opacity: 0, scale: 0.9, duration: 0.45, ease: "power2.in" }, 10.75);
+
+    // ---------- 4. au programme (11 → 17,8)
+    tl.fromTo(".s4 .mini-livre", { opacity: 0, x: -80, rotation: -4 }, { opacity: 1, x: 0, rotation: 3, duration: 0.9, ease: "expo.out" }, 11.0);
+    tl.to(".s4 .mini-livre", { rotation: -2, y: -14, duration: 5.6, ease: "sine.inOut" }, 11.9);
+    tl.fromTo(".s4 .kick", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6 }, 11.1);
+    tl.fromTo(".s4 .prog-titre .ln > span", { yPercent: 135 }, { yPercent: 0, duration: 0.8, ease: "expo.out" }, 11.2);
+    const T4 = [11.8, 13.1, 14.4, 15.7];
+    $$(".s4 .point").forEach((p, i) => {
+      tl.fromTo(p, { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.7, ease: "expo.out" }, T4[i]);
+      tl.fromTo(p.querySelector(".ic"), { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.6, ease: "back.out(2.2)" }, T4[i] + 0.12);
+    });
+    tl.fromTo(".s4 .offert", { scale: 1 }, { scale: 1.035, duration: 0.25, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, 16.4);
+    tl.to([".s4 .liste", ".s4 .prog-titre", ".s4 .mini-livre"], { opacity: 0, y: -40, duration: 0.45, ease: "power2.in", stagger: 0.05 }, 17.3);
+
+    // ---------- 5. 16 chapitres (17,6 → 22)
+    const compte = { v: 0 };
+    tl.fromTo(compte, { v: 0 }, { v: 16, duration: 1.1, ease: "power2.out", onUpdate: () => { $(".compte").textContent = Math.round(compte.v); } }, 17.7);
+    tl.fromTo(".s5 .chiffre .n", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.9, ease: "expo.out" }, 17.6);
+    tl.fromTo(".s5 .chiffre .l", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, 18.2);
+    tl.fromTo(".s5 .atout", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.45, ease: "expo.out" }, 18.8);
+    tl.fromTo(".s5 .adapte", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 19.9);
+    tl.fromTo(".s5 .mot", { opacity: 0, y: 30, scale: 0.85 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, stagger: 0.4, ease: "back.out(2)" }, 20.0);
+    tl.to([".s5 .chiffre", ".s5 .atouts", ".s5 .adapte"], { opacity: 0, y: -40, duration: 0.45, ease: "power2.in", stagger: 0.05 }, 21.45);
+
+    // ---------- 6. prix + commande (21,8 → 26)
+    tl.fromTo(".final-livre", { opacity: 0, x: -140, rotation: -6 }, { opacity: 1, x: 0, rotation: 0, duration: 1, ease: "expo.out" }, 21.85);
+    tl.fromTo(".final-livre .eclat i", { xPercent: -140 }, { xPercent: 360, duration: 1.1, ease: "power2.inOut" }, 22.6);
+    tl.to(".final-livre", { y: -16, duration: 3.2, ease: "sine.inOut" }, 22.8);
+    tl.fromTo(".s6 .cta .ln > span", { yPercent: 135 }, { yPercent: 0, duration: 0.8, stagger: 0.13, ease: "expo.out" }, 22.0);
+    tl.fromTo(".tampon .disque", { scale: 2.4, opacity: 0, rotation: -40 }, { scale: 1, opacity: 1, rotation: -10, duration: 0.55, ease: "power4.in" }, 22.8);
+    tl.fromTo(".tampon .disque", { scale: 1 }, { scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, 23.35);
+    tl.fromTo(".tampon .tour", { opacity: 0, scale: 0.7, rotation: 0 }, { opacity: 1, scale: 1, rotation: 90, duration: 2.6, ease: "power2.out" }, 23.35);
+    tl.fromTo(".s6 .cta .btn", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "back.out(2)" }, 23.8);
+    tl.fromTo(".s6 .signe", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 24.2);
+
+    window.__timelines["culture-serre"] = tl;
+  };
+  document.fonts.ready.then(build);
+})();
+</script>
+</body>
+</html>
