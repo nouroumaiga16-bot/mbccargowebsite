@@ -1,0 +1,565 @@
+<!doctype html>
+<!--
+  Nafa Digital présente « Culture sous Serre » — motion design 62,5 s, voix off ElevenLabs (Simon, 58 s).
+  Gabarit unique : motion/nafa/build.mjs en tire motion/nafa/build/{9x16,1x1,16x9}/index.html.
+  Chaque scène est dessinée dans une « scène » carrée de 1080 px mise à l'échelle selon le format ; sous-titres en bas.
+  Temps calés sur les pauses de la voix (voix décalée de 0,1 s) :
+     1 Partenaires ............. 0 → 6,6       7 Le guide : 5 étapes ...... 25,4 → 39,5
+     2 Voici Nafa Digital ...... 6,6 → 8,7     8 Pas de théorie ........... 39,5 → 46
+     3 Je vous présente ........ 8,7 → 11,95   9 Pourquoi l'acheter ? ..... 46 → 58,1
+     4 Toute l'année ........... 11,95 → 15,95 10 Prix + nafa-digital.com .. 58,1 → 62,5
+     5 La serre protège ........ 15,95 → 21,4
+     6 Prix au plus haut ....... 21,4 → 25,5
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width={{W}}, height={{H}}">
+<title>Nafa Digital — Culture sous Serre</title>
+<script src="assets/gsap.min.js"></script>
+<style>
+@font-face { font-family: "Oswald"; font-weight: 600; src: url(assets/fonts/oswald-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Oswald"; font-weight: 700; src: url(assets/fonts/oswald-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Fraunces"; font-weight: 600; font-style: italic; src: url(assets/fonts/fraunces-latin-600-italic.woff2) format("woff2"); }
+@font-face { font-family: "Fraunces"; font-weight: 400; font-style: italic; src: url(assets/fonts/fraunces-latin-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 500; src: url(assets/fonts/inter-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 600; src: url(assets/fonts/inter-latin-600-normal.woff2) format("woff2"); }
+:root { --vert: #0F2A1D; --or: #F2C230; --creme: #F6EEDC; --terre: #E3A86B; --eau: #5BC0EB; --rouge: #E5462F; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--vert); }
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--vert); color: #fff; font-family: "Inter", sans-serif; }
+.clip { position: absolute; inset: 0; overflow: hidden; }
+.fill { position: absolute; inset: 0; }
+.os { font-family: "Oswald", sans-serif; font-weight: 700; text-transform: uppercase; }
+.fr { font-family: "Fraunces", serif; font-style: italic; font-weight: 600; text-transform: none; }
+.or { color: var(--or); }
+.ln { display: block; overflow: hidden; padding: .06em .06em .1em; margin: -.06em 0 -.1em; }
+.ln > span { display: block; }
+.kick { font: 600 26px/1 "Inter", sans-serif; letter-spacing: .3em; text-transform: uppercase; color: var(--or); }
+.kick i { display: inline-block; width: 46px; height: 2px; background: var(--or); vertical-align: middle; margin: 0 18px; }
+
+/* scène carrée 1080 × 1080, mise à l'échelle par format (jamais animée elle-même) */
+.stage { position: absolute; width: 1080px; height: 1080px; transform-origin: 0 0; }
+.port .stage { left: 0; top: 330px; }
+.sq .stage { left: 97px; top: 16px; transform: scale(.82); }
+.land .stage { left: 506px; top: 8px; transform: scale(.84); }
+.ab { position: absolute; }
+.centre { left: 0; right: 0; text-align: center; }
+
+/* fond permanent */
+.fond { background: radial-gradient(ellipse at 50% 30%, #1B4A31 0%, #12331F 45%, #0A1D13 100%); }
+.soleil { position: absolute; left: 50%; top: 0; width: 1500px; height: 1500px; margin-left: -750px; margin-top: -600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(242,194,48,.5) 0%, rgba(242,194,48,.16) 38%, rgba(242,194,48,0) 70%); }
+.grain { position: absolute; inset: 0; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>"); }
+.feuille { position: absolute; width: 0; height: 0; }
+.feuille svg { position: absolute; left: -120px; top: -120px; width: 240px; height: 240px; }
+.cadre { position: absolute; inset: 30px; border: 1.5px solid rgba(242,194,48,.28); border-radius: 6px; }
+.marque { position: absolute; left: 0; right: 0; top: 150px; text-align: center; }
+.sq .marque, .land .marque { display: none; }
+.wm { font: 700 54px/1 "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .02em; color: var(--creme); white-space: nowrap; }
+.wm .fr { color: var(--or); text-transform: none; margin-left: .12em; }
+.wm .pt { display: inline-block; width: .32em; height: .32em; border-radius: 50%; background: var(--or); margin-right: .22em; vertical-align: .12em; }
+
+/* sous-titres */
+.st { position: absolute; left: 60px; right: 60px; text-align: center; }
+.port .st { top: 1480px; } .sq .st { top: 918px; left: 40px; right: 40px; } .land .st { top: 935px; left: 260px; right: 260px; }
+.st p { position: absolute; left: 0; right: 0; top: 0; margin: 0; }
+.st span { display: inline; padding: 10px 22px; border-radius: 10px; background: rgba(8,22,14,.74); color: #fff;
+  font: 600 44px/1.75 "Inter", sans-serif; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.sq .st span { font-size: 32px; padding: 8px 16px; } .land .st span { font-size: 32px; padding: 8px 18px; }
+
+/* 1. partenaires */
+.reseau { left: 0; top: 0; width: 1080px; height: 1080px; }
+.reseau svg { width: 100%; height: 100%; }
+.k1 { top: 250px; } .n1 { top: 310px; font-size: 80px; line-height: 1.04; color: var(--creme); white-space: nowrap; }
+.sep { left: 490px; top: 560px; width: 100px; height: 4px; background: var(--or); border-radius: 4px; }
+.k2 { top: 620px; } .n2 { top: 675px; left: 30px; right: 30px; font: 600 italic 54px/1.2 "Fraunces", serif; color: var(--or); white-space: nowrap; }
+
+/* 2. voici Nafa Digital */
+.voici { top: 250px; font: 600 italic 80px/1 "Fraunces", serif; color: var(--creme); }
+.nafa { top: 380px; font-size: 250px; line-height: 1; color: var(--creme); letter-spacing: .02em; }
+.digital { top: 640px; font: 600 italic 170px/1 "Fraunces", serif; color: var(--or); }
+.eclair { left: 540px; top: 540px; width: 0; height: 0; }
+.eclair i { position: absolute; left: -480px; top: -480px; width: 960px; height: 960px; border-radius: 50%; border: 4px solid rgba(242,194,48,.6); display: block; }
+.eclair b { position: absolute; left: -300px; top: -300px; width: 600px; height: 600px; border-radius: 50%; display: block;
+  background: radial-gradient(circle, rgba(242,194,48,.45) 0%, rgba(242,194,48,0) 70%); }
+
+/* 3. je vous présente */
+.presente { top: 90px; font: 600 italic 66px/1.1 "Fraunces", serif; color: var(--creme); }
+.livre { left: 330px; top: 220px; width: 420px; height: 596px; }
+.livre img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lueur { position: absolute; left: 50%; top: 50%; width: 170%; height: 125%; margin-left: -85%; margin-top: -62.5%; border-radius: 50%; background: radial-gradient(ellipse, rgba(242,194,48,.38) 0%, rgba(242,194,48,0) 62%); }
+.ombre-sol { position: absolute; left: 6%; right: 2%; bottom: -3%; height: 9%; border-radius: 50%; background: radial-gradient(ellipse, rgba(0,0,0,.55) 0%, rgba(0,0,0,0) 70%); }
+.eclat { position: absolute; inset: 0; overflow: hidden; -webkit-mask-image: url(assets/livre.png); -webkit-mask-size: 100% 100%; mask-image: url(assets/livre.png); mask-size: 100% 100%; }
+.eclat i { position: absolute; top: -20%; bottom: -20%; left: 0; width: 34%; display: block; background: linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 100%); }
+.titre-livre { top: 860px; font-size: 92px; line-height: 1; }
+
+/* 4. toute l'année */
+.photo { position: absolute; inset: 0; overflow: hidden; }
+.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.voile { position: absolute; inset: 0; opacity: 0; background: linear-gradient(180deg, rgba(10,29,19,.25) 0%, rgba(10,29,19,.45) 45%, rgba(10,29,19,.94) 100%); }
+.annee { top: 420px; font-size: 170px; line-height: 1; }
+.seche { top: 610px; font: 600 italic 70px/1.15 "Fraunces", serif; color: var(--creme); }
+.possible { left: 0; right: 0; top: 790px; text-align: center; }
+.possible span { display: inline-block; padding: 18px 44px; border-radius: 12px; background: var(--or); color: var(--vert); font: 700 84px/1 "Oswald", sans-serif; text-transform: uppercase; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+
+/* 5. la serre protège */
+.dessin { left: 0; top: 0; width: 1080px; height: 1080px; }
+.dessin svg { width: 100%; height: 100%; overflow: visible; }
+.puces { left: 60px; top: 90px; display: flex; flex-direction: column; gap: 18px; }
+.puce { display: inline-flex; align-items: center; gap: 16px; padding: 14px 26px 14px 16px; border-radius: 999px; background: rgba(246,238,220,.08); border: 1.5px solid rgba(246,238,220,.2);
+  font: 600 38px/1 "Inter", sans-serif; color: var(--creme); width: max-content; }
+.puce i { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-style: normal; }
+.puce i svg { width: 60%; height: 60%; }
+.protege { left: 0; right: 0; top: 900px; text-align: center; }
+.protege span { display: inline-flex; align-items: center; gap: 16px; padding: 16px 34px; border-radius: 999px; background: var(--or); color: var(--vert); font: 700 52px/1 "Oswald", sans-serif; text-transform: uppercase; }
+.protege svg { width: 44px; height: 44px; }
+
+/* 6. prix au plus haut */
+.surtout { top: 80px; font: 600 italic 76px/1 "Fraunces", serif; color: var(--creme); }
+.graph { left: 90px; top: 220px; width: 900px; height: 640px; }
+.graph svg { width: 100%; height: 100%; overflow: visible; }
+.mois { font: 600 26px/1 "Inter", sans-serif; fill: rgba(246,238,220,.6); }
+.saison-l { font: 600 26px/1 "Inter", sans-serif; fill: var(--terre); letter-spacing: .12em; }
+.pic-l { left: 250px; top: 250px; padding: 14px 24px; border-radius: 12px; background: var(--or); color: var(--vert); font: 700 46px/1 "Oswald", sans-serif; text-transform: uppercase; white-space: nowrap; }
+.produisez { top: 900px; font-size: 60px; line-height: 1.1; color: var(--creme); }
+
+/* 7. le guide : étapes */
+.s7 .titre { top: 60px; }
+.s7 .titre .t { margin-top: 14px; font-size: 104px; line-height: 1; }
+.liste { left: 60px; right: 60px; top: 250px; display: flex; flex-direction: column; gap: 16px; }
+.av { display: flex; align-items: center; gap: 30px; padding: 18px 28px; border-radius: 22px; background: rgba(246,238,220,.06); border: 1.5px solid rgba(246,238,220,.14); }
+.av .n { flex: 0 0 auto; width: 96px; height: 96px; border-radius: 50%; background: var(--or); color: var(--vert); display: flex; align-items: center; justify-content: center; font: 700 52px/1 "Oswald", sans-serif; }
+.av .tx { flex: 1; font: 600 42px/1.2 "Inter", sans-serif; color: var(--creme); }
+.av .tx em { font: 600 italic 1.1em/1 "Fraunces", serif; color: var(--or); }
+.av .ic { flex: 0 0 auto; width: 64px; height: 64px; opacity: .85; }
+
+/* 8. pas de théorie */
+.pasde { top: 150px; }
+.theorie { left: 0; right: 0; top: 200px; text-align: center; }
+.theorie span { position: relative; display: inline-block; font: 700 118px/1.1 "Oswald", sans-serif; text-transform: uppercase; color: rgba(246,238,220,.7); }
+.theorie i { position: absolute; left: -3%; right: -3%; top: 50%; height: 10px; border-radius: 8px; background: var(--rouge); transform-origin: 0 50%; display: block; }
+.methodes { top: 420px; font: 600 italic 92px/1.05 "Fraunces", serif; color: var(--or); white-space: nowrap; }
+.pensees { top: 575px; left: 80px; right: 80px; font: 600 48px/1.25 "Inter", sans-serif; color: var(--creme); }
+.pensees b { color: var(--or); font-weight: 600; }
+.demain { left: 0; right: 0; top: 760px; text-align: center; }
+.demain span { display: inline-flex; align-items: center; gap: 16px; padding: 20px 38px; border-radius: 999px; background: var(--or); color: var(--vert); font: 700 54px/1 "Oswald", sans-serif; text-transform: uppercase; }
+.demain svg { width: 46px; height: 46px; }
+
+/* 9. pourquoi l'acheter */
+.pourquoi { top: 70px; font: 600 italic 100px/1 "Fraunces", serif; color: var(--or); }
+.raisons { left: 60px; right: 60px; top: 260px; display: flex; flex-direction: column; gap: 26px; }
+.raison { display: flex; align-items: center; gap: 30px; padding: 30px 34px; border-radius: 24px; background: rgba(246,238,220,.07); border: 1.5px solid rgba(246,238,220,.16); }
+.raison .ok { flex: 0 0 auto; width: 100px; height: 100px; border-radius: 50%; background: var(--or); display: flex; align-items: center; justify-content: center; }
+.raison .ok svg { width: 58%; height: 58%; }
+.raison .tx { font: 600 44px/1.22 "Inter", sans-serif; color: var(--creme); }
+.raison .tx em { font: 600 italic 1.08em/1 "Fraunces", serif; color: var(--or); }
+
+/* 10. prix + site */
+.s10 .livre { left: 150px; top: 80px; width: 400px; height: 568px; }
+.tampon { left: 640px; top: 400px; width: 0; height: 0; }
+.tampon .disque { position: absolute; left: -165px; top: -165px; width: 330px; height: 330px; border-radius: 50%; background: var(--or); color: var(--vert);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 24px 60px rgba(0,0,0,.4); }
+.tampon .p { font: 700 100px/0.9 "Oswald", sans-serif; }
+.tampon .d { font: 700 44px/1 "Oswald", sans-serif; letter-spacing: .08em; }
+.tampon .u { margin-top: 8px; font: 600 italic 26px/1 "Fraunces", serif; }
+.tampon .tour { position: absolute; left: -195px; top: -195px; width: 390px; height: 390px; }
+.cta { left: 0; right: 0; top: 700px; text-align: center; }
+.cta .s { font: 600 italic 60px/1 "Fraunces", serif; color: var(--creme); }
+.cta .btn { display: inline-flex; align-items: center; gap: 18px; margin-top: 26px; padding: 26px 46px; border-radius: 16px; background: var(--or); color: var(--vert);
+  font: 700 72px/1 "Oswald", sans-serif; text-transform: lowercase; box-shadow: 0 18px 50px rgba(242,194,48,.35); white-space: nowrap; }
+.cta .btn svg { width: .8em; height: .8em; }
+.s10 .wm { left: 0; right: 0; top: 990px; text-align: center; font-size: 44px; }
+.port .s10 .wm { display: none; }
+</style>
+</head>
+<body>
+<div id="root" class="{{FMT}}" data-composition-id="nafa-serre" data-start="0" data-duration="62.5" data-width="{{W}}" data-height="{{H}}">
+  <audio id="voix-off" src="assets/voix-off.m4a" data-start="0" data-duration="62.5" data-volume="1"></audio>
+  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="62.5" data-volume="1"></audio>
+  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="62.5" data-volume="0.7"></audio>
+
+  <div id="fond" class="clip" data-start="0" data-duration="62.5" data-track-index="0">
+    <div class="fill fond"></div>
+    <div class="soleil"></div>
+    <div class="feuilles"></div>
+    <div class="grain"></div>
+    <div class="cadre"></div>
+    <div class="marque"><div class="wm"><span class="pt"></span>Nafa<span class="fr">digital</span></div></div>
+  </div>
+
+  <section id="s1-partenaires" class="clip s1" data-start="0" data-duration="6.65" data-track-index="1">
+    <div class="stage">
+      <div class="ab reseau"><svg viewBox="0 0 1080 1080"><g class="liens"></g><g class="noeuds"></g></svg></div>
+      <div class="ab centre kick k1"><i></i>Sous l'accompagnement de<i></i></div>
+      <div class="ab centre os n1"><span class="ln"><span>Institut des entrepreneurs</span></span><span class="ln"><span class="or">ouest-africains</span></span></div>
+      <div class="ab sep"></div>
+      <div class="ab centre kick k2"><i></i>Avec le soutien de<i></i></div>
+      <div class="ab centre n2"><span class="ln"><span>plusieurs acteurs de l'agriculture</span></span><span class="ln"><span>ouest-africaine</span></span></div>
+    </div>
+  </section>
+
+  <section id="s2-nafa" class="clip s2" data-start="6.6" data-duration="2.15" data-track-index="2">
+    <div class="stage">
+      <div class="ab eclair"><b></b><i></i></div>
+      <div class="ab centre voici"><span class="ln"><span>Voici</span></span></div>
+      <div class="ab centre os nafa"><span class="ln"><span>Nafa</span></span></div>
+      <div class="ab centre digital"><span class="ln"><span>digital</span></span></div>
+    </div>
+  </section>
+
+  <section id="s3-presente" class="clip s3" data-start="8.7" data-duration="3.3" data-track-index="3">
+    <div class="stage">
+      <div class="ab centre presente"><span class="ln"><span>Aujourd'hui, je vous présente</span></span></div>
+      <div class="ab livre l3"><div class="lueur"></div><div class="ombre-sol"></div><img src="assets/livre.png" alt="Culture sous Serre"><div class="eclat"><i></i></div></div>
+      <div class="ab centre os titre-livre"><span class="ln"><span>Culture <span class="or">sous serre</span></span></span></div>
+    </div>
+  </section>
+
+  <section id="s4-annee" class="clip s4" data-start="11.95" data-duration="4.05" data-track-index="4">
+    <div class="photo"><img src="assets/serre-photo.jpg" alt=""></div>
+    <div class="voile"></div>
+    <div class="stage">
+      <div class="ab centre os annee"><span class="ln"><span>Toute <span class="or">l'année</span></span></span></div>
+      <div class="ab centre seche"><span class="ln"><span>même en pleine saison sèche ?</span></span></div>
+      <div class="ab possible"><span>C'est possible.</span></div>
+    </div>
+  </section>
+
+  <section id="s5-protege" class="clip s5" data-start="15.95" data-duration="5.5" data-track-index="5">
+    <div class="stage">
+      <div class="ab dessin"><svg viewBox="0 0 1080 1080">
+        <g class="astre"><circle cx="880" cy="200" r="72" fill="#F2C230"/><g class="rayons" stroke="#F2C230" stroke-width="8" stroke-linecap="round"></g></g>
+        <g class="projectiles"></g>
+        <g class="serre">
+          <path class="toit-glow" d="M220 830 V610 A320 240 0 0 1 860 610 V830" fill="none" stroke="#F2C230" stroke-width="22" stroke-opacity="0"/>
+          <path d="M220 830 V610 A320 240 0 0 1 860 610 V830 Z" fill="rgba(220,240,230,.13)"/>
+          <g class="cotes" stroke="rgba(246,238,220,.45)" stroke-width="4"></g>
+          <g class="plantes"></g>
+          <path class="contour" d="M220 830 V610 A320 240 0 0 1 860 610 V830 Z" fill="none" stroke="#F6EEDC" stroke-width="8" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+          <line x1="160" y1="832" x2="920" y2="832" stroke="#7A4E2A" stroke-width="10" stroke-linecap="round"/>
+        </g>
+      </svg></div>
+      <div class="ab puces">
+        <div class="puce pu1"><i style="background:#F2C230"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg></i>Soleil brûlant</div>
+        <div class="puce pu2"><i style="background:#5BC0EB"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="2.2" stroke-linecap="round"><path d="M7 15a4 4 0 0 1 .5-8 5 5 0 0 1 9.5 1.5A3.5 3.5 0 0 1 17 15z"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/></svg></i>Pluies irrégulières</div>
+        <div class="puce pu3"><i style="background:#E3A86B"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8a3 3 0 0 1 6 0v1H9z"/><path d="M8 10h8v5a4 4 0 0 1-8 0z"/><path d="M4 12h4M16 12h4M5 18l3-2M19 18l-3-2M5 6l3 2.5M19 6l-3 2.5"/></svg></i>Insectes</div>
+      </div>
+      <div class="ab protege"><span><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Cultures protégées</span></div>
+    </div>
+  </section>
+
+  <section id="s6-prix" class="clip s6" data-start="21.4" data-duration="4.15" data-track-index="6">
+    <div class="stage">
+      <div class="ab centre surtout"><span class="ln"><span>Et surtout…</span></span></div>
+      <div class="ab graph"><svg viewBox="0 0 900 640">
+        <rect class="bande" x="0" y="40" width="300" height="500" fill="rgba(227,168,107,.12)"/>
+        <text class="saison-l" x="20" y="520">SAISON SÈCHE</text>
+        <line x1="0" y1="540" x2="900" y2="540" stroke="rgba(246,238,220,.35)" stroke-width="3"/>
+        <g class="mois-g"></g>
+        <path class="aire" d="" fill="rgba(242,194,48,.12)"/>
+        <path class="courbe" d="" fill="none" stroke="#F2C230" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+        <circle class="pic" cx="0" cy="0" r="18" fill="#F2C230" stroke="#0F2A1D" stroke-width="6"/>
+      </svg></div>
+      <div class="ab pic-l">Prix au plus haut</div>
+      <div class="ab centre os produisez"><span class="ln"><span>Produisez <span class="or">au bon moment</span></span></span></div>
+    </div>
+  </section>
+
+  <section id="s7-guide" class="clip s7" data-start="25.45" data-duration="14" data-track-index="7">
+    <div class="stage">
+      <div class="ab centre titre"><div class="kick"><i></i>Dans ce guide<i></i></div><div class="t os"><span class="ln"><span>5 étapes <span class="fr or">concrètes</span></span></span></div></div>
+      <div class="ab liste">
+        <div class="av"><div class="n">1</div><div class="tx">Choisir le bon <em>emplacement</em></div>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#F2C230" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg></div>
+        <div class="av"><div class="n">2</div><div class="tx">Construire avec des <em>matériaux d'ici</em></div>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#F2C230" stroke-width="1.8" stroke-linejoin="round"><path d="M3 20V11a9 7 0 0 1 18 0v9z"/><path d="M12 4v16M3 13h18M7.5 6.2V20M16.5 6.2V20"/></svg></div>
+        <div class="av"><div class="n">3</div><div class="tx">Arrosage et <em>fertilisation</em></div>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#F2C230" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/></svg></div>
+        <div class="av"><div class="n">4</div><div class="tx">Les cultures les plus <em>rentables</em></div>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#F2C230" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="7"/><path d="M12 7c0-2 1-3.5 3-4M9 6.5l3 1 3-1"/></svg></div>
+        <div class="av"><div class="n">5</div><div class="tx">De la production <em>à la vente</em></div>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#F2C230" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.5 11h11L21 8H6.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="s8-methodes" class="clip s8" data-start="39.45" data-duration="6.55" data-track-index="8">
+    <div class="stage">
+      <div class="ab centre kick pasde">Pas de</div>
+      <div class="ab theorie"><span>Théorie inutile<i></i></span></div>
+      <div class="ab centre methodes"><span class="ln"><span>Des méthodes simples</span></span></div>
+      <div class="ab centre pensees">pensées pour le <b>contexte ouest&#8209;africain</b></div>
+      <div class="ab demain"><span><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Prêtes dès demain</span></div>
+    </div>
+  </section>
+
+  <section id="s9-pourquoi" class="clip s9" data-start="45.95" data-duration="12.25" data-track-index="9">
+    <div class="stage">
+      <div class="ab centre pourquoi"><span class="ln"><span>Pourquoi l'acheter ?</span></span></div>
+      <div class="ab raisons">
+        <div class="raison"><div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+          <div class="tx">Un seul cycle bien planifié peut <em>couvrir le prix</em> du guide</div></div>
+        <div class="raison"><div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+          <div class="tx">Une <em>méthode éprouvée</em>, au lieu de tout découvrir à vos dépens</div></div>
+        <div class="raison"><div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+          <div class="tx">Votre terre mérite mieux que des <em>essais au hasard</em></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="s10-commande" class="clip s10" data-start="58.1" data-duration="4.4" data-track-index="10">
+    <div class="stage">
+      <div class="ab livre l10"><div class="lueur"></div><div class="ombre-sol"></div><img src="assets/livre.png" alt=""><div class="eclat"><i></i></div></div>
+      <div class="ab tampon">
+        <svg class="tour" viewBox="0 0 400 400"><circle cx="200" cy="200" r="190" fill="none" stroke="#F2C230" stroke-width="3" stroke-dasharray="6 12"/></svg>
+        <div class="disque"><div class="p">8 000</div><div class="d">FCFA</div><div class="u">seulement</div></div>
+      </div>
+      <div class="ab cta">
+        <div class="s"><span class="ln"><span>Commandez sur</span></span></div>
+        <div class="btn">nafa-digital.com<svg viewBox="0 0 24 24" fill="none" stroke="#0F2A1D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      </div>
+      <div class="ab wm"><span class="pt"></span>Nafa<span class="fr">digital</span></div>
+    </div>
+  </section>
+
+  <div id="sous-titres" class="clip" data-start="0" data-duration="62.5" data-track-index="11">
+    <div class="st"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  const W = {{W}}, H = {{H}};
+  let seed = 31;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+
+  // Sous-titres : [début, texte] — calés sur les pauses de la voix (+0,1 s)
+  const ST = [
+    [0.1, "Sous l'accompagnement de l'Institut des entrepreneurs ouest-africains,"],
+    [3.2, "et avec le soutien de plusieurs acteurs de l'agriculture ouest-africaine,"],
+    [6.68, "voici Nafa Digital !"], [8.75, "Aujourd'hui, je vous présente « Culture sous Serre »."],
+    [12.04, "Vous voulez cultiver toute l'année, même en pleine saison sèche ?"], [15.0, "C'est possible."],
+    [15.97, "Une serre bien pensée protège vos cultures du soleil brûlant,"], [19.15, "des pluies irrégulières et des insectes."],
+    [21.47, "Et surtout, elle vous permet de produire quand les prix du marché sont au plus haut."],
+    [25.53, "Dans ce guide, vous allez découvrir comment choisir le bon emplacement,"],
+    [29.02, "construire une serre avec des matériaux accessibles chez nous,"], [31.85, "gérer l'arrosage et la fertilisation,"],
+    [34.24, "choisir les cultures les plus rentables pour nos marchés,"], [36.73, "et organiser votre production jusqu'à la vente."],
+    [39.62, "Pas de théorie inutile."], [41.02, "Des méthodes simples, pensées pour le contexte ouest-africain,"],
+    [44.14, "prêtes à appliquer dès demain."], [46.06, "Pourquoi l'acheter ?"],
+    [47.1, "Parce qu'un seul cycle bien planifié peut déjà couvrir le prix du guide."],
+    [50.88, "Parce que vous apprenez d'une méthode éprouvée, au lieu de tout découvrir à vos dépens."],
+    [55.14, "Et parce que votre terre mérite mieux que des essais au hasard."],
+  ];
+  const FIN_VOIX = 58.15;
+  const st = $(".st");
+  ST.forEach(([, t]) => { const p = document.createElement("p"); p.innerHTML = `<span>${t}</span>`; st.appendChild(p); });
+
+  // feuilles du fond
+  const feuilles = $(".feuilles");
+  const FEUILLE = '<svg viewBox="-60 -60 120 120"><path d="M0 -50 C 32 -30, 34 22, 0 50 C -34 22, -32 -30, 0 -50 Z" fill="#2E7A4E" fill-opacity=".38"/><path d="M0 -44 L0 46" stroke="#F2C230" stroke-opacity=".28" stroke-width="2"/></svg>';
+  for (let i = 0; i < 10; i++) {
+    const d = document.createElement("div");
+    d.className = "feuille"; d.style.left = `${Math.round(rnd() * W)}px`; d.style.top = `${Math.round(rnd() * H)}px`; d.innerHTML = FEUILLE;
+    feuilles.appendChild(d);
+  }
+  // 1. réseau de partenaires (points reliés)
+  const pts = [];
+  for (let i = 0; i < 22; i++) pts.push([60 + rnd() * 960, 60 + rnd() * 960]);
+  pts.forEach((p, i) => {
+    const q = pts[(i * 7 + 3) % pts.length], r = pts[(i * 5 + 1) % pts.length];
+    [q, r].forEach((o) => el("line", { x1: p[0], y1: p[1], x2: o[0], y2: o[1], stroke: "#F2C230", "stroke-opacity": ".14", "stroke-width": "2", pathLength: "1", "stroke-dasharray": "1", "stroke-dashoffset": "1" }, $(".liens")));
+    el("circle", { cx: p[0], cy: p[1], r: (4 + rnd() * 6).toFixed(1), fill: "#F2C230", "fill-opacity": ".45" }, $(".noeuds"));
+  });
+  // 5. serre : côtes, plantes, rayons, projectiles
+  const toit = (x) => 610 - 240 * Math.sqrt(Math.max(0, 1 - ((x - 540) / 320) ** 2));
+  for (let x = 300; x <= 780; x += 80) el("line", { x1: x, y1: toit(x), x2: x, y2: 830 }, $(".cotes"));
+  el("line", { x1: 220, y1: 700, x2: 860, y2: 700 }, $(".cotes"));
+  for (let x = 270; x <= 810; x += 60) {
+    const h = 50 + rnd() * 50;
+    el("path", { d: `M${x} 830 C ${x - 26} ${830 - h * 0.6}, ${x - 8} ${830 - h}, ${x} ${830 - h} C ${x + 8} ${830 - h}, ${x + 26} ${830 - h * 0.6}, ${x} 830Z`, fill: rnd() > 0.5 ? "#3FA45B" : "#4DB86A" }, $(".plantes"));
+    if (rnd() > 0.55) el("circle", { cx: x + 6, cy: 830 - h * 0.5, r: 9, fill: "#E5462F" }, $(".plantes"));
+  }
+  for (let k = 0; k < 8; k++) {
+    const a = (k / 8) * Math.PI * 2;
+    el("line", { x1: 880 + Math.cos(a) * 92, y1: 200 + Math.sin(a) * 92, x2: 880 + Math.cos(a) * 120, y2: 200 + Math.sin(a) * 120 }, $(".rayons"));
+  }
+  const proj = $(".projectiles");
+  const RAYONS = [], GOUTTES = [], INSECTES = [];
+  for (let i = 0; i < 6; i++) { // rayons de soleil : du soleil vers le toit, puis rebond
+    const tx = 560 + i * 45, ty = toit(tx);
+    RAYONS.push({ g: el("line", { x1: 880, y1: 200, x2: 880, y2: 200, stroke: "#F2C230", "stroke-width": "7", "stroke-linecap": "round" }, proj), tx, ty });
+  }
+  for (let i = 0; i < 16; i++) { // gouttes de pluie
+    const x = 250 + rnd() * 580;
+    GOUTTES.push({ g: el("line", { x1: x, y1: -40, x2: x - 8, y2: -10, stroke: "#5BC0EB", "stroke-width": "6", "stroke-linecap": "round" }, proj), x, y: toit(x) });
+  }
+  for (let i = 0; i < 4; i++) { // insectes
+    const g = el("g", {}, proj);
+    el("ellipse", { cx: 0, cy: 0, rx: 14, ry: 9, fill: "#1A120C" }, g);
+    el("ellipse", { cx: -3, cy: -10, rx: 10, ry: 6, fill: "rgba(246,238,220,.7)" }, g);
+    const tx = [260, 320, 820, 760][i];
+    INSECTES.push({ g, x0: i < 2 ? -60 : 1140, y0: 380 + i * 60, tx, ty: toit(tx) - 10 });
+  }
+  // 6. courbe des prix (illustrative) : plus haut en saison sèche
+  const V = [0.92, 1.0, 0.95, 0.8, 0.6, 0.45, 0.35, 0.3, 0.38, 0.5, 0.65, 0.82];
+  const MOIS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  const px = (i) => 37 + i * 75, py = (v) => 520 - v * 400;
+  let d = `M${px(0)} ${py(V[0])}`;
+  for (let i = 1; i < 12; i++) { const xm = (px(i - 1) + px(i)) / 2; d += ` C ${xm} ${py(V[i - 1])}, ${xm} ${py(V[i])}, ${px(i)} ${py(V[i])}`; }
+  $(".courbe").setAttribute("d", d);
+  $(".aire").setAttribute("d", `${d} L ${px(11)} 540 L ${px(0)} 540 Z`);
+  $(".pic").setAttribute("cx", px(1)); $(".pic").setAttribute("cy", py(V[1]));
+  MOIS.forEach((m, i) => { const t = el("text", { x: px(i), y: 584, "text-anchor": "middle", class: "mois" }, $(".mois-g")); t.textContent = m; });
+
+  const build = () => {
+    const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+    const D = 62.5;
+    const lignes = (sel, t, sg = 0.14) => tl.fromTo(sel, { yPercent: 135 }, { yPercent: 0, duration: 0.8, stagger: sg, ease: "expo.out" }, t);
+    const sortie = (sel, t) => tl.to(sel, { opacity: 0, y: -40, duration: 0.35, stagger: 0.04, ease: "power2.in" }, t);
+
+    // ---------- fond
+    tl.fromTo(".soleil", { opacity: 0, scale: 0.8 }, { opacity: 0.6, scale: 1, duration: 2 }, 0);
+    tl.to(".soleil", { opacity: 1, scale: 1.15, duration: 0.6, yoyo: true, repeat: 1, ease: "power2.out" }, 7.2);
+    $$(".feuille").forEach((f) => {
+      const r0 = rnd() * 360, dr = (rnd() - 0.5) * 160, s = 0.5 + rnd() * 0.8;
+      tl.fromTo(f, { x: 0, y: 0, rotation: r0, scale: s, opacity: 0 },
+        { x: (rnd() - 0.5) * 220, y: -200 - rnd() * 300, rotation: r0 + dr, opacity: 1, duration: D, ease: "none" }, 0);
+    });
+    tl.fromTo(".cadre", { opacity: 0 }, { opacity: 1, duration: 1 }, 0.2);
+    tl.fromTo(".marque", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.8 }, 8.6);
+
+    // ---------- 1. partenaires
+    tl.fromTo(".liens line", { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.2, stagger: 0.05, ease: "power2.out" }, 0.1);
+    tl.fromTo(".noeuds circle", { opacity: 0 }, { opacity: 1, duration: 0.4, stagger: 0.06 }, 0.1);
+    tl.fromTo(".k1", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 0.15);
+    lignes(".n1 .ln > span", 0.4, 0.3);
+    tl.fromTo(".sep", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "expo.out" }, 3.0);
+    tl.fromTo(".k2", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 3.2);
+    lignes(".n2 .ln > span", 3.5, 0.6);
+    sortie([".s1 .k1", ".s1 .n1", ".s1 .sep", ".s1 .k2", ".s1 .n2", ".s1 .reseau"], 6.25);
+
+    // ---------- 2. voici Nafa Digital
+    lignes(".s2 .voici .ln > span", 6.66);
+    tl.fromTo(".s2 .nafa .ln > span", { yPercent: 135, scale: 1.3 }, { yPercent: 0, scale: 1, duration: 0.6, ease: "expo.out" }, 7.2);
+    lignes(".s2 .digital .ln > span", 7.55);
+    tl.fromTo(".eclair b", { scale: 0.3, opacity: 0 }, { scale: 1.2, opacity: 1, duration: 0.6, ease: "expo.out" }, 7.2);
+    tl.fromTo(".eclair i", { scale: 0.2, opacity: 1 }, { scale: 1.1, opacity: 0, duration: 1.0, ease: "power2.out" }, 7.25);
+    sortie([".s2 .voici", ".s2 .nafa", ".s2 .digital", ".s2 .eclair"], 8.4);
+
+    // ---------- 3. je vous présente
+    lignes(".s3 .presente .ln > span", 8.75);
+    tl.fromTo(".l3", { opacity: 0, y: 240, rotation: -7, scale: 0.86 }, { opacity: 1, y: 0, rotation: 0, scale: 1, duration: 1.0, ease: "expo.out" }, 10.2);
+    tl.fromTo(".l3 .lueur", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 1.2 }, 10.3);
+    tl.fromTo(".l3 .eclat i", { xPercent: -140 }, { xPercent: 360, duration: 1.0, ease: "power2.inOut" }, 10.8);
+    lignes(".s3 .titre-livre .ln > span", 10.45);
+    tl.to(".l3", { y: -14, duration: 1.4, ease: "sine.inOut" }, 11.2);
+    sortie([".s3 .presente", ".s3 .titre-livre"], 11.6);
+    tl.to(".l3", { opacity: 0, scale: 0.9, duration: 0.35, ease: "power2.in" }, 11.65);
+
+    // ---------- 4. toute l'année
+    tl.fromTo(".s4 .photo", { clipPath: "inset(50% 0% 50% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.8, ease: "expo.inOut" }, 11.95);
+    tl.fromTo(".s4 .photo img", { scale: 1.25 }, { scale: 1.05, duration: 4.1, ease: "power1.out" }, 11.95);
+    tl.fromTo(".s4 .voile", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 12.2);
+    lignes(".s4 .annee .ln > span", 12.3);
+    lignes(".s4 .seche .ln > span", 13.4);
+    tl.fromTo(".s4 .possible span", { opacity: 0, scale: 2.2, rotation: -16 }, { opacity: 1, scale: 1, rotation: -4, duration: 0.4, ease: "power4.in" }, 14.85);
+    tl.to(".s4 .photo", { clipPath: "inset(0% 0% 100% 0%)", duration: 0.5, ease: "power3.in" }, 15.6);
+    tl.to([".s4 .stage > *", ".s4 .voile"], { opacity: 0, duration: 0.3 }, 15.6);
+
+    // ---------- 5. la serre protège
+    tl.fromTo(".s5 .contour", { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.0, ease: "power2.inOut" }, 15.97);
+    tl.fromTo([".s5 .cotes", ".s5 .plantes"], { opacity: 0 }, { opacity: 1, duration: 0.6, stagger: 0.25 }, 16.4);
+    tl.fromTo(".s5 .astre", { opacity: 0, y: -60 }, { opacity: 1, y: 0, duration: 0.7 }, 17.4);
+    tl.to(".s5 .rayons", { rotation: 90, svgOrigin: "880 200", duration: 4, ease: "none" }, 17.4);
+    tl.fromTo(".pu1", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 17.9);
+    RAYONS.forEach((r, i) => {
+      const t = 18.0 + i * 0.16, bx = r.tx + (r.tx - 540) * 0.5, by = r.ty - 160;
+      tl.fromTo(r.g, { attr: { x1: 880, y1: 200, x2: 880, y2: 200 }, opacity: 1 },
+        { keyframes: [{ attr: { x2: r.tx, y2: r.ty }, duration: 0.25, ease: "none" }, { attr: { x1: r.tx, y1: r.ty, x2: bx, y2: by }, duration: 0.35, ease: "power1.out" }, { opacity: 0, duration: 0.15 }] }, t);
+    });
+    tl.fromTo(".pu2", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 19.15);
+    GOUTTES.forEach((g, i) => {
+      const t = 19.2 + (i % 8) * 0.12 + Math.floor(i / 8) * 0.5;
+      tl.fromTo(g.g, { y: 0, x: 0, opacity: 1 }, { keyframes: [{ y: g.y + 20, duration: 0.35, ease: "power1.in" }, { x: (g.x < 540 ? -40 : 40), y: g.y - 10, opacity: 0, duration: 0.3, ease: "power1.out" }] }, t);
+    });
+    tl.fromTo(".pu3", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 20.3);
+    INSECTES.forEach((b, i) => {
+      const t = 20.3 + i * 0.12;
+      tl.fromTo(b.g, { x: b.x0, y: b.y0, opacity: 1 },
+        { keyframes: [{ x: b.tx, y: b.ty, duration: 0.45, ease: "power1.in" }, { x: b.x0 * 0.6 + b.tx * 0.4, y: b.y0 - 200, opacity: 0, duration: 0.45, ease: "power2.out" }] }, t);
+    });
+    tl.fromTo(".s5 .toit-glow", { attr: { "stroke-opacity": 0 } }, { attr: { "stroke-opacity": 0.55 }, duration: 0.2, yoyo: true, repeat: 5, ease: "none" }, 18.2);
+    tl.fromTo(".s5 .protege span", { opacity: 0, y: 30, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(2)" }, 20.7);
+    sortie([".s5 .dessin", ".s5 .puces", ".s5 .protege"], 21.1);
+
+    // ---------- 6. prix au plus haut
+    lignes(".s6 .surtout .ln > span", 21.47);
+    tl.fromTo(".s6 .bande", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 22.0);
+    tl.fromTo(".s6 .saison-l", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 22.1);
+    tl.fromTo(".s6 .mois", { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.04 }, 22.0);
+    tl.fromTo(".s6 .courbe", { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.6, ease: "power2.inOut" }, 22.1);
+    tl.fromTo(".s6 .aire", { opacity: 0 }, { opacity: 1, duration: 0.8 }, 23.2);
+    tl.fromTo(".s6 .pic", { opacity: 0, attr: { r: 0 } }, { opacity: 1, attr: { r: 18 }, duration: 0.4, ease: "back.out(3)" }, 24.1);
+    tl.fromTo(".s6 .pic-l", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 24.2);
+    lignes(".s6 .produisez .ln > span", 24.3);
+    sortie([".s6 .surtout", ".s6 .graph", ".s6 .pic-l", ".s6 .produisez"], 25.15);
+
+    // ---------- 7. le guide : 5 étapes
+    tl.fromTo(".s7 .kick", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 25.53);
+    lignes(".s7 .titre .ln > span", 25.7);
+    [27.0, 29.02, 31.85, 34.24, 36.73].forEach((t, i) => {
+      const av = $$(".s7 .av")[i];
+      tl.fromTo(av, { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.65, ease: "expo.out" }, t);
+      tl.fromTo(av.querySelector(".n"), { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.55, ease: "back.out(2.2)" }, t + 0.1);
+      tl.fromTo(av, { borderColor: "rgba(242,194,48,.9)" }, { borderColor: "rgba(246,238,220,.14)", duration: 1.6, ease: "power1.out", immediateRender: false }, t + 0.4);
+    });
+    sortie([".s7 .titre", ".s7 .liste"], 39.15);
+
+    // ---------- 8. pas de théorie
+    tl.fromTo(".s8 .pasde", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 39.62);
+    tl.fromTo(".s8 .theorie span", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" }, 39.62);
+    tl.fromTo(".s8 .theorie i", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.inOut" }, 40.25);
+    lignes(".s8 .methodes .ln > span", 41.02);
+    tl.fromTo(".s8 .pensees", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, 42.3);
+    tl.fromTo(".s8 .demain span", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2.2)" }, 44.14);
+    sortie([".s8 .pasde", ".s8 .theorie", ".s8 .methodes", ".s8 .pensees", ".s8 .demain"], 45.65);
+
+    // ---------- 9. pourquoi l'acheter
+    lignes(".s9 .pourquoi .ln > span", 46.06);
+    [47.1, 50.88, 55.14].forEach((t, i) => {
+      const r = $$(".s9 .raison")[i];
+      tl.fromTo(r, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.65, ease: "expo.out" }, t);
+      tl.fromTo(r.querySelector(".ok"), { scale: 0, rotation: -120 }, { scale: 1, rotation: 0, duration: 0.55, ease: "back.out(2.4)" }, t + 0.15);
+    });
+    sortie([".s9 .pourquoi", ".s9 .raisons"], 57.85);
+
+    // ---------- 10. prix + nafa-digital.com
+    tl.fromTo(".l10", { opacity: 0, y: 200, rotation: -6, scale: 0.88 }, { opacity: 1, y: 0, rotation: 0, scale: 1, duration: 0.9, ease: "expo.out" }, 58.15);
+    tl.fromTo(".l10 .eclat i", { xPercent: -140 }, { xPercent: 360, duration: 1.0, ease: "power2.inOut" }, 58.8);
+    tl.fromTo(".tampon .disque", { scale: 2.4, opacity: 0, rotation: -40 }, { scale: 1, opacity: 1, rotation: -10, duration: 0.45, ease: "power4.in" }, 58.7);
+    tl.fromTo(".tampon .tour", { opacity: 0, scale: 0.7, rotation: 0 }, { opacity: 1, scale: 1, rotation: 100, duration: 3.3, ease: "power2.out" }, 59.15);
+    lignes(".s10 .cta .ln > span", 59.3);
+    tl.fromTo(".s10 .cta .btn", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "back.out(2)" }, 59.7);
+    tl.fromTo(".s10 .cta .btn", { scale: 1 }, { scale: 1.05, duration: 0.35, yoyo: true, repeat: 1, ease: "sine.inOut", immediateRender: false }, 61.0);
+    tl.fromTo(".s10 .wm", { opacity: 0 }, { opacity: 1, duration: 0.6 }, 60.2);
+
+    // ---------- sous-titres
+    $$(".st p").forEach((p, i) => {
+      const t0 = ST[i][0], t1 = i + 1 < ST.length ? ST[i + 1][0] : FIN_VOIX;
+      tl.fromTo(p, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, t0);
+      tl.to(p, { opacity: 0, duration: 0.12, ease: "none" }, t1 - 0.1);
+    });
+
+    window.__timelines["nafa-serre"] = tl;
+  };
+  document.fonts.ready.then(build);
+})();
+</script>
+</body>
+</html>
