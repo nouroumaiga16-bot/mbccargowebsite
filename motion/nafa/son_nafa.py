@@ -1,4 +1,11 @@
-"""Musique chaleureuse (composée en code, libre de droits) + effets sonores de la vidéo « Nafa Digital — Culture sous Serre » (62,5 s).
+"""Musique « épique et émotionnelle » (composée en code, libre de droits) + effets sonores de la vidéo
+« Nafa Digital — Culture sous Serre » (62,5 s). La musique suit le montage :
+  0 → 7,2 s    intro émotion : piano en arpèges + cordes qui montent, montée vers la révélation
+  7,2 s        « Nafa Digital » : impact + entrée du groove (kick afro, claps, shaker, basse, cordes)
+  25,4 → 39,4  les 5 étapes : arpège synthé en plus, ça pousse
+  39,4 → 41    respiration (« Pas de théorie ») puis remontée
+  46 → 58      final : grand refrain (mélodie principale, chœurs, crashs)
+  58,1 s       impact final, accord qui résonne jusqu'à la fin
 La voix off ElevenLabs (motion/nafa/voix-off/elevenlabs-voix-off.mp3) est normalisée et la musique baissée dessous.
 Usage : python motion/nafa/son_nafa.py  →  motion/nafa/assets/voix-off.m4a, musique.m4a et sfx.m4a
 """
@@ -7,86 +14,177 @@ import numpy as np
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SFX = os.path.join(ICI, "..", "son", "sfx")
-SR, D, BPM = 44100, 62.5, 108
+SR, D, BPM = 44100, 62.5, 112
 BEAT = 60 / BPM; BAR = 4 * BEAT; N = int(SR * D)
-rng = np.random.default_rng(16)
+rng = np.random.default_rng(62)
 hz = lambda m: 440 * 2 ** ((m - 69) / 12)
+L = np.zeros(N); R = np.zeros(N)
 
-def add(buf, sig, t0, g=1.0):
+def add(sig, t0, g=1.0, pan=0.0):
     i = int(t0 * SR)
-    if 0 <= i < len(buf):
-        j = min(len(buf), i + len(sig)); buf[i:j] += g * sig[: j - i]
+    if i >= N or i + len(sig) <= 0: return
+    a = max(0, -i); i = max(0, i); j = min(N, i + len(sig) - a)
+    s = g * sig[a:a + j - i]
+    L[i:j] += s * np.sqrt(0.5 * (1 - pan)); R[i:j] += s * np.sqrt(0.5 * (1 + pan))
+
+def tt(d): return np.arange(int(d * SR)) / SR
+
+def passe_bas(x, fc):
+    X = np.fft.rfft(x); f = np.fft.rfftfreq(len(x), 1 / SR); X *= 1 / np.sqrt(1 + (f / fc) ** 4)
+    return np.fft.irfft(X, len(x))
 
 def bruit(n, lo, hi):
     s = np.fft.rfft(rng.standard_normal(n)); f = np.fft.rfftfreq(n, 1 / SR); s[(f < lo) | (f > hi)] = 0
     return np.fft.irfft(s, n)
 
-def kalimba(f, n):
-    t = np.arange(n) / SR
-    return np.sin(2 * np.pi * f * t) * np.exp(-t / 0.4) + 0.3 * np.sin(2 * np.pi * f * 5.4 * t) * np.exp(-t / 0.04)
+def piano(m, d=1.6):
+    t = tt(d); f = hz(m)
+    s = sum(np.sin(2 * np.pi * f * k * t * (1 + 0.0004 * k * k)) * np.exp(-t * (1.6 + k * 0.9)) / k ** 1.3 for k in range(1, 7))
+    return s * np.minimum(1, t / 0.004)
 
-def marimba(f, n):
-    t = np.arange(n) / SR
-    return (np.sin(2 * np.pi * f * t) + 0.2 * np.sin(2 * np.pi * f * 4 * t) * np.exp(-t / 0.05)) * np.exp(-t / 0.22)
+def scie(f, t, n=12):
+    return sum(np.sin(2 * np.pi * f * k * t) / k for k in range(1, n))
 
-# ré majeur : Dmaj7 – Bm7 – Gmaj7 – A6 (lumineux, « soleil »), résolution finale sur Dmaj9
-PROG = [[62, 66, 69, 73], [59, 62, 66, 69], [55, 59, 62, 66], [57, 61, 64, 66]]
-ROOT = [38, 35, 43, 33]
-pad = np.zeros(N); kal = np.zeros(N); bass = np.zeros(N); drums = np.zeros(N)
-for b in range(int(np.ceil(D / BAR))):
-    t0 = b * BAR; ch, rt = PROG[b % 4], ROOT[b % 4]
-    fin = t0 + BAR > D - 1.0
-    if fin:
-        ch, rt = [50, 57, 62, 66, 69, 76], 38
-    n = int((BAR + 1.0) * SR); tt = np.arange(n) / SR
-    e = np.minimum(1, tt / 0.6) * np.clip((n / SR - tt) / 1.0, 0, 1)
-    for m in ch:
-        for det in (-0.1, 0.1):
-            add(pad, e * (np.sin(2 * np.pi * hz(m + det) * tt) + 0.2 * np.sin(4 * np.pi * hz(m + det) * tt)), t0, 0.045)
-    if fin:
-        break
-    # kalimba en doubles-croches légères (motif qui tourne)
-    for k, idx in enumerate([0, 2, 3, 1, 2, 3, 0, 2]):
-        if t0 + k * BEAT / 2 < 0.4 or (b % 2 and k in (3, 7)):
-            continue
-        add(kal, kalimba(hz(ch[idx] + 12), int(1.0 * SR)), t0 + k * BEAT / 2, 0.15 if k % 2 == 0 else 0.1)
-    # marimba en réponse (dès la scène du livre)
-    if t0 >= 8.6:
-        for off, idx in ((2.5, 3), (3.0, 2), (3.5, 1)):
-            add(kal, marimba(hz(ch[idx]), int(0.6 * SR)), t0 + off * BEAT, 0.16)
-    # basse + batterie (dès la révélation de Nafa Digital, 6,6 s)
-    if 6.5 <= t0 < D - 1.5:
-        for off, dur in ((0, 0.6), (1.5 * BEAT, 0.3), (2.5 * BEAT, 0.3), (3 * BEAT, 0.45)):
-            n = int(dur * SR); tt = np.arange(n) / SR
-            sig = (np.sin(2 * np.pi * hz(rt) * tt) + 0.3 * np.sin(4 * np.pi * hz(rt) * tt)) * np.minimum(1, tt / 0.005) * np.exp(-tt / (dur * 0.7))
-            add(bass, sig, t0 + off, 0.4)
-        for beat in range(4):
-            tb = t0 + beat * BEAT
-            if beat in (0, 2) or (beat == 3 and b % 2):
-                n = int(0.35 * SR); tt = np.arange(n) / SR; f = 46 + 80 * np.exp(-tt / 0.03)
-                add(drums, np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt / 0.12), tb, 0.5)
-            if beat in (1, 3):
-                n = int(0.12 * SR); tt = np.arange(n) / SR
-                add(drums, bruit(n, 1500, 5000) * np.exp(-tt / 0.03), tb, 0.18)
-        for s16 in range(16):
-            n = int(0.06 * SR); tt = np.arange(n) / SR
-            add(drums, bruit(n, 5500, 11000) * np.minimum(1, tt / 0.004) * np.exp(-tt / 0.02), t0 + s16 * BEAT / 4, 0.065 if s16 % 4 == 2 else 0.03)
-# « riser » avant le livre et avant le prix
-riser = np.zeros(N)
-for t_hit in (7.2, 58.15):
-    n = int(1.4 * SR); tt = np.arange(n) / SR
-    add(riser, bruit(n, 2500, 9000) * (tt / 1.4) ** 2, t_hit - 1.4, 0.22)
+def cordes(m, d, att=0.5):  # ensemble de cordes : scies désaccordées filtrées, vibrato lent
+    t = tt(d); s = 0
+    for det in (-0.08, 0, 0.08):
+        f = hz(m + det) * (1 + 0.003 * np.sin(2 * np.pi * 5.2 * t + det * 9))
+        s = s + scie(f, t, 10)
+    e = np.minimum(1, t / att) * np.clip((d - t) / 0.4, 0, 1)
+    return passe_bas(s * e, 2600) / 3
+
+def lead(m, d):  # mélodie : scie + carré doux, vibrato retardé
+    t = tt(d); vib = 1 + 0.006 * np.sin(2 * np.pi * 5.5 * t) * np.clip((t - 0.12) / 0.2, 0, 1)
+    f = hz(m) * vib
+    s = scie(f, t, 8) + 0.5 * np.sign(np.sin(2 * np.pi * f * t)) * 0.4
+    e = np.minimum(1, t / 0.015) * np.exp(-t / 1.2) * np.clip((d - t) / 0.06, 0, 1)
+    return passe_bas(s * e, 4200)
+
+def choeur(m, d):  # « aah » : formants simples sur une scie
+    t = tt(d); s = scie(hz(m) * (1 + 0.004 * np.sin(2 * np.pi * 4.8 * t)), t, 30)
+    S = np.fft.rfft(s); f = np.fft.rfftfreq(len(s), 1 / SR)
+    form = sum(a * np.exp(-((f - fc) / bw) ** 2) for fc, bw, a in ((750, 130, 1.0), (1150, 160, 0.6), (2600, 260, 0.25)))
+    s = np.fft.irfft(S * form, len(s))
+    return s * np.minimum(1, t / 0.6) * np.clip((d - t) / 0.5, 0, 1)
+
+def kick():
+    t = tt(0.4); f = 42 + 120 * np.exp(-t / 0.03)
+    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / 0.16) + 0.3 * bruit(len(t), 2000, 6000) * np.exp(-t / 0.004)
+
+def clap():
+    n = int(0.25 * SR); t = np.arange(n) / SR; b = bruit(n, 900, 5000)
+    e = sum(np.exp(-np.clip(t - o, 0, None) / 0.008) * (t >= o) for o in (0, 0.011, 0.022)) + 0.6 * np.exp(-t / 0.08)
+    return b * e
+
+def crash(d=2.5):
+    t = tt(d); return bruit(len(t), 4000, 12000) * np.exp(-t / 0.55) * np.minimum(1, t / 0.003)
+
+def impact():
+    t = tt(2.5); f = 30 + 60 * np.exp(-t / 0.15)
+    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / 0.9) + 0.5 * bruit(len(t), 60, 600) * np.exp(-t / 0.25)
+
+def montee(d):  # bruit blanc qui monte + filtre qui s'ouvre
+    t = tt(d); n = len(t); b = rng.standard_normal(n)
+    out = np.zeros(n); seg = int(0.05 * SR)
+    for k in range(0, n, seg):
+        fc = 400 + 9000 * (k / n) ** 2
+        out[k:k + seg] = passe_bas(b[k:k + seg + 64], fc)[:len(out[k:k + seg])]
+    return out * (t / d) ** 2.2
+
+# Progression émotionnelle : Si m – Sol – Ré – La (vi – IV – I – V en ré majeur)
+PROG = [[59, 62, 66], [55, 59, 62], [50, 54, 57], [57, 61, 64]]
+ROOT = [35, 31, 38, 33]
+MELO = [[78, 78, 76, 74, 76, 78, 81, 78], [79, 78, 76, 74, 71, 74, 76, 74],
+        [69, 74, 78, 81, 81, 78, 76, 74], [73, 76, 81, 76, 73, 76, 78, 76]]
+T_DROP, T_PAUSE, T_REPRISE, T_REFRAIN, T_FIN = 7.2, 39.4, 41.0, 46.0, 58.15
+
+def mesures(t0, t1):  # mesures calées sur le « drop » (7,2 s)
+    k = int(np.floor((t0 - T_DROP) / BAR))
+    while T_DROP + k * BAR < t1:
+        yield k, T_DROP + k * BAR
+        k += 1
+
+# ---- intro (0 → 7,2) : piano + cordes qui gonflent
+for k, b0 in mesures(T_DROP - 4 * BAR, T_DROP):
+    ch = PROG[k % 4]
+    for i, idx in enumerate([0, 1, 2, 1, 2, 0, 1, 2]):
+        tn = b0 + i * BEAT / 2
+        if tn >= 0: add(piano(ch[idx] + 12), tn, 0.28 if i % 2 == 0 else 0.2, pan=-0.3 + 0.6 * (i % 3) / 2)
+    if b0 + BAR > 0:
+        for m in ch: add(cordes(m, BAR + 0.5, att=1.2), max(0, b0), 0.09 * (1 + k + 4) / 4)
+add(montee(3.0), T_DROP - 3.0, 0.35)
+add(impact(), T_DROP, 0.9); add(crash(), T_DROP, 0.2, 0.2)
+
+# ---- corps du morceau (7,2 → 58,15)
+for k, b0 in mesures(T_DROP, T_FIN):
+    ch, rt, mel = PROG[k % 4], ROOT[k % 4], MELO[k % 4]
+    pause = T_PAUSE <= b0 < T_REPRISE
+    refrain = b0 >= T_REFRAIN
+    etapes = 25.4 <= b0 < T_PAUSE
+    montee_finale = T_REPRISE <= b0 < T_REFRAIN
+    # cordes (toujours), plus larges au refrain
+    for m in ch + ([ch[0] + 12] if refrain else []):
+        add(cordes(m, BAR + 0.3, att=0.25), b0, 0.10 if refrain else 0.08, pan=(-0.4 if m % 2 else 0.4))
+    # piano : accords rythmés (charleston afro) ou arpèges pendant la pause
+    if pause:
+        for i, idx in enumerate([0, 1, 2, 1, 2, 0, 1, 2]):
+            add(piano(ch[idx] + 12), b0 + i * BEAT / 2, 0.24)
+        continue
+    for off in (0, 1.5, 2.5, 3.5):
+        for m in ch: add(piano(m + 12, 0.5), b0 + off * BEAT, 0.09)
+    # basse syncopée
+    for off, d in ((0, 0.45), (0.75, 0.2), (1.5, 0.35), (2.5, 0.3), (3.25, 0.25)):
+        t = tt(d); s = (np.sin(2 * np.pi * hz(rt) * t) + 0.35 * np.sin(4 * np.pi * hz(rt) * t)) * np.minimum(1, t / 0.004) * np.exp(-t / (d * 0.8))
+        add(s, b0 + off * BEAT, 0.55)
+    # batterie : kick afro, claps sur 2 et 4, shaker en doubles-croches
+    for off in ((0, 1, 2, 3) if (refrain or montee_finale) else (0, 1.5, 2, 3.5)):
+        add(kick(), b0 + off * BEAT, 0.75)
+    for off in (1, 3): add(clap(), b0 + off * BEAT, 0.32, 0.1)
+    for s16 in range(16):
+        n = int(0.05 * SR); t = np.arange(n) / SR
+        add(bruit(n, 6000, 12000) * np.minimum(1, t / 0.003) * np.exp(-t / 0.018), b0 + s16 * BEAT / 4, 0.09 if s16 % 4 == 2 else 0.045, 0.35)
+    if k % 4 == 0: add(crash(1.8), b0, 0.05 if not refrain else 0.08, -0.2)
+    # arpège synthé (étapes et après)
+    if etapes or montee_finale or refrain:
+        for i in range(8):
+            m = ch[[0, 1, 2, 1][i % 4]] + 24
+            t = tt(0.2); s = scie(hz(m), t, 6) * np.exp(-t / 0.08)
+            add(s, b0 + i * BEAT / 2, 0.035, pan=(-0.5 if i % 2 else 0.5))
+    # mélodie principale au refrain (et en écho discret pendant les étapes)
+    if refrain or etapes:
+        for i, m in enumerate(mel):
+            add(lead(m, BEAT / 2 + 0.05), b0 + i * BEAT / 2, 0.10 if refrain else 0.045)
+            if refrain: add(lead(m - 12, BEAT / 2 + 0.05), b0 + i * BEAT / 2, 0.05)
+    if refrain:
+        for m in ch: add(choeur(m + 12, BAR + 0.3), b0, 0.05)
+
+# montées et respirations
+add(montee(BAR), T_PAUSE - BAR, 0.28)
+add(montee(T_REFRAIN - T_REPRISE), T_REPRISE, 0.3)
+add(impact(), T_REFRAIN, 0.6); add(crash(), T_REFRAIN, 0.18)
+add(montee(2.0), T_FIN - 2.0, 0.32)
+
+# ---- final : impact + grand accord qui résonne
+add(impact(), T_FIN, 0.95); add(crash(4), T_FIN, 0.2)
+for m in [38, 50, 57, 62, 66, 69, 74]:
+    add(cordes(m, D - T_FIN, att=0.05), T_FIN, 0.08)
+    add(piano(m + 12, 3.5), T_FIN, 0.12)
+for m in [62, 66, 69]: add(choeur(m + 12, D - T_FIN), T_FIN, 0.05)
+
+# réverbération stéréo
+irn = int(2.2 * SR)
+for ch_ in (L, R):
+    ir = rng.standard_normal(irn) * np.exp(-np.arange(irn) / SR / 0.55); ir /= np.sqrt((ir ** 2).sum())
+    n2 = N + irn; wet = np.fft.irfft(np.fft.rfft(ch_, n2) * np.fft.rfft(ir, n2), n2)[:N]
+    ch_ += 0.28 * wet
 t = np.arange(N) / SR
-drums *= 1 - 0.85 * ((t > 39.4) & (t < 40.3))
-mix = pad + kal + bass + drums + riser
-irn = int(1.5 * SR); ir = rng.standard_normal(irn) * np.exp(-np.arange(irn) / SR / 0.4); ir /= np.sqrt((ir ** 2).sum())
-L = N + irn
-mix = mix + 0.24 * np.fft.irfft(np.fft.rfft(mix, L) * np.fft.rfft(ir, L), L)[:N]
-mix *= np.clip(t / 0.4, 0, 1) * np.clip((D - t) / 1.3, 0, 1)
-mix /= np.abs(mix).max() * 1.1
+env = np.clip(t / 0.3, 0, 1) * np.clip((D - t) / 2.0, 0, 1)
+L *= env; R *= env
+pk = max(np.abs(L).max(), np.abs(R).max()) * 1.1
+st = np.stack([L / pk, R / pk], axis=1)
 tmp = tempfile.mkdtemp(); brut = os.path.join(tmp, "m.wav")
 with wave.open(brut, "wb") as w:
-    w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes((mix * 32767).astype("<i2").tobytes())
+    w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes((st * 32767).astype("<i2").tobytes())
 
 voix_src = os.path.join(ICI, "voix-off", "elevenlabs-voix-off.mp3")
 musique = os.path.join(ICI, "assets", "musique.m4a")
