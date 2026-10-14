@@ -96,8 +96,8 @@ if os.path.exists(voix_src):
                            f"adelay=100:all=1,apad=whole_dur={D},atrim=0:{D},loudnorm=I=-15:TP=-1.5:LRA=11,aresample=48000",
                            "-ac", "2", "-c:a", "aac", "-b:a", "192k", voix])
     subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-i", brut, "-i", voix, "-filter_complex",
-                           "[0:a]loudnorm=I=-21:TP=-2:LRA=9,aresample=48000,aformat=channel_layouts=stereo[m];"
-                           "[1:a]aformat=channel_layouts=stereo[v];[m][v]sidechaincompress=threshold=0.03:ratio=5:attack=30:release=350[o]",
+                           "[0:a]loudnorm=I=-13:TP=-1.5:LRA=9,aresample=48000,aformat=channel_layouts=stereo[m];"
+                           "[1:a]aformat=channel_layouts=stereo[v];[m][v]sidechaincompress=threshold=0.03:ratio=3:attack=40:release=500[o]",
                            "-map", "[o]", "-t", str(D), "-c:a", "aac", "-b:a", "192k", musique])
 else:  # musique seule : niveau plein (ne devrait pas arriver ici)
     subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-i", brut, "-af", "loudnorm=I=-16:TP=-1.5:LRA=9,aresample=48000",
