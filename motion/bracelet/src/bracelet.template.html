@@ -1,0 +1,328 @@
+<!doctype html>
+<!--
+  Bracelet sport LED — motion design 28,5 s pour la vente (tous les textes en français).
+  Gabarit unique : motion/bracelet/build.mjs en tire motion/bracelet/build/{9x16,1x1,16x9}/index.html.
+  Visuels : motion/bracelet/decouper.py (bracelets détourés + photos recadrées sans texte).   Son : motion/bracelet/son_bracelet.py
+    1 Accroche : horloge LED ..... 0 → 3,4 s
+    2 Les coloris ................ 3,3 → 7 s
+    3 8 fonctions ................ 6,9 → 12,6 s
+    4 Chaque pas compte .......... 12,5 → 15,8 s
+    5 Réveil silencieux .......... 15,7 → 18,9 s
+    6 Étanche .................... 18,8 → 22 s
+    7 Recharge magnétique ........ 21,9 → 25 s
+    8 Commander .................. 24,9 → 28,5 s
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width={{W}}, height={{H}}">
+<title>Bracelet sport LED</title>
+<script src="assets/gsap.min.js"></script>
+<style>
+@font-face { font-family: "Montserrat"; font-weight: 700; src: url(assets/fonts/montserrat-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 800; font-style: italic; src: url(assets/fonts/montserrat-latin-800-italic.woff2) format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 900; font-style: italic; src: url(assets/fonts/montserrat-latin-900-italic.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 500; src: url(assets/fonts/inter-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Inter"; font-weight: 600; src: url(assets/fonts/inter-latin-600-normal.woff2) format("woff2"); }
+:root { --nuit: #0A0D12; --menthe: #6FE6C6; --gris: #9AA3B2; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--nuit); }
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--nuit); color: #fff; font-family: "Inter", sans-serif; }
+.clip { position: absolute; inset: 0; overflow: hidden; }
+.fill { position: absolute; inset: 0; }
+.it { font-family: "Montserrat", sans-serif; font-style: italic; font-weight: 900; text-transform: uppercase; letter-spacing: -0.01em; }
+.m { color: var(--menthe); }
+.ln { display: block; overflow: hidden; padding: .04em .08em .08em; margin: -.04em 0 -.08em; }
+.ln > span { display: block; }
+.kick { font: 700 26px/1 "Montserrat", sans-serif; letter-spacing: .34em; text-transform: uppercase; color: var(--menthe); }
+
+.stage { position: absolute; width: 1080px; height: 1080px; transform-origin: 0 0; }
+.port .stage { left: 0; top: 420px; }
+.sq .stage { left: 0; top: 0; }
+.land .stage { left: 420px; top: 0; }
+.ab { position: absolute; }
+.centre { left: 0; right: 0; text-align: center; }
+
+/* fond */
+.fond { background: radial-gradient(ellipse at 50% 40%, #16202A 0%, #0E141B 50%, #07090D 100%); }
+.halo { position: absolute; left: 50%; top: 50%; width: 1400px; height: 1400px; margin: -700px 0 0 -700px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(111,230,198,.22) 0%, rgba(111,230,198,.06) 40%, rgba(111,230,198,0) 70%); }
+.grille { position: absolute; inset: -10%; background-image: linear-gradient(rgba(111,230,198,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(111,230,198,.05) 1px, transparent 1px); background-size: 80px 80px; }
+.grain { position: absolute; inset: 0; opacity: .07; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>"); }
+
+/* 1. horloge LED */
+.led { left: 140px; top: 250px; width: 800px; height: 330px; }
+.led svg { width: 100%; height: 100%; overflow: visible; }
+.seg { fill: #18242A; }
+.seg.on { fill: #F4FFFC; filter: drop-shadow(0 0 8px rgba(111,230,198,.9)) drop-shadow(0 0 22px rgba(111,230,198,.45)); }
+.s1 .t { top: 620px; font-size: 104px; line-height: .95; }
+.s1 .s { top: 850px; font: 600 46px/1.2 "Inter", sans-serif; color: var(--menthe); }
+
+/* 2. coloris */
+.s2 .titre { top: 70px; }
+.s2 .titre .t { margin-top: 16px; font-size: 76px; line-height: 1; white-space: nowrap; }
+.bracelet { width: 400px; height: 618px; }
+.bracelet img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.b-menthe { left: 90px; top: 300px; } .b-noir { left: 590px; top: 300px; }
+.socle { position: absolute; left: 8%; right: 8%; bottom: -4%; height: 8%; border-radius: 50%; background: radial-gradient(ellipse, rgba(111,230,198,.35) 0%, rgba(111,230,198,0) 70%); }
+.puce { display: inline-flex; align-items: center; gap: 14px; padding: 14px 28px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.2); font: 700 36px/1 "Montserrat", sans-serif; white-space: nowrap; }
+.puce i { width: 26px; height: 26px; border-radius: 50%; display: block; border: 2px solid rgba(255,255,255,.6); }
+.p-menthe { left: 180px; top: 960px; } .p-noir { left: 700px; top: 960px; }
+
+/* 3. fonctions */
+.s3 .titre { top: 60px; }
+.s3 .titre .t { margin-top: 14px; font-size: 92px; line-height: 1; }
+.grille-f { left: 60px; right: 60px; top: 250px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px 26px; }
+.fct { display: flex; align-items: center; gap: 22px; padding: 22px 24px; border-radius: 22px; background: rgba(255,255,255,.05); border: 1.5px solid rgba(111,230,198,.22); }
+.fct .ic { flex: 0 0 auto; width: 92px; height: 92px; border-radius: 50%; background: var(--menthe); display: flex; align-items: center; justify-content: center; }
+.fct .ic svg { width: 56%; height: 56%; }
+.fct .tx { font: 700 34px/1.15 "Montserrat", sans-serif; }
+.fct .tx small { display: block; margin-top: 6px; font: 500 24px/1.2 "Inter", sans-serif; color: var(--gris); }
+
+/* photos plein cadre (scènes 4 à 7) */
+.photo { position: absolute; inset: 0; overflow: hidden; }
+.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.voile { position: absolute; inset: 0; opacity: 0; background: linear-gradient(180deg, rgba(7,9,13,0) 35%, rgba(7,9,13,.55) 62%, rgba(7,9,13,.94) 100%); }
+.land .voile { background: linear-gradient(90deg, rgba(7,9,13,.94) 0%, rgba(7,9,13,.6) 38%, rgba(7,9,13,0) 62%); }
+.texte { left: 70px; right: 70px; top: 720px; }
+.land .texte { left: -380px; right: auto; width: 820px; top: 440px; }
+.texte .t { font-size: 96px; line-height: .98; }
+.texte .s { margin-top: 20px; font: 600 40px/1.25 "Inter", sans-serif; color: rgba(255,255,255,.88); }
+.stats { left: 70px; top: 300px; display: flex; flex-direction: column; gap: 16px; }
+.land .stats { left: -380px; top: 70px; }
+.stat { display: inline-flex; align-items: center; gap: 16px; padding: 14px 26px 14px 14px; border-radius: 18px; background: rgba(10,13,18,.78); border: 1.5px solid rgba(111,230,198,.5); font: 700 40px/1 "Montserrat", sans-serif; width: max-content; }
+.stat i { width: 56px; height: 56px; border-radius: 50%; background: var(--menthe); display: flex; align-items: center; justify-content: center; }
+.stat i svg { width: 58%; height: 58%; }
+.stat small { font: 500 26px/1 "Inter", sans-serif; color: var(--gris); margin-left: 6px; }
+.gouttes { position: absolute; inset: 0; }
+.gouttes i { position: absolute; top: -60px; width: 3px; height: 46px; border-radius: 3px; background: linear-gradient(180deg, rgba(200,240,255,0), rgba(200,240,255,.8)); display: block; }
+
+/* 8. commander */
+.s8 .b-menthe { left: 120px; top: 150px; width: 340px; height: 525px; }
+.s8 .b-noir { left: 620px; top: 150px; width: 340px; height: 525px; }
+.s8 .t { top: 705px; font-size: 72px; line-height: 1; white-space: nowrap; }
+.btn { left: 0; right: 0; top: 830px; text-align: center; }
+.btn span { display: inline-flex; align-items: center; gap: 18px; padding: 26px 50px; border-radius: 16px; background: var(--menthe); color: var(--nuit); font: 900 italic 50px/1 "Montserrat", sans-serif; text-transform: uppercase; box-shadow: 0 18px 60px rgba(111,230,198,.4); }
+.btn svg { width: .9em; height: .9em; }
+.inclus { top: 970px; font: 600 32px/1 "Inter", sans-serif; color: var(--gris); }
+.inclus b { color: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="root" class="{{FMT}}" data-composition-id="bracelet-led" data-start="0" data-duration="28.5" data-width="{{W}}" data-height="{{H}}">
+  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="28.5" data-volume="1"></audio>
+  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="28.5" data-volume="0.75"></audio>
+
+  <div id="fond" class="clip" data-start="0" data-duration="28.5" data-track-index="0">
+    <div class="fill fond"></div><div class="grille"></div><div class="halo"></div><div class="grain"></div>
+  </div>
+
+  <section id="s1-horloge" class="clip s1" data-start="0" data-duration="3.4" data-track-index="1">
+    <div class="stage">
+      <div class="ab led"><svg viewBox="0 0 800 330"></svg></div>
+      <div class="ab centre t it"><span class="ln"><span>Bracelet <span class="m">sport LED</span></span></span></div>
+      <div class="ab centre s"><span class="ln"><span>Sans téléphone. Sans appli.</span></span></div>
+    </div>
+  </section>
+
+  <section id="s2-coloris" class="clip s2" data-start="3.3" data-duration="3.7" data-track-index="2">
+    <div class="stage">
+      <div class="ab centre titre"><div class="kick">Léger · confortable · lisible</div><div class="t it"><span class="ln"><span>Choisissez <span class="m">votre style</span></span></span></div></div>
+      <div class="ab bracelet b-menthe"><div class="socle"></div><img src="assets/menthe.png" alt="Bracelet vert menthe"></div>
+      <div class="ab bracelet b-noir"><div class="socle"></div><img src="assets/noir.png" alt="Bracelet noir"></div>
+      <div class="ab puce p-menthe"><i style="background:#9FE8D2"></i>Menthe</div>
+      <div class="ab puce p-noir"><i style="background:#111"></i>Noir</div>
+    </div>
+  </section>
+
+  <section id="s3-fonctions" class="clip s3" data-start="6.9" data-duration="5.7" data-track-index="3">
+    <div class="stage">
+      <div class="ab centre titre"><div class="kick">Tout au poignet</div><div class="t it"><span class="ln"><span><span class="m">8</span> fonctions</span></span></div></div>
+      <div class="ab grille-f">
+        <div class="fct"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="15.5" cy="15.5" r="3"/><path d="M15.5 14v1.5l1 1"/></svg></div><div class="tx">Heure &amp; date<small>jour de la semaine</small></div></div>
+        <div class="fct"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="14" r="7"/><path d="M12 14l3-3M10 3h4M12 3v4M18.5 6.5l1.5-1.5"/></svg></div><div class="tx">Chronomètre<small>chaque seconde</small></div></div>
+        <div class="fct"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3c2 0 3 2 3 5s-1 5-1 7-1 3-2.5 3S4 17 4 15s1-3 1-6 0-6 2-6z"/><path d="M17 7c2 0 3 2 3 5s-1 4-1 6-1 3-2.5 3S14 20 14 18s1-3 1-5 0-6 2-6z"/></svg></div><div class="tx">Podomètre 3D<small>compte vos pas</small></div></div>
+        <div class="fct"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 1.5-5 3-6 0 2 1 3 2 3 0-4 1-6 1-9z"/></svg></div><div class="tx">Calories<small>dépensées</small></div></div>
+        <div class="fct"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13s-5-4.5-5-8a5 5 0 0 1 10 0c0 3.5-5 8-5 8z"/><circle cx="12" cy="5" r="1.6"/><path d="M5 17c3 0 4 3 7 3s5-2 7-2"/></svg></div><div class="tx">Distance<small>en kilomètres</small></div></div>
+        <div class="fct"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20V9M3 15h18v5M21 15v-3a3 3 0 0 0-3-3h-7v6"/><circle cx="7" cy="12" r="2"/><path d="M15 3h4l-4 4h4"/></svg></div><div class="tx">Sommeil<small>suivi de vos nuits</small></div></div>
+        <div class="fct"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7"/><path d="M12 10v3l2 2M5 4L2 7M19 4l3 3"/></svg></div><div class="tx">3 alarmes<small>par vibration</small></div></div>
+        <div class="fct"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="6" r="2"/><path d="M4 13l5-4 4 3 3-2M2 17c2 0 2 1.5 4 1.5S8 17 10 17s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5"/></svg></div><div class="tx">Étanche<small>même pour nager</small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="s4-pas" class="clip s4" data-start="12.5" data-duration="3.3" data-track-index="4">
+    <div class="photo"><img src="assets/poignet.jpg" alt=""></div><div class="voile"></div>
+    <div class="stage">
+      <div class="ab stats">
+        <div class="stat"><i><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2.2" stroke-linecap="round"><path d="M7 3c2 0 3 2 3 5s-1 5-1 7-1 3-2.5 3S4 17 4 15s1-3 1-6 0-6 2-6z"/></svg></i><span class="n" data-v="8560" data-f="esp">0</span><small>pas</small></div>
+        <div class="stat"><i><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2.2" stroke-linecap="round"><path d="M12 13s-5-4.5-5-8a5 5 0 0 1 10 0c0 3.5-5 8-5 8z"/></svg></i><span class="n" data-v="1.5" data-f="km">0</span><small>km</small></div>
+        <div class="stat"><i><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2.2" stroke-linecap="round"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 1.5-5 3-6 0 2 1 3 2 3 0-4 1-6 1-9z"/></svg></i><span class="n" data-v="60" data-f="int">0</span><small>kcal</small></div>
+      </div>
+      <div class="ab texte"><div class="t it"><span class="ln"><span>Chaque pas</span></span><span class="ln"><span class="m">compte</span></span></div></div>
+    </div>
+  </section>
+
+  <section id="s5-reveil" class="clip s5" data-start="15.7" data-duration="3.2" data-track-index="5">
+    <div class="photo"><img src="assets/vibration.jpg" alt=""></div><div class="voile"></div>
+    <div class="stage">
+      <div class="ab texte"><div class="t it"><span class="ln"><span>Réveil</span></span><span class="ln"><span class="m">silencieux</span></span></div>
+        <div class="s"><span class="ln"><span>Il vibre. Personne d'autre n'entend.</span></span></div></div>
+    </div>
+  </section>
+
+  <section id="s6-eau" class="clip s6" data-start="18.8" data-duration="3.2" data-track-index="6">
+    <div class="photo"><img src="assets/eau.jpg" alt=""></div><div class="gouttes"></div><div class="voile"></div>
+    <div class="stage">
+      <div class="ab texte"><div class="t it"><span class="ln"><span>Étanche,</span></span><span class="ln"><span class="m">même pour nager</span></span></div>
+        <div class="s"><span class="ln"><span>Pluie, douche, piscine : aucun souci.</span></span></div></div>
+    </div>
+  </section>
+
+  <section id="s7-recharge" class="clip s7" data-start="21.9" data-duration="3.1" data-track-index="7">
+    <div class="photo"><img src="assets/recharge.jpg" alt=""></div><div class="voile"></div>
+    <div class="stage">
+      <div class="ab texte"><div class="t it"><span class="ln"><span>Recharge</span></span><span class="ln"><span class="m">magnétique</span></span></div>
+        <div class="s"><span class="ln"><span>Le câble se clipse tout seul. Longue autonomie.</span></span></div></div>
+    </div>
+  </section>
+
+  <section id="s8-commande" class="clip s8" data-start="24.9" data-duration="3.6" data-track-index="8">
+    <div class="stage">
+      <div class="ab bracelet b-menthe"><div class="socle"></div><img src="assets/menthe.png" alt=""></div>
+      <div class="ab bracelet b-noir"><div class="socle"></div><img src="assets/noir.png" alt=""></div>
+      <div class="ab centre t it"><span class="ln"><span>Commandez <span class="m">le vôtre</span></span></span></div>
+      <div class="ab btn"><span>Disponible maintenant<svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+      <div class="ab centre inclus"><b>Câble de recharge magnétique inclus</b> · aucune appli nécessaire</div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => [...document.querySelectorAll(s)];
+  const W = {{W}}, H = {{H}};
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+  const NS = "http://www.w3.org/2000/svg";
+
+  // horloge LED à 7 segments : « 20:38 »
+  const SEGS = { 0: "abcdef", 1: "bc", 2: "abged", 3: "abgcd", 4: "fgbc", 5: "afgcd", 6: "afgedc", 7: "abc", 8: "abcdefg", 9: "abcfgd" };
+  const svg = $(".led svg");
+  const seg = (x, y, w, h, horiz) => {  // segment hexagonal
+    const e = horiz ? h / 2 : w / 2;
+    return horiz
+      ? `${x + e},${y} ${x + w - e},${y} ${x + w},${y + h / 2} ${x + w - e},${y + h} ${x + e},${y + h} ${x},${y + h / 2}`
+      : `${x + w / 2},${y} ${x + w},${y + e} ${x + w},${y + h - e} ${x + w / 2},${y + h} ${x},${y + h - e} ${x},${y + e}`;
+  };
+  const chiffre = (x0, d) => {
+    const L = 130, T = 26, G = 4, H2 = 140;
+    const geo = {
+      a: [x0 + T / 2 + G, 10, L, T, 1], g: [x0 + T / 2 + G, 10 + H2, L, T, 1], d: [x0 + T / 2 + G, 10 + 2 * H2, L, T, 1],
+      f: [x0, 10 + T / 2 + G, T, H2 - 2 * G, 0], b: [x0 + L + 2 * G, 10 + T / 2 + G, T, H2 - 2 * G, 0],
+      e: [x0, 10 + H2 + T / 2 + G, T, H2 - 2 * G, 0], c: [x0 + L + 2 * G, 10 + H2 + T / 2 + G, T, H2 - 2 * G, 0],
+    };
+    for (const k in geo) {
+      const p = document.createElementNS(NS, "polygon");
+      p.setAttribute("points", seg(...geo[k]));
+      p.setAttribute("class", SEGS[d].includes(k) ? "seg on" : "seg");
+      svg.appendChild(p);
+    }
+  };
+  [[0, 2], [185, 0], [430, 3], [615, 8]].forEach(([x, d]) => chiffre(x, d));
+  [[392, 105], [392, 205]].forEach(([cx, cy]) => {
+    const c = document.createElementNS(NS, "rect");
+    c.setAttribute("x", cx - 13); c.setAttribute("y", cy - 13); c.setAttribute("width", 26); c.setAttribute("height", 26); c.setAttribute("rx", 5);
+    c.setAttribute("class", "seg on deux-points"); svg.appendChild(c);
+  });
+
+  // gouttes de pluie (scène étanche)
+  const gt = $(".gouttes");
+  for (let i = 0; i < 26; i++) { const g = document.createElement("i"); g.style.left = `${Math.round(rnd() * W)}px`; gt.appendChild(g); }
+
+  const build = () => {
+    const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
+    const D = 28.5;
+    const lignes = (sel, t, sg = 0.12) => tl.fromTo(sel, { yPercent: 135 }, { yPercent: 0, duration: 0.7, stagger: sg, ease: "expo.out" }, t);
+    const sortie = (sel, t) => tl.to(sel, { opacity: 0, y: -40, duration: 0.3, stagger: 0.03, ease: "power2.in" }, t);
+
+    // fond
+    tl.fromTo(".grille", { y: 0 }, { y: 80, duration: D, ease: "none" }, 0);
+    tl.fromTo(".halo", { scale: 0.8, opacity: 0.5 }, { scale: 1.1, opacity: 1, duration: 3, ease: "sine.inOut", yoyo: true, repeat: 8 }, 0);
+
+    // 1. horloge LED : les segments s'allument, les deux-points clignotent
+    const on = $$(".led .seg.on:not(.deux-points)");
+    on.forEach((s) => tl.fromTo(s, { opacity: 0 }, { opacity: 1, duration: 0.06, ease: "none" }, 0.15 + rnd() * 0.75));
+    tl.fromTo(".led .seg:not(.on)", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.1);
+    tl.fromTo(".deux-points", { opacity: 0 }, { opacity: 1, duration: 0.05, yoyo: true, repeat: 6, repeatDelay: 0.3, ease: "none" }, 1.0);
+    tl.fromTo(".s1 .led", { scale: 1.08 }, { scale: 1, duration: 3.2, ease: "power1.out" }, 0);
+    lignes(".s1 .t .ln > span", 1.0);
+    lignes(".s1 .s .ln > span", 1.6);
+    sortie([".s1 .led", ".s1 .t", ".s1 .s"], 3.05);
+
+    // 2. coloris
+    tl.fromTo(".s2 .kick", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 3.35);
+    lignes(".s2 .titre .ln > span", 3.4);
+    tl.fromTo(".s2 .b-menthe", { opacity: 0, x: -260, rotation: -18 }, { opacity: 1, x: 0, rotation: -4, duration: 0.8, ease: "expo.out" }, 3.6);
+    tl.fromTo(".s2 .b-noir", { opacity: 0, x: 260, rotation: 18 }, { opacity: 1, x: 0, rotation: 4, duration: 0.8, ease: "expo.out" }, 3.8);
+    tl.to(".s2 .b-menthe", { y: -16, rotation: -2, duration: 2.4, ease: "sine.inOut" }, 4.4);
+    tl.to(".s2 .b-noir", { y: -16, rotation: 2, duration: 2.4, ease: "sine.inOut" }, 4.6);
+    tl.fromTo(".s2 .puce", { opacity: 0, y: 30, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.2, ease: "back.out(2)" }, 4.5);
+    sortie([".s2 .titre", ".s2 .b-menthe", ".s2 .b-noir", ".s2 .puce"], 6.65);
+
+    // 3. 8 fonctions
+    tl.fromTo(".s3 .kick", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 6.95);
+    lignes(".s3 .titre .ln > span", 7.0);
+    $$(".s3 .fct").forEach((f, i) => {
+      const t = 7.5 + i * 0.42;
+      tl.fromTo(f, { opacity: 0, x: i % 2 ? 80 : -80 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, t);
+      tl.fromTo(f.querySelector(".ic"), { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.45, ease: "back.out(2.4)" }, t + 0.08);
+    });
+    sortie([".s3 .titre", ".s3 .grille-f"], 12.3);
+
+    // photos : ouverture, zoom lent, voile
+    const photo = (s, t0, d, sous = true) => {
+      tl.fromTo(`${s} .photo`, { clipPath: "inset(0% 50% 0% 50%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "expo.inOut" }, t0);
+      tl.fromTo(`${s} .photo img`, { scale: 1.2 }, { scale: 1.04, duration: d, ease: "power1.out" }, t0);
+      tl.fromTo(`${s} .voile`, { opacity: 0 }, { opacity: 1, duration: 0.5 }, t0 + 0.2);
+      lignes(`${s} .texte .t .ln > span`, t0 + 0.35);
+      if (sous) lignes(`${s} .texte .s .ln > span`, t0 + 0.9);
+      tl.to(`${s} .stage > *`, { opacity: 0, duration: 0.25 }, t0 + d - 0.3);
+    };
+    // 4. chaque pas compte (compteurs)
+    photo(".s4", 12.5, 3.3, false);
+    $$(".s4 .stat").forEach((s, i) => tl.fromTo(s, { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.45, ease: "expo.out" }, 13.0 + i * 0.25));
+    $$(".s4 .n").forEach((n, i) => {
+      const o = { v: 0 }, v = +n.dataset.v, f = n.dataset.f;
+      tl.fromTo(o, { v: 0 }, { v, duration: 1.4, ease: "power2.out", onUpdate: () => {
+        n.textContent = f === "km" ? o.v.toFixed(1).replace(".", ",") : f === "esp" ? Math.round(o.v).toLocaleString("fr-FR").replace(/\s/g, " ") : Math.round(o.v);
+      } }, 13.1 + i * 0.25);
+    });
+    // 5. réveil silencieux : la photo vibre
+    photo(".s5", 15.7, 3.2);
+    tl.fromTo(".s5 .photo img", { x: 0 }, { x: 6, duration: 0.05, yoyo: true, repeat: 11, ease: "none", immediateRender: false }, 16.4);
+    tl.fromTo(".s5 .photo img", { x: 0 }, { x: 6, duration: 0.05, yoyo: true, repeat: 11, ease: "none", immediateRender: false }, 17.5);
+    // 6. étanche : pluie
+    photo(".s6", 18.8, 3.2);
+    $$(".s6 .gouttes i").forEach((g, i) => tl.fromTo(g, { y: 0, opacity: 0.9 }, { y: H + 120, duration: 0.55 + rnd() * 0.35, ease: "none", repeat: 4, delay: 0 }, 18.9 + rnd() * 0.6));
+    // 7. recharge magnétique
+    photo(".s7", 21.9, 3.1);
+
+    // 8. commander
+    tl.fromTo(".s8 .b-menthe", { opacity: 0, y: 160, rotation: -14 }, { opacity: 1, y: 0, rotation: -5, duration: 0.8, ease: "expo.out" }, 24.95);
+    tl.fromTo(".s8 .b-noir", { opacity: 0, y: 160, rotation: 14 }, { opacity: 1, y: 0, rotation: 5, duration: 0.8, ease: "expo.out" }, 25.1);
+    tl.to([".s8 .b-menthe", ".s8 .b-noir"], { y: -14, duration: 2.6, ease: "sine.inOut" }, 25.8);
+    lignes(".s8 .t .ln > span", 25.3);
+    tl.fromTo(".s8 .btn span", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2.2)" }, 25.8);
+    tl.fromTo(".s8 .btn span", { scale: 1 }, { scale: 1.05, duration: 0.35, yoyo: true, repeat: 3, ease: "sine.inOut", immediateRender: false }, 26.5);
+    tl.fromTo(".s8 .inclus", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 26.2);
+
+    window.__timelines["bracelet-led"] = tl;
+  };
+  document.fonts.ready.then(build);
+})();
+</script>
+</body>
+</html>
