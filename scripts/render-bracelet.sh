@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Bracelet sport LED — rendu HyperFrames (28,5 s, musique + effets) en 9:16, 1:1 et 16:9
+# Bracelet sport LED — rendu HyperFrames (30 s, musique + effets) en 9:16, 1:1 et 16:9
 # Usage : bash scripts/render-bracelet.sh   (depuis la racine du dépôt)
 set -euo pipefail
 export HYPERFRAMES_NO_TELEMETRY=1 DO_NOT_TRACK=1 HYPERFRAMES_NO_UPDATE_CHECK=1 HYPERFRAMES_SKIP_SKILLS=1

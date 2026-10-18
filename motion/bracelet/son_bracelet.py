@@ -1,4 +1,4 @@
-"""Musique électro-pop énergique (composée en code, libre de droits) + effets sonores de la vidéo du bracelet sport LED (28,5 s, sans voix).
+"""Musique électro-pop énergique (composée en code, libre de droits) + effets sonores de la vidéo du bracelet sport LED (30 s, sans voix).
 Usage : python motion/bracelet/son_bracelet.py  →  motion/bracelet/assets/musique.m4a et sfx.m4a
 """
 import os, subprocess, tempfile, wave
@@ -6,7 +6,7 @@ import numpy as np
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SFX = os.path.join(ICI, "..", "son", "sfx")
-SR, D, BPM = 44100, 28.5, 124
+SR, D, BPM = 44100, 30.0, 124
 BEAT = 60 / BPM; BAR = 4 * BEAT; N = int(SR * D)
 rng = np.random.default_rng(5)
 hz = lambda m: 440 * 2 ** ((m - 69) / 12)
@@ -73,7 +73,7 @@ CUES = [(0.15, "impact-bass-1.mp3", .45)] + [(0.2 + k * 0.11, "click-soft.mp3", 
        [(12.3, "whoosh.mp3", .45), (13.0, "click-soft.mp3", .3), (13.25, "click-soft.mp3", .3), (13.5, "click-soft.mp3", .3), (14.5, "ping.mp3", .25),
         (15.7, "whoosh.mp3", .4), (16.4, "notification.mp3", .3), (17.5, "notification.mp3", .3),
         (18.8, "whoosh.mp3", .4), (19.2, "sparkle.mp3", .3), (21.9, "whoosh.mp3", .4), (22.6, "click.mp3", .35), (22.8, "chime.mp3", .25),
-        (24.9, "impact-bass-2.mp3", .5), (25.8, "pop.mp3", .35), (26.2, "sparkle.mp3", .3)]
+        (24.9, "whoosh.mp3", .35), (25.85, "impact-bass-2.mp3", .55), (25.9, "sparkle.mp3", .3), (25.8, "pop.mp3", .35), (26.6, "notification.mp3", .3)]
 ent, fil = [], []
 for i, (t0, f, v) in enumerate(CUES):
     ent += ["-i", os.path.join(SFX, f)]

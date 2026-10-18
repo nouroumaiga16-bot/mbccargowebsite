@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Bracelet sport LED — motion design 28,5 s pour la vente (tous les textes en français).
+  Bracelet sport LED — motion design 30 s pour la vente (tous les textes en français).
   Gabarit unique : motion/bracelet/build.mjs en tire motion/bracelet/build/{9x16,1x1,16x9}/index.html.
   Visuels : motion/bracelet/decouper.py (bracelets détourés + photos recadrées sans texte).   Son : motion/bracelet/son_bracelet.py
     1 Accroche : horloge LED ..... 0 → 3,4 s
@@ -10,7 +10,7 @@
     5 Réveil silencieux .......... 15,7 → 18,9 s
     6 Étanche .................... 18,8 → 22 s
     7 Recharge magnétique ........ 21,9 → 25 s
-    8 Commander .................. 24,9 → 28,5 s
+    8 Prix + WhatsApp ............ 24,9 → 30 s
 -->
 <html lang="fr">
 <head>
@@ -102,19 +102,25 @@ body { margin: 0; background: var(--nuit); }
 .s8 .b-menthe { left: 120px; top: 150px; width: 340px; height: 525px; }
 .s8 .b-noir { left: 620px; top: 150px; width: 340px; height: 525px; }
 .s8 .t { top: 705px; font-size: 72px; line-height: 1; white-space: nowrap; }
-.btn { left: 0; right: 0; top: 830px; text-align: center; }
-.btn span { display: inline-flex; align-items: center; gap: 18px; padding: 26px 50px; border-radius: 16px; background: var(--menthe); color: var(--nuit); font: 900 italic 50px/1 "Montserrat", sans-serif; text-transform: uppercase; box-shadow: 0 18px 60px rgba(111,230,198,.4); }
-.btn svg { width: .9em; height: .9em; }
-.inclus { top: 970px; font: 600 32px/1 "Inter", sans-serif; color: var(--gris); }
+.btn { left: 0; right: 0; top: 815px; text-align: center; }
+.btn span { display: inline-flex; align-items: center; gap: 20px; padding: 22px 46px 22px 26px; border-radius: 18px; background: #25D366; color: #fff; font: 800 italic 56px/1 "Montserrat", sans-serif; box-shadow: 0 18px 60px rgba(37,211,102,.4); white-space: nowrap; }
+.btn span small { display: block; font: 600 24px/1 "Inter", sans-serif; letter-spacing: .12em; text-transform: uppercase; opacity: .9; margin-bottom: 8px; font-style: normal; }
+.btn svg { width: 74px; height: 74px; flex: 0 0 auto; }
+.prix { left: 540px; top: 400px; width: 0; height: 0; }
+.prix .disque { position: absolute; left: -125px; top: -125px; width: 250px; height: 250px; border-radius: 50%; background: var(--menthe); color: var(--nuit); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+.prix .p { font: 900 italic 62px/0.9 "Montserrat", sans-serif; letter-spacing: -0.02em; white-space: nowrap; }
+.prix .d { margin-top: 6px; font: 800 italic 36px/1 "Montserrat", sans-serif; letter-spacing: .06em; }
+.prix .tour { position: absolute; left: -150px; top: -150px; width: 300px; height: 300px; }
+.inclus { top: 995px; font: 600 32px/1 "Inter", sans-serif; color: var(--gris); }
 .inclus b { color: #fff; font-weight: 600; }
 </style>
 </head>
 <body>
-<div id="root" class="{{FMT}}" data-composition-id="bracelet-led" data-start="0" data-duration="28.5" data-width="{{W}}" data-height="{{H}}">
-  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="28.5" data-volume="1"></audio>
-  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="28.5" data-volume="0.75"></audio>
+<div id="root" class="{{FMT}}" data-composition-id="bracelet-led" data-start="0" data-duration="30" data-width="{{W}}" data-height="{{H}}">
+  <audio id="musique" src="assets/musique.m4a" data-start="0" data-duration="30" data-volume="1"></audio>
+  <audio id="effets" src="assets/sfx.m4a" data-start="0" data-duration="30" data-volume="0.75"></audio>
 
-  <div id="fond" class="clip" data-start="0" data-duration="28.5" data-track-index="0">
+  <div id="fond" class="clip" data-start="0" data-duration="30" data-track-index="0">
     <div class="fill fond"></div><div class="grille"></div><div class="halo"></div><div class="grain"></div>
   </div>
 
@@ -188,12 +194,13 @@ body { margin: 0; background: var(--nuit); }
     </div>
   </section>
 
-  <section id="s8-commande" class="clip s8" data-start="24.9" data-duration="3.6" data-track-index="8">
+  <section id="s8-commande" class="clip s8" data-start="24.9" data-duration="5.1" data-track-index="8">
     <div class="stage">
       <div class="ab bracelet b-menthe"><div class="socle"></div><img src="assets/menthe.png" alt=""></div>
       <div class="ab bracelet b-noir"><div class="socle"></div><img src="assets/noir.png" alt=""></div>
       <div class="ab centre t it"><span class="ln"><span>Commandez <span class="m">le vôtre</span></span></span></div>
-      <div class="ab btn"><span>Disponible maintenant<svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+      <div class="ab prix"><svg class="tour" viewBox="0 0 300 300"><circle cx="150" cy="150" r="144" fill="none" stroke="#6FE6C6" stroke-width="3" stroke-dasharray="6 12"/></svg><div class="disque"><div class="p">19 000</div><div class="d">FCFA</div></div></div>
+      <div class="ab btn"><span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 8.5c0 3 2.5 6 6 6.5l1.3-1.5-2-1-1 .8c-1-.4-2.2-1.6-2.6-2.6l.8-1-1-2z" fill="#fff" stroke="none"/></svg><div><small>Commandez sur WhatsApp</small>(418) 812 9419</div></span></div>
       <div class="ab centre inclus"><b>Câble de recharge magnétique inclus</b> · aucune appli nécessaire</div>
     </div>
   </section>
@@ -244,7 +251,7 @@ body { margin: 0; background: var(--nuit); }
 
   const build = () => {
     const tl = gsap.timeline({ paused: true, defaults: { ease: "power3.out" } });
-    const D = 28.5;
+    const D = 30;
     const lignes = (sel, t, sg = 0.12) => tl.fromTo(sel, { yPercent: 135 }, { yPercent: 0, duration: 0.7, stagger: sg, ease: "expo.out" }, t);
     const sortie = (sel, t) => tl.to(sel, { opacity: 0, y: -40, duration: 0.3, stagger: 0.03, ease: "power2.in" }, t);
 
@@ -316,7 +323,10 @@ body { margin: 0; background: var(--nuit); }
     tl.to([".s8 .b-menthe", ".s8 .b-noir"], { y: -14, duration: 2.6, ease: "sine.inOut" }, 25.8);
     lignes(".s8 .t .ln > span", 25.3);
     tl.fromTo(".s8 .btn span", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2.2)" }, 25.8);
-    tl.fromTo(".s8 .btn span", { scale: 1 }, { scale: 1.05, duration: 0.35, yoyo: true, repeat: 3, ease: "sine.inOut", immediateRender: false }, 26.5);
+    tl.fromTo(".s8 .btn span", { scale: 1 }, { scale: 1.05, duration: 0.35, yoyo: true, repeat: 5, ease: "sine.inOut", immediateRender: false }, 26.6);
+    tl.fromTo(".s8 .prix .disque", { scale: 2.4, opacity: 0, rotation: -40 }, { scale: 1, opacity: 1, rotation: -8, duration: 0.45, ease: "power4.in" }, 25.4);
+    tl.fromTo(".s8 .prix .disque", { scale: 1 }, { scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, 25.85);
+    tl.fromTo(".s8 .prix .tour", { opacity: 0, scale: 0.7, rotation: 0 }, { opacity: 1, scale: 1, rotation: 120, duration: 4, ease: "power2.out" }, 25.85);
     tl.fromTo(".s8 .inclus", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 26.2);
 
     window.__timelines["bracelet-led"] = tl;
