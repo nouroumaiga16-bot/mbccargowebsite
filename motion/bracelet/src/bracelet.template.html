@@ -111,6 +111,9 @@ body { margin: 0; background: var(--nuit); }
 .prix .p { font: 900 italic 62px/0.9 "Montserrat", sans-serif; letter-spacing: -0.02em; white-space: nowrap; }
 .prix .d { margin-top: 6px; font: 800 italic 36px/1 "Montserrat", sans-serif; letter-spacing: .06em; }
 .prix .tour { position: absolute; left: -150px; top: -150px; width: 300px; height: 300px; }
+.lieu { left: 0; right: 0; top: 40px; text-align: center; }
+.lieu > span { display: inline-flex; align-items: center; gap: 14px; padding: 14px 30px 14px 20px; border-radius: 999px; background: rgba(111,230,198,.12); border: 2px solid var(--menthe); font: 800 italic 40px/1 "Montserrat", sans-serif; text-transform: uppercase; }
+.lieu svg { width: 40px; height: 40px; }
 .inclus { top: 995px; font: 600 32px/1 "Inter", sans-serif; color: var(--gris); }
 .inclus b { color: #fff; font-weight: 600; }
 </style>
@@ -199,6 +202,7 @@ body { margin: 0; background: var(--nuit); }
       <div class="ab bracelet b-menthe"><div class="socle"></div><img src="assets/menthe.png" alt=""></div>
       <div class="ab bracelet b-noir"><div class="socle"></div><img src="assets/noir.png" alt=""></div>
       <div class="ab centre t it"><span class="ln"><span>Commandez <span class="m">le vôtre</span></span></span></div>
+      <div class="ab lieu"><span><svg viewBox="0 0 24 24" fill="none" stroke="#6FE6C6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>Disponible à <span class="m">Ouaga</span></span></div>
       <div class="ab prix"><svg class="tour" viewBox="0 0 300 300"><circle cx="150" cy="150" r="144" fill="none" stroke="#6FE6C6" stroke-width="3" stroke-dasharray="6 12"/></svg><div class="disque"><div class="p">19 000</div><div class="d">FCFA</div></div></div>
       <div class="ab btn"><span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 8.5c0 3 2.5 6 6 6.5l1.3-1.5-2-1-1 .8c-1-.4-2.2-1.6-2.6-2.6l.8-1-1-2z" fill="#fff" stroke="none"/></svg><div><small>Commandez sur WhatsApp</small>(418) 812 9419</div></span></div>
       <div class="ab centre inclus"><b>Câble de recharge magnétique inclus</b> · aucune appli nécessaire</div>
@@ -327,6 +331,7 @@ body { margin: 0; background: var(--nuit); }
     tl.fromTo(".s8 .prix .disque", { scale: 2.4, opacity: 0, rotation: -40 }, { scale: 1, opacity: 1, rotation: -8, duration: 0.45, ease: "power4.in" }, 25.4);
     tl.fromTo(".s8 .prix .disque", { scale: 1 }, { scale: 1.08, duration: 0.12, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, 25.85);
     tl.fromTo(".s8 .prix .tour", { opacity: 0, scale: 0.7, rotation: 0 }, { opacity: 1, scale: 1, rotation: 120, duration: 4, ease: "power2.out" }, 25.85);
+    tl.fromTo(".s8 .lieu > span", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(2)" }, 25.2);
     tl.fromTo(".s8 .inclus", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 }, 26.2);
 
     window.__timelines["bracelet-led"] = tl;
