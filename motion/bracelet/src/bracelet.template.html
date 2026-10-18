@@ -98,6 +98,15 @@ body { margin: 0; background: var(--nuit); }
 .gouttes { position: absolute; inset: 0; }
 .gouttes i { position: absolute; top: -60px; width: 3px; height: 46px; border-radius: 3px; background: linear-gradient(180deg, rgba(200,240,255,0), rgba(200,240,255,.8)); display: block; }
 
+/* 4. vidéo réelle au poignet : fond flouté + cadre net */
+.vfond { position: absolute; inset: 0; opacity: 0; filter: blur(30px) brightness(.5) saturate(1.2); }
+.vfond video { position: absolute; inset: -60px; width: calc(100% + 120px); height: calc(100% + 120px); object-fit: cover; }
+.vcadre { position: absolute; opacity: 0; overflow: hidden; border-radius: 28px; border: 3px solid var(--menthe); box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 60px rgba(111,230,198,.25); }
+.vcadre video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 37% 50%; }
+.port .vcadre { left: 40px; top: 500px; width: 1000px; height: 620px; }
+.sq .vcadre { left: 40px; top: 190px; width: 1000px; height: 500px; }
+.land .vcadre { left: 880px; top: 140px; width: 980px; height: 680px; }
+
 /* 8. commander */
 .s8 .b-menthe { left: 120px; top: 150px; width: 340px; height: 525px; }
 .s8 .b-noir { left: 620px; top: 150px; width: 340px; height: 525px; }
@@ -161,8 +170,9 @@ body { margin: 0; background: var(--nuit); }
     </div>
   </section>
 
+  <div class="vfond"><video id="poignet-fond" class="clip" src="assets/poignet-video.mp4" muted playsinline data-start="12.5" data-duration="3.3" data-media-start="1.2" data-track-index="9"></video></div>
+  <div class="vcadre"><video id="poignet-net" class="clip" src="assets/poignet-video.mp4" muted playsinline data-start="12.5" data-duration="3.3" data-media-start="1.2" data-track-index="10"></video></div>
   <section id="s4-pas" class="clip s4" data-start="12.5" data-duration="3.3" data-track-index="4">
-    <div class="photo"><img src="assets/poignet.jpg" alt=""></div><div class="voile"></div>
     <div class="stage">
       <div class="ab stats">
         <div class="stat"><i><svg viewBox="0 0 24 24" fill="none" stroke="#0A0D12" stroke-width="2.2" stroke-linecap="round"><path d="M7 3c2 0 3 2 3 5s-1 5-1 7-1 3-2.5 3S4 17 4 15s1-3 1-6 0-6 2-6z"/></svg></i><span class="n" data-v="8560" data-f="esp">0</span><small>pas</small></div>
@@ -303,7 +313,12 @@ body { margin: 0; background: var(--nuit); }
       tl.to(`${s} .stage > *`, { opacity: 0, duration: 0.25 }, t0 + d - 0.3);
     };
     // 4. chaque pas compte (compteurs)
-    photo(".s4", 12.5, 3.3, false);
+    // 4. vidéo réelle : le cadre s'ouvre, fond flouté, léger zoom
+    tl.fromTo(".vfond", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 12.5);
+    tl.fromTo(".vcadre", { opacity: 0, clipPath: "inset(0% 50% 0% 50% round 28px)", y: 40 }, { opacity: 1, clipPath: "inset(0% 0% 0% 0% round 28px)", y: 0, duration: 0.6, ease: "expo.inOut" }, 12.5);
+    tl.to([".vfond", ".vcadre"], { opacity: 0, duration: 0.25, ease: "none" }, 15.55);
+    lignes(".s4 .texte .t .ln > span", 12.85);
+    tl.to(".s4 .stage > *", { opacity: 0, duration: 0.25 }, 15.5);
     $$(".s4 .stat").forEach((s, i) => tl.fromTo(s, { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.45, ease: "expo.out" }, 13.0 + i * 0.25));
     $$(".s4 .n").forEach((n, i) => {
       const o = { v: 0 }, v = +n.dataset.v, f = n.dataset.f;
